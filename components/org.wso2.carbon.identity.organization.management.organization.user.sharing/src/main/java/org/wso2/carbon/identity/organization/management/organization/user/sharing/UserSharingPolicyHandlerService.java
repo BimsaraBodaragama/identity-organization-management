@@ -18,11 +18,19 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing;
 
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareSelectiveDO;
+
 /**
  * Service that manages the user sharing policy handler.
  */
 public interface UserSharingPolicyHandlerService {
 
+    void propagateSelectiveShare(UserShareSelectiveDO userShareSelectiveDO);
 
+    //void propagateGeneralShare(UserShareGeneralDO userShareGeneralDO);
+
+    //void propagateSelectiveUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO);
+
+    //void propagateGeneralUnshare(UserUnshareGeneralDO userUnshareGeneralDO);
 
 }

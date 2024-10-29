@@ -20,7 +20,10 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareGeneralDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareSelectiveDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserUnshareGeneralDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserUnshareSelectiveDO;
 
 /**
  * Service implementation for handling user sharing policies.
@@ -45,6 +48,21 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         // db call and check the roles in the db  and check if the policy is a valid policy??
 
         LOG.info("Went out from propagateSelectiveShare");
+
+    }
+
+    @Override
+    public void propagateGeneralShare(UserShareGeneralDO userShareGeneralDO) {
+
+    }
+
+    @Override
+    public void propagateSelectiveUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO) {
+
+    }
+
+    @Override
+    public void propagateGeneralUnshare(UserUnshareGeneralDO userUnshareGeneralDO) {
 
     }
 

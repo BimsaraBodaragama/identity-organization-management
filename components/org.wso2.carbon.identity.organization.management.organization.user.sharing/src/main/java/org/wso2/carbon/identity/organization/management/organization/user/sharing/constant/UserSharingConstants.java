@@ -32,7 +32,9 @@ public class UserSharingConstants {
     public static final String POLICY = "policy";
     public static final String ROLES = "roles";
 
-    public static final String NULL_POLICY = "Policy is null";;
+    public static final String NULL_POLICY = "Policy is null";
+
+    public static final String SHARING_ERROR_PREFIX = "OUS-";
 
     public static final String DEFAULT_PROFILE = "default";
     public static final String CLAIM_MANAGED_ORGANIZATION = "http://wso2.org/claims/identity/managedOrg";
@@ -70,4 +72,92 @@ public class UserSharingConstants {
                             USER_STORE_CONFIG_VIEW_PERMISSION, USER_MGT_VIEW_PERMISSION, USER_MGT_LIST_PERMISSION,
                             APPLICATION_MGT_VIEW_PERMISSION, CORS_CONFIG_MGT_VIEW_PERMISSION, IDP_MGT_VIEW_PERMISSION,
                             CLAIM_META_DATA_MGT_VIEW_PERMISSION));
+
+
+    /**
+     * Enum for assignmentType.
+     */
+    public enum AssignmentType {
+        ROLE,
+        GROUP
+    }
+
+    /**
+     * Error messages for organization user sharing management related errors.
+     */
+    public enum ErrorMessage {
+
+        // Service layer errors
+        ERROR_CODE_USER_NOT_FOUND("10011",
+                "Invalid user identification provided.",
+                "Could not find a user with given username."),
+        ERROR_PROPAGATE_SELECTIVE_SHARE("10012",
+                "Error occurred during selective share propagation.",
+                "Unexpected error occurred during selective share propagation."),
+        ERROR_PROPAGATE_GENERAL_SHARE("10013",
+                "Error occurred during general share propagation.",
+                "Unexpected error occurred during general share propagation."),
+        ERROR_CODE_NULL_INPUT("10014",
+                "Input is null.",
+                "The provided input is null and must be provided."),
+        ERROR_CODE_USER_CRITERIA_INVALID("10015",
+                "User criteria is invalid.",
+                "User criteria must contain valid user identifiers."),
+        ERROR_CODE_USER_CRITERIA_MISSING("10016",
+                "User criteria is missing USER_IDS.",
+                "User criteria must contain USER_IDS."),
+        ERROR_CODE_ORGANIZATIONS_NULL("10017",
+                "Organizations list is null.",
+                "Organizations list must be provided."),
+        ERROR_CODE_POLICY_NULL("10018",
+                "Policy is null.",
+                "Policy must be provided."),
+        ERROR_CODE_ROLES_NULL("10019",
+                "Roles list is null.",
+                "Roles list must be provided."),
+        ERROR_CODE_USER_ID_NULL("10020",
+                "User ID is null.",
+                "User ID must be provided."),
+        ERROR_CODE_ORG_DETAILS_NULL("10021",
+                "Organization details are null.",
+                "Organization details must be provided."),
+        ERROR_CODE_ORG_ID_NULL("10022",
+                "Organization ID is null.",
+                "Organization ID must be provided."),
+        ERROR_INVALID_ROLES_FORMAT("10025",
+                "Invalid roles format.",
+                "The roles provided are in an invalid format and cannot be processed."),
+        ERROR_SELECTIVE_SHARE("10026",
+                "Error occurred during selective share propagation for userId: %s - %s",
+                "Error occurred during selective share propagation for a given user."),
+        ERROR_GENERAL_SHARE("10027",
+                "Error occurred during general share propagation for userId: %s - %s",
+                "Error occurred during general share propagation for a given user.");
+
+        private final String code;
+        private final String message;
+        private final String description;
+
+        ErrorMessage(String code, String message, String description) {
+
+            this.code = code;
+            this.message = message;
+            this.description = description;
+        }
+
+        public String getCode() {
+
+            return SHARING_ERROR_PREFIX + code;
+        }
+
+        public String getMessage() {
+
+            return message;
+        }
+
+        public String getDescription() {
+
+            return description;
+        }
+    }
 }

@@ -30,6 +30,8 @@ import java.util.Map;
 
 public class UserSharingValidationHelper {
 
+    private UserSharingValidationHelper() {}
+
     public static void validateInput(Object userShareDO, String context) throws UserShareMgtServerException {
         if (userShareDO == null) {
             throwValidationException(context + " is null", ErrorMessage.ERROR_CODE_NULL_INPUT.getCode(), ErrorMessage.ERROR_CODE_NULL_INPUT.getDescription());

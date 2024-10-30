@@ -58,14 +58,9 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         try {
             UserSharingValidationHelper.validateInput(userShareSelectiveDO, "UserShareSelectiveDO");
 
-            userShareSelectiveDO.getUserCriteria().get(USER_IDS).forEach(userId -> {
-                try {
-                    propagateSelectiveShareForUser(userId, userShareSelectiveDO.getOrganizations());
-                } catch (UserShareMgtServerException e) {
-                    LOG.error(ERROR_SELECTIVE_SHARE.getMessage() + e.getMessage(), e);
-                    throw new RuntimeException(e);
-                }
-            });
+            for (String userId : userShareSelectiveDO.getUserCriteria().get(USER_IDS)) {
+                propagateSelectiveShareForUser(userId, userShareSelectiveDO.getOrganizations());
+            }
 
             LOG.info("Selective share completed.");
         } catch (UserShareMgtServerException e) {
@@ -87,14 +82,10 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         try {
             UserSharingValidationHelper.validateInput(userShareGeneralDO, "UserShareGeneralDO");
 
-            userShareGeneralDO.getUserCriteria().get(USER_IDS).forEach(userId -> {
-                try {
-                    propagateGeneralShareForUser(userId, userShareGeneralDO.getPolicy(), getRoleIds(userShareGeneralDO.getRoles()));
-                } catch (UserShareMgtServerException e) {
-                    LOG.error(ERROR_GENERAL_SHARE.getMessage() + e.getMessage(), e);
-                    throw new RuntimeException(e);
-                }
-            });
+            for (String userId : userShareGeneralDO.getUserCriteria().get(USER_IDS)) {
+                propagateGeneralShareForUser(userId, userShareGeneralDO.getPolicy(),
+                        getRoleIds(userShareGeneralDO.getRoles()));
+            }
 
             LOG.info("General share completed.");
         } catch (UserShareMgtServerException e) {
@@ -123,7 +114,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         }
     }
 
-    private void propagateGeneralShareForUser(String userId, String policy, List<String> roleIds) throws UserShareMgtServerException {
+    private void propagateGeneralShareForUser(String userId, String policy, List<String> roleIds) {
         UserShareGeneral userShareGeneral = createUserShareGeneral(userId, policy, roleIds);
         shareUserWithAllOrganizations(userShareGeneral);
     }
@@ -160,7 +151,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
     private void setRolesIfPresent(Map<String, Object> orgDetails, UserShareSelective userShareSelective) {
         List<String> roleIds = extractRoleIds(orgDetails.get(ROLES));
-        if (roleIds != null) {
+        if (!roleIds.isEmpty()) {
             userShareSelective.setRoles(roleIds);
         } else {
             userShareSelective.setRoles(Collections.emptyList());

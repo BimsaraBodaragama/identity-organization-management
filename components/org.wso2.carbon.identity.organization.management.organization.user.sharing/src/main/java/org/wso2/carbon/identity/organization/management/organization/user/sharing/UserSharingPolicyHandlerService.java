@@ -31,7 +31,7 @@ public interface UserSharingPolicyHandlerService {
 
     void propagateSelectiveShare(UserShareSelectiveDO userShareSelectiveDO) throws UserShareMgtException;
 
-    void propagateGeneralShare(UserShareGeneralDO userShareGeneralDO);
+    void propagateGeneralShare(UserShareGeneralDO userShareGeneralDO) throws UserShareMgtException;
 
     void propagateSelectiveUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO);
 

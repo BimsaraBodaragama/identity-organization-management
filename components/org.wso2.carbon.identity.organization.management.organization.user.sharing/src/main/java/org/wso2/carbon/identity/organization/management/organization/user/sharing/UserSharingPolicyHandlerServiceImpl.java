@@ -73,38 +73,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         LOG.info("Selective share completed.");
     }
 
-    /**
-     * Propagates the general share of a user to all organizations.
-     *
-     * @param userShareGeneralDO Contains details for general sharing.
-     */
-    @Override
-    public void propagateGeneralShare(UserShareGeneralDO userShareGeneralDO) {
-
-        List<String> userIds = userShareGeneralDO.getUserCriteria().get("userIds");
-        String policy = userShareGeneralDO.getPolicy();
-        List<String> roleIds = getRoleIds(userShareGeneralDO.getRoles());
-
-        for (String userId : userIds) {
-            UserShareGeneral userShareGeneral = new UserShareGeneral();
-            userShareGeneral.setUserId(userId);
-            userShareGeneral.setPolicy(policy);
-            userShareGeneral.setRoles(roleIds);
-
-            shareUserWithAllOrganizations(userShareGeneral);
-        }
-    }
-
-    @Override
-    public void propagateSelectiveUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO) {
-        // TODO: To be implemented on selective unsharing
-    }
-
-    @Override
-    public void propagateGeneralUnshare(UserUnshareGeneralDO userUnshareGeneralDO) {
-        // TODO: To be implemented on general unsharing
-    }
-
     private void validateAndLogInput(UserShareSelectiveDO userShareSelectiveDO) throws UserShareMgtServerException {
         try {
             validateInput(userShareSelectiveDO);
@@ -190,6 +158,64 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         } else {
             userShareSelective.setRoles(Collections.emptyList());
         }
+    }
+
+    /**
+     * Propagates the general share of a user to all organizations.
+     *
+     * @param userShareGeneralDO Contains details for general sharing.
+     */
+    @Override
+    public void propagateGeneralShare(UserShareGeneralDO userShareGeneralDO) throws UserShareMgtServerException {
+        validateAndLogInputGeneral(userShareGeneralDO);
+
+        List<String> userIds = userShareGeneralDO.getUserCriteria().get("userIds");
+        String policy = userShareGeneralDO.getPolicy();
+        List<String> roleIds = getRoleIds(userShareGeneralDO.getRoles());
+
+        for (String userId : userIds) {
+            UserShareGeneral userShareGeneral = new UserShareGeneral();
+            userShareGeneral.setUserId(userId);
+            userShareGeneral.setPolicy(policy);
+            userShareGeneral.setRoles(roleIds);
+
+            shareUserWithAllOrganizations(userShareGeneral);
+        }
+    }
+
+    private void validateAndLogInputGeneral(UserShareGeneralDO userShareGeneralDO) throws UserShareMgtServerException {
+        try {
+            validateInputGeneral(userShareGeneralDO);
+        } catch (UserShareMgtServerException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    private void validateInputGeneral(UserShareGeneralDO userShareGeneralDO) throws UserShareMgtServerException {
+        if (userShareGeneralDO == null) {
+            throw new UserShareMgtServerException("UserShareGeneralDO is null", new NullPointerException("userShareGeneralDO is null"), "USR_GEN_001", "UserShareGeneralDO must be provided");
+        }
+        if (userShareGeneralDO.getUserCriteria() == null || !userShareGeneralDO.getUserCriteria().containsKey("userIds") ||
+                userShareGeneralDO.getUserCriteria().get("userIds") == null) {
+            throw new UserShareMgtServerException("User criteria is invalid", new NullPointerException("userCriteria is null or missing userIds"), "USR_GEN_002", "User criteria must contain userIds");
+        }
+        if (userShareGeneralDO.getPolicy() == null) {
+            throw new UserShareMgtServerException("Policy is null", new NullPointerException("policy is null"), "USR_GEN_003", "Policy must be provided");
+        }
+        if (userShareGeneralDO.getRoles() == null) {
+            throw new UserShareMgtServerException("Roles list is null", new NullPointerException("roles is null"), "USR_GEN_004", "Roles list must be provided");
+        }
+    }
+
+    @Override
+    public void propagateSelectiveUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO) {
+        // TODO: To be implemented on selective unsharing
+    }
+
+    @Override
+    public void propagateGeneralUnshare(UserUnshareGeneralDO userUnshareGeneralDO) {
+        // TODO: To be implemented on general unsharing
     }
 
     /**

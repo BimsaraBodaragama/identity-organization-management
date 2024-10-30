@@ -20,9 +20,8 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtException;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtServerException;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.helper.UserSharingValidationHelper;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareGeneral;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareGeneralDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareSelective;
@@ -57,7 +56,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     @Override
     public void propagateSelectiveShare(UserShareSelectiveDO userShareSelectiveDO) throws UserShareMgtServerException {
         try {
-            validateInput(userShareSelectiveDO, "UserShareSelectiveDO");
+            UserSharingValidationHelper.validateInput(userShareSelectiveDO, "UserShareSelectiveDO");
 
             userShareSelectiveDO.getUserCriteria().get(USER_IDS).forEach(userId -> {
                 try {
@@ -86,7 +85,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     @Override
     public void propagateGeneralShare(UserShareGeneralDO userShareGeneralDO) throws UserShareMgtServerException {
         try {
-            validateInput(userShareGeneralDO, "UserShareGeneralDO");
+            UserSharingValidationHelper.validateInput(userShareGeneralDO, "UserShareGeneralDO");
 
             userShareGeneralDO.getUserCriteria().get(USER_IDS).forEach(userId -> {
                 try {
@@ -107,6 +106,16 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         }
     }
 
+    @Override
+    public void propagateSelectiveUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO) {
+        // TODO: To be implemented on selective unsharing
+    }
+
+    @Override
+    public void propagateGeneralUnshare(UserUnshareGeneralDO userUnshareGeneralDO) {
+        // TODO: To be implemented on general unsharing
+    }
+
     private void propagateSelectiveShareForUser(String userId, List<Map<String, Object>> organizations) throws UserShareMgtServerException {
         for (Map<String, Object> orgDetails : organizations) {
             UserShareSelective userShareSelective = createUserShareSelective(userId, orgDetails);
@@ -119,49 +128,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         shareUserWithAllOrganizations(userShareGeneral);
     }
 
-    private void validateInput(Object userShareDO, String context) throws UserShareMgtServerException {
-        if (userShareDO == null) {
-            throwValidationException(context + " is null", ERROR_CODE_NULL_INPUT.getCode(), ERROR_CODE_NULL_INPUT.getDescription());
-        }
-
-        if (userShareDO instanceof UserShareSelectiveDO) {
-            validateSelectiveDO((UserShareSelectiveDO) userShareDO);
-        } else if (userShareDO instanceof UserShareGeneralDO) {
-            validateGeneralDO((UserShareGeneralDO) userShareDO);
-        }
-    }
-
-    private void validateSelectiveDO(UserShareSelectiveDO selectiveDO) throws UserShareMgtServerException {
-        validateNotNull(selectiveDO.getUserCriteria(), ERROR_CODE_USER_CRITERIA_INVALID.getMessage(), ERROR_CODE_USER_CRITERIA_INVALID.getCode());
-        if (!selectiveDO.getUserCriteria().containsKey(USER_IDS) || selectiveDO.getUserCriteria().get(USER_IDS) == null) {
-            throwValidationException(ERROR_CODE_USER_CRITERIA_MISSING.getMessage(), ERROR_CODE_USER_CRITERIA_MISSING.getCode(), ERROR_CODE_USER_CRITERIA_MISSING.getDescription());
-        }
-        validateNotNull(selectiveDO.getOrganizations(), ERROR_CODE_ORGANIZATIONS_NULL.getMessage(), ERROR_CODE_ORGANIZATIONS_NULL.getCode());
-    }
-
-    private void validateGeneralDO(UserShareGeneralDO generalDO) throws UserShareMgtServerException {
-        validateNotNull(generalDO.getUserCriteria(), ERROR_CODE_USER_CRITERIA_INVALID.getMessage(), ERROR_CODE_USER_CRITERIA_INVALID.getCode());
-        if (!generalDO.getUserCriteria().containsKey("userIds") || generalDO.getUserCriteria().get("userIds") == null) {
-            throwValidationException(ERROR_CODE_USER_CRITERIA_MISSING.getMessage(), ERROR_CODE_USER_CRITERIA_MISSING.getCode(), ERROR_CODE_USER_CRITERIA_MISSING.getDescription());
-        }
-        validateNotNull(generalDO.getPolicy(), ERROR_CODE_POLICY_NULL.getMessage(), ERROR_CODE_POLICY_NULL.getCode());
-        validateNotNull(generalDO.getRoles(), ERROR_CODE_ROLES_NULL.getMessage(), ERROR_CODE_ROLES_NULL.getCode());
-    }
-
-    private void validateNotNull(Object obj, String errorMessage, String errorCode) throws UserShareMgtServerException {
-        if (obj == null) {
-            throwValidationException(errorMessage, errorCode, errorMessage);
-        }
-    }
-
-    private void throwValidationException(String message, String errorCode, String description) throws UserShareMgtServerException {
-        UserShareMgtServerException exception = new UserShareMgtServerException(message, new NullPointerException(message), errorCode, description);
-        LOG.error(exception.getMessage(), exception);
-        throw exception;
-    }
-
     private UserShareSelective createUserShareSelective(String userId, Map<String, Object> orgDetails) throws UserShareMgtServerException {
-        validateUserAndOrgDetails(userId, orgDetails);
+        UserSharingValidationHelper.validateUserAndOrgDetails(userId, orgDetails);
 
         UserShareSelective userShareSelective = new UserShareSelective();
         userShareSelective.setUserId(userId);
@@ -173,20 +141,12 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         return userShareSelective;
     }
 
-    private void validateUserAndOrgDetails(String userId, Map<String, Object> orgDetails) throws UserShareMgtServerException {
-        validateUserId(userId);
-        validateOrgDetails(orgDetails);
-    }
-
-    private void validateUserId(String userId) throws UserShareMgtServerException {
-        validateNotNull(userId, ERROR_CODE_USER_ID_NULL.getMessage(), ERROR_CODE_USER_ID_NULL.getCode());
-    }
-
-    private void validateOrgDetails(Map<String, Object> orgDetails) throws UserShareMgtServerException {
-        validateNotNull(orgDetails, ERROR_CODE_ORG_DETAILS_NULL.getMessage(), ERROR_CODE_ORG_DETAILS_NULL.getCode());
-        validateNotNull(orgDetails.get(ORG_ID), ERROR_CODE_ORG_ID_NULL.getMessage(), ERROR_CODE_ORG_ID_NULL.getCode());
-        validateNotNull(orgDetails.get(POLICY), ERROR_CODE_POLICY_NULL.getMessage(), ERROR_CODE_POLICY_NULL.getCode());
-        validateNotNull(orgDetails.get(ROLES), ERROR_CODE_ROLES_NULL.getMessage(), ERROR_CODE_ROLES_NULL.getCode());
+    private UserShareGeneral createUserShareGeneral(String userId, String policy, List<String> roleIds) {
+        UserShareGeneral userShareGeneral = new UserShareGeneral();
+        userShareGeneral.setUserId(userId);
+        userShareGeneral.setPolicy(policy);
+        userShareGeneral.setRoles(roleIds);
+        return userShareGeneral;
     }
 
     private void setPolicyIfPresent(Map<String, Object> orgDetails, UserShareSelective userShareSelective) throws UserShareMgtServerException {
@@ -205,24 +165,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         } else {
             userShareSelective.setRoles(Collections.emptyList());
         }
-    }
-
-    private UserShareGeneral createUserShareGeneral(String userId, String policy, List<String> roleIds) {
-        UserShareGeneral userShareGeneral = new UserShareGeneral();
-        userShareGeneral.setUserId(userId);
-        userShareGeneral.setPolicy(policy);
-        userShareGeneral.setRoles(roleIds);
-        return userShareGeneral;
-    }
-
-    @Override
-    public void propagateSelectiveUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO) {
-        // TODO: To be implemented on selective unsharing
-    }
-
-    @Override
-    public void propagateGeneralUnshare(UserUnshareGeneralDO userUnshareGeneralDO) {
-        // TODO: To be implemented on general unsharing
     }
 
     /**

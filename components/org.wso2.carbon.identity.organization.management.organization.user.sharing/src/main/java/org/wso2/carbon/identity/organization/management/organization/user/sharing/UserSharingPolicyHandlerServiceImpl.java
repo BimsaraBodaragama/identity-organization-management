@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_POLICY;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORG_ID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ROLES;
@@ -74,45 +75,44 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     }
 
     private void validateInput(Object userShareDO, String context) throws UserShareMgtServerException {
-        UserShareMgtServerException validationException = null;
-        try {
-            if (userShareDO == null) {
-                validationException = new UserShareMgtServerException(context + " is null", new NullPointerException(context + " is null"), "USR_VAL_001", context + " must be provided");
-                throw validationException;
-            }
-
-            if (userShareDO instanceof UserShareSelectiveDO) {
-                UserShareSelectiveDO selectiveDO = (UserShareSelectiveDO) userShareDO;
-                if (selectiveDO.getUserCriteria() == null || !selectiveDO.getUserCriteria().containsKey(USER_IDS) ||
-                        selectiveDO.getUserCriteria().get(USER_IDS) == null) {
-                    validationException = new UserShareMgtServerException("User criteria is invalid", new NullPointerException("userCriteria is null or missing USER_IDS"), "USR_VAL_002", "User criteria must contain USER_IDS");
-                    throw validationException;
-                }
-                if (selectiveDO.getOrganizations() == null) {
-                    validationException = new UserShareMgtServerException("Organizations list is null", new NullPointerException("organizations is null"), "USR_VAL_003", "Organizations list must be provided");
-                    throw validationException;
-                }
-            } else if (userShareDO instanceof UserShareGeneralDO) {
-                UserShareGeneralDO generalDO = (UserShareGeneralDO) userShareDO;
-                if (generalDO.getUserCriteria() == null || !generalDO.getUserCriteria().containsKey("userIds") ||
-                        generalDO.getUserCriteria().get("userIds") == null) {
-                    validationException = new UserShareMgtServerException("User criteria is invalid", new NullPointerException("userCriteria is null or missing userIds"), "USR_VAL_002", "User criteria must contain userIds");
-                    throw validationException;
-                }
-                if (generalDO.getPolicy() == null) {
-                    validationException = new UserShareMgtServerException("Policy is null", new NullPointerException("policy is null"), "USR_VAL_003", "Policy must be provided");
-                    throw validationException;
-                }
-                if (generalDO.getRoles() == null) {
-                    validationException = new UserShareMgtServerException("Roles list is null", new NullPointerException("roles is null"), "USR_VAL_004", "Roles list must be provided");
-                    throw validationException;
-                }
-            }
-        } finally {
-            if (validationException != null) {
-                LOG.error(validationException.getMessage(), validationException);
-            }
+        if (userShareDO == null) {
+            throwValidationException(context + " is null", "USR_VAL_001", context + " must be provided");
         }
+
+        if (userShareDO instanceof UserShareSelectiveDO) {
+            validateSelectiveDO((UserShareSelectiveDO) userShareDO);
+        } else if (userShareDO instanceof UserShareGeneralDO) {
+            validateGeneralDO((UserShareGeneralDO) userShareDO);
+        }
+    }
+
+    private void validateSelectiveDO(UserShareSelectiveDO selectiveDO) throws UserShareMgtServerException {
+        if (selectiveDO.getUserCriteria() == null || !selectiveDO.getUserCriteria().containsKey(USER_IDS) ||
+                selectiveDO.getUserCriteria().get(USER_IDS) == null) {
+            throwValidationException("User criteria is invalid", "USR_VAL_002", "User criteria must contain USER_IDS");
+        }
+        if (selectiveDO.getOrganizations() == null) {
+            throwValidationException("Organizations list is null", "USR_VAL_003", "Organizations list must be provided");
+        }
+    }
+
+    private void validateGeneralDO(UserShareGeneralDO generalDO) throws UserShareMgtServerException {
+        if (generalDO.getUserCriteria() == null || !generalDO.getUserCriteria().containsKey("userIds") ||
+                generalDO.getUserCriteria().get("userIds") == null) {
+            throwValidationException("User criteria is invalid", "USR_VAL_002", "User criteria must contain userIds");
+        }
+        if (generalDO.getPolicy() == null) {
+            throwValidationException("Policy is null", "USR_VAL_003", "Policy must be provided");
+        }
+        if (generalDO.getRoles() == null) {
+            throwValidationException("Roles list is null", "USR_VAL_004", "Roles list must be provided");
+        }
+    }
+
+    private void throwValidationException(String message, String errorCode, String description) throws UserShareMgtServerException {
+        UserShareMgtServerException exception = new UserShareMgtServerException(message, new NullPointerException(message), errorCode, description);
+        LOG.error(exception.getMessage(), exception);
+        throw exception;
     }
 
     private UserShareSelective createUserShareSelective(String userId, Map<String, Object> orgDetails) throws UserShareMgtServerException {
@@ -148,7 +148,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         } else if (orgDetails.get(POLICY) == null) {
             message = "Policy is null for userId: " + userId;
             errorCode = "USR_VAL_007";
-            cause = new NullPointerException("policy is null");
+            cause = new NullPointerException(NULL_POLICY);
         } else if (orgDetails.get(ROLES) == null) {
             message = "Roles list is null for userId: " + userId;
             errorCode = "USR_VAL_008";
@@ -165,7 +165,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         if (policy != null) {
             userShareSelective.setPolicy(policy);
         } else {
-            throw new UserShareMgtServerException("Policy is null", new NullPointerException("policy is null"), "USR_VAL_007", "Policy must be provided");
+            throw new UserShareMgtServerException(NULL_POLICY, new NullPointerException(NULL_POLICY), "USR_VAL_007", "Policy must be provided");
         }
     }
 
@@ -187,7 +187,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     public void propagateGeneralShare(UserShareGeneralDO userShareGeneralDO) throws UserShareMgtServerException {
         validateInput(userShareGeneralDO, "UserShareGeneralDO");
 
-        List<String> userIds = userShareGeneralDO.getUserCriteria().get("userIds");
+        List<String> userIds = userShareGeneralDO.getUserCriteria().get(USER_IDS);
         String policy = userShareGeneralDO.getPolicy();
         List<String> roleIds = getRoleIds(userShareGeneralDO.getRoles());
 

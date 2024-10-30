@@ -31,6 +31,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORG_ID;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ROLES;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_IDS;
+
 /**
  * Service implementation for handling user sharing policies.
  */
@@ -46,22 +51,24 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     @Override
     public void propagateSelectiveShare(UserShareSelectiveDO userShareSelectiveDO) {
 
-        List<String> userIds = userShareSelectiveDO.getUserCriteria().get("userIds");
+        List<String> userIds = userShareSelectiveDO.getUserCriteria().get(USER_IDS);
         List<Map<String, Object>> organizations = userShareSelectiveDO.getOrganizations();
 
         for (String userId : userIds) {
             for (Map<String, Object> orgDetails : organizations) {
                 UserShareSelective userShareSelective = new UserShareSelective();
                 userShareSelective.setUserId(userId);
-                userShareSelective.setOrganizationId((String) orgDetails.get("orgId"));
-                userShareSelective.setPolicy((String) orgDetails.get("policy"));
+                userShareSelective.setOrganizationId((String) orgDetails.get(ORG_ID));
+                userShareSelective.setPolicy((String) orgDetails.get(POLICY));
 
-                List<String> roleIds = extractRoleIds(orgDetails.get("roles"));
+                List<String> roleIds = extractRoleIds(orgDetails.get(ROLES));
                 userShareSelective.setRoles(roleIds);
 
                 shareUserWithOrganization(userShareSelective);
             }
         }
+
+        LOG.info("selective share completed.");
     }
 
     /**
@@ -85,6 +92,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             shareUserWithAllOrganizations(userShareGeneral);
         }
     }
+
 
     @Override
     public void propagateSelectiveUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO) {

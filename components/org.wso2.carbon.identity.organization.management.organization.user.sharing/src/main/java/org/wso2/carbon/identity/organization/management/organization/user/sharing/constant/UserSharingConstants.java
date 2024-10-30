@@ -27,6 +27,11 @@ import java.util.List;
  */
 public class UserSharingConstants {
 
+    public static final String USER_IDS = "userIds";
+    public static final String ORG_ID = "orgId";
+    public static final String POLICY = "policy";
+    public static final String ROLES = "roles";
+
     public static final String DEFAULT_PROFILE = "default";
     public static final String CLAIM_MANAGED_ORGANIZATION = "http://wso2.org/claims/identity/managedOrg";
     public static final String ID_CLAIM_READ_ONLY = "http://wso2.org/claims/identity/isReadOnlyUser";

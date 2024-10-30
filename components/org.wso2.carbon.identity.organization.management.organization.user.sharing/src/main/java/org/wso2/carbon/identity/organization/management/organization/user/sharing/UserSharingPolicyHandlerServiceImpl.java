@@ -20,6 +20,8 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtException;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtServerException;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareGeneral;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareGeneralDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareSelective;
@@ -28,6 +30,7 @@ import org.wso2.carbon.identity.organization.management.organization.user.sharin
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserUnshareSelectiveDO;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -49,26 +52,25 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
      * @param userShareSelectiveDO Contains details for selective sharing.
      */
     @Override
-    public void propagateSelectiveShare(UserShareSelectiveDO userShareSelectiveDO) {
+    public void propagateSelectiveShare(UserShareSelectiveDO userShareSelectiveDO) throws UserShareMgtServerException {
+        validateAndLogInput(userShareSelectiveDO);
 
         List<String> userIds = userShareSelectiveDO.getUserCriteria().get(USER_IDS);
         List<Map<String, Object>> organizations = userShareSelectiveDO.getOrganizations();
 
         for (String userId : userIds) {
             for (Map<String, Object> orgDetails : organizations) {
-                UserShareSelective userShareSelective = new UserShareSelective();
-                userShareSelective.setUserId(userId);
-                userShareSelective.setOrganizationId((String) orgDetails.get(ORG_ID));
-                userShareSelective.setPolicy((String) orgDetails.get(POLICY));
-
-                List<String> roleIds = extractRoleIds(orgDetails.get(ROLES));
-                userShareSelective.setRoles(roleIds);
-
-                shareUserWithOrganization(userShareSelective);
+                try {
+                    UserShareSelective userShareSelective = createUserShareSelective(userId, orgDetails);
+                    shareUserWithOrganization(userShareSelective);
+                } catch (UserShareMgtServerException e) {
+                    LOG.error(e.getMessage(), e);
+                    throw e;
+                }
             }
         }
 
-        LOG.info("selective share completed.");
+        LOG.info("Selective share completed.");
     }
 
     /**
@@ -93,7 +95,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         }
     }
 
-
     @Override
     public void propagateSelectiveUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO) {
         // TODO: To be implemented on selective unsharing
@@ -102,6 +103,93 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     @Override
     public void propagateGeneralUnshare(UserUnshareGeneralDO userUnshareGeneralDO) {
         // TODO: To be implemented on general unsharing
+    }
+
+    private void validateAndLogInput(UserShareSelectiveDO userShareSelectiveDO) throws UserShareMgtServerException {
+        try {
+            validateInput(userShareSelectiveDO);
+        } catch (UserShareMgtServerException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    private void validateInput(UserShareSelectiveDO userShareSelectiveDO) throws UserShareMgtServerException {
+        if (userShareSelectiveDO == null) {
+            throw new UserShareMgtServerException("UserShareSelectiveDO is null", new NullPointerException("userShareSelectiveDO is null"), "USR_SHR_001", "UserShareSelectiveDO must be provided");
+        }
+        if (userShareSelectiveDO.getUserCriteria() == null || !userShareSelectiveDO.getUserCriteria().containsKey(USER_IDS) ||
+                userShareSelectiveDO.getUserCriteria().get(USER_IDS) == null) {
+            throw new UserShareMgtServerException("User criteria is invalid", new NullPointerException("userCriteria is null or missing USER_IDS"), "USR_SHR_002", "User criteria must contain USER_IDS");
+        }
+        if (userShareSelectiveDO.getOrganizations() == null) {
+            throw new UserShareMgtServerException("Organizations list is null", new NullPointerException("organizations is null"), "USR_SHR_003", "Organizations list must be provided");
+        }
+    }
+
+    private UserShareSelective createUserShareSelective(String userId, Map<String, Object> orgDetails) throws UserShareMgtServerException {
+        validateUserAndOrgDetails(userId, orgDetails);
+
+        UserShareSelective userShareSelective = new UserShareSelective();
+        userShareSelective.setUserId(userId);
+        userShareSelective.setOrganizationId((String) orgDetails.get(ORG_ID));
+
+        setPolicyIfPresent(orgDetails, userShareSelective);
+        setRolesIfPresent(orgDetails, userShareSelective);
+
+        return userShareSelective;
+    }
+
+    private void validateUserAndOrgDetails(String userId, Map<String, Object> orgDetails) throws UserShareMgtServerException {
+        String message;
+        String errorCode;
+        Throwable cause;
+
+        if (userId == null) {
+            message = "User ID is null";
+            errorCode = "USR_SHR_004";
+            cause = new NullPointerException("userId is null");
+        } else if (orgDetails == null) {
+            message = "Organization details are null";
+            errorCode = "USR_SHR_005";
+            cause = new NullPointerException("orgDetails is null");
+        } else if (orgDetails.get(ORG_ID) == null) {
+            message = "Organization ID is null for userId: " + userId;
+            errorCode = "USR_SHR_006";
+            cause = new NullPointerException("orgId is null");
+        } else if (orgDetails.get(POLICY) == null) {
+            message = "Policy is null for userId: " + userId;
+            errorCode = "USR_SHR_008";
+            cause = new NullPointerException("policy is null");
+        } else if (orgDetails.get(ROLES) == null) {
+            message = "Roles list is null for userId: " + userId;
+            errorCode = "USR_SHR_009";
+            cause = new NullPointerException("roles is null");
+        } else {
+            message = "Error in validating user and organization details in selective share";
+            errorCode = "USR_SHR_007";
+            cause = new Exception(message);
+        }
+
+        throw new UserShareMgtServerException(message, cause, errorCode, message);
+    }
+
+    private void setPolicyIfPresent(Map<String, Object> orgDetails, UserShareSelective userShareSelective) throws UserShareMgtServerException {
+        String policy = (String) orgDetails.get(POLICY);
+        if (policy != null) {
+            userShareSelective.setPolicy(policy);
+        } else {
+            throw new UserShareMgtServerException("Policy is null", new NullPointerException("policy is null"), "USR_SHR_008", "Policy must be provided");
+        }
+    }
+
+    private void setRolesIfPresent(Map<String, Object> orgDetails, UserShareSelective userShareSelective) {
+        List<String> roleIds = extractRoleIds(orgDetails.get(ROLES));
+        if (roleIds != null) {
+            userShareSelective.setRoles(roleIds);
+        } else {
+            userShareSelective.setRoles(Collections.emptyList());
+        }
     }
 
     /**

@@ -36,6 +36,12 @@ public class UserSharingConstants {
 
     public static final String SHARING_ERROR_PREFIX = "OUS-";
 
+    public static final String VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO = "UserShareSelectiveDO";
+    public static final String VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO = "UserShareGeneralDO";
+
+    public static final String LOG_INFO_SELECTIVE_SHARE_COMPLETED = "Selective share completed.";
+    public static final String LOG_INFO_GENERAL_SHARE_COMPLETED = "General share completed.";
+
     public static final String DEFAULT_PROFILE = "default";
     public static final String CLAIM_MANAGED_ORGANIZATION = "http://wso2.org/claims/identity/managedOrg";
     public static final String ID_CLAIM_READ_ONLY = "http://wso2.org/claims/identity/isReadOnlyUser";

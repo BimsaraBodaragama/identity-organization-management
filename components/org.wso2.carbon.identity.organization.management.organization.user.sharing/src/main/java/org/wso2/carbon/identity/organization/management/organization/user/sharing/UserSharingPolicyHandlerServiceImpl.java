@@ -34,12 +34,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.LOG_INFO_GENERAL_SHARE_COMPLETED;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.LOG_INFO_SELECTIVE_SHARE_COMPLETED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_POLICY;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORG_ID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ROLES;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_IDS;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.*;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO;
 
 /**
  * Service implementation for handling user sharing policies.
@@ -56,13 +60,13 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     @Override
     public void propagateSelectiveShare(UserShareSelectiveDO userShareSelectiveDO) throws UserShareMgtServerException {
         try {
-            UserSharingValidationHelper.validateInput(userShareSelectiveDO, "UserShareSelectiveDO");
+            UserSharingValidationHelper.validateInput(userShareSelectiveDO, VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO);
 
             for (String userId : userShareSelectiveDO.getUserCriteria().get(USER_IDS)) {
                 propagateSelectiveShareForUser(userId, userShareSelectiveDO.getOrganizations());
             }
 
-            LOG.info("Selective share completed.");
+            LOG.info(LOG_INFO_SELECTIVE_SHARE_COMPLETED);
         } catch (UserShareMgtServerException e) {
             LOG.error(ERROR_PROPAGATE_SELECTIVE_SHARE.getMessage() + e.getMessage(), e);
             throw e;
@@ -80,14 +84,14 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     @Override
     public void propagateGeneralShare(UserShareGeneralDO userShareGeneralDO) throws UserShareMgtServerException {
         try {
-            UserSharingValidationHelper.validateInput(userShareGeneralDO, "UserShareGeneralDO");
+            UserSharingValidationHelper.validateInput(userShareGeneralDO, VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO);
 
             for (String userId : userShareGeneralDO.getUserCriteria().get(USER_IDS)) {
                 propagateGeneralShareForUser(userId, userShareGeneralDO.getPolicy(),
                         getRoleIds(userShareGeneralDO.getRoles()));
             }
 
-            LOG.info("General share completed.");
+            LOG.info(LOG_INFO_GENERAL_SHARE_COMPLETED);
         } catch (UserShareMgtServerException e) {
             LOG.error(ERROR_PROPAGATE_GENERAL_SHARE.getMessage() + e.getMessage(), e);
             throw e;

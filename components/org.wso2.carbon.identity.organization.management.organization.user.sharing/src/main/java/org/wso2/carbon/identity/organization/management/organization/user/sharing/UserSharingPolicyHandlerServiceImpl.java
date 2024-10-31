@@ -20,8 +20,9 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtServerException;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.helper.UserSharingValidationHelper;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareBaseDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareGeneral;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareGeneralDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareSelective;
@@ -36,6 +37,7 @@ import java.util.Map;
 
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.LOG_INFO_GENERAL_SHARE_COMPLETED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.LOG_INFO_SELECTIVE_SHARE_COMPLETED;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_INPUT_MESSAGE_SUFFIX;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_POLICY;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORG_ID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY;
@@ -52,6 +54,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
     private static final Log LOG = LogFactory.getLog(UserSharingPolicyHandlerServiceImpl.class);
 
+    //Core Methods.
+
     /**
      * Propagates the selective share of a user to specific organizations.
      *
@@ -60,7 +64,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     @Override
     public void propagateSelectiveShare(UserShareSelectiveDO userShareSelectiveDO) throws UserShareMgtServerException {
 
-        UserSharingValidationHelper.validateInput(userShareSelectiveDO, VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO);
+        validateInput(userShareSelectiveDO, VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO);
 
         for (String userId : userShareSelectiveDO.getUserCriteria().get(USER_IDS)) {
             propagateSelectiveShareForUser(userId, userShareSelectiveDO.getOrganizations());
@@ -78,7 +82,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     @Override
     public void propagateGeneralShare(UserShareGeneralDO userShareGeneralDO) throws UserShareMgtServerException {
 
-        UserSharingValidationHelper.validateInput(userShareGeneralDO, VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO);
+        validateInput(userShareGeneralDO, VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO);
 
         for (String userId : userShareGeneralDO.getUserCriteria().get(USER_IDS)) {
             propagateGeneralShareForUser(userId, userShareGeneralDO.getPolicy(),
@@ -101,6 +105,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
     //TODO: set Enums for policy?
 
+    //Business Logic Methods.
+
     private void propagateSelectiveShareForUser(String userId, List<Map<String, Object>> organizations)
             throws UserShareMgtServerException {
 
@@ -119,7 +125,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     private UserShareSelective createUserShareSelective(String userId, Map<String, Object> orgDetails)
             throws UserShareMgtServerException {
 
-        UserSharingValidationHelper.validateUserAndOrgDetails(userId, orgDetails);
+        validateUserAndOrgDetails(userId, orgDetails);
 
         UserShareSelective userShareSelective = new UserShareSelective();
         userShareSelective.setUserId(userId);
@@ -138,28 +144,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         userShareGeneral.setPolicy(policy);
         userShareGeneral.setRoles(roleIds);
         return userShareGeneral;
-    }
-
-    private void setPolicyIfPresent(Map<String, Object> orgDetails, UserShareSelective userShareSelective)
-            throws UserShareMgtServerException {
-
-        String policy = (String) orgDetails.get(POLICY);
-        if (policy != null) {
-            userShareSelective.setPolicy(policy);
-        } else {
-            throw new UserShareMgtServerException(NULL_POLICY, new NullPointerException(NULL_POLICY),
-                    ERROR_CODE_POLICY_NULL.getCode(), ERROR_CODE_POLICY_NULL.getDescription());
-        }
-    }
-
-    private void setRolesIfPresent(Map<String, Object> orgDetails, UserShareSelective userShareSelective) {
-
-        List<String> roleIds = extractRoleIds(orgDetails.get(ROLES));
-        if (!roleIds.isEmpty()) {
-            userShareSelective.setRoles(roleIds);
-        } else {
-            userShareSelective.setRoles(Collections.emptyList());
-        }
     }
 
     /**
@@ -185,6 +169,123 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         // Then we iterate through those orgs and create an UserAssociation model and share the user
         // Then inside that loop, we do the role assign for each inside that
     }
+
+    //Setter Methods.
+
+    private void setPolicyIfPresent(Map<String, Object> orgDetails, UserShareSelective userShareSelective)
+            throws UserShareMgtServerException {
+
+        String policy = (String) orgDetails.get(POLICY);
+        if (policy != null) {
+            userShareSelective.setPolicy(policy);
+        } else {
+            throw new UserShareMgtServerException(NULL_POLICY, new NullPointerException(NULL_POLICY),
+                    ERROR_CODE_POLICY_NULL.getCode(), ERROR_CODE_POLICY_NULL.getDescription());
+        }
+    }
+
+    private void setRolesIfPresent(Map<String, Object> orgDetails, UserShareSelective userShareSelective) {
+
+        List<String> roleIds = extractRoleIds(orgDetails.get(ROLES));
+        if (!roleIds.isEmpty()) {
+            userShareSelective.setRoles(roleIds);
+        } else {
+            userShareSelective.setRoles(Collections.emptyList());
+        }
+    }
+
+    //Validation Methods.
+
+    private void validateInput(UserShareBaseDO userShareDO, String context) throws UserShareMgtServerException {
+
+        if (userShareDO == null) {
+            throwValidationException(context + NULL_INPUT_MESSAGE_SUFFIX,
+                    UserSharingConstants.ErrorMessage.ERROR_CODE_NULL_INPUT.getCode(),
+                    UserSharingConstants.ErrorMessage.ERROR_CODE_NULL_INPUT.getDescription());
+        }
+
+        if (userShareDO instanceof UserShareSelectiveDO) {
+            validateSelectiveDO((UserShareSelectiveDO) userShareDO);
+        } else if (userShareDO instanceof UserShareGeneralDO) {
+            validateGeneralDO((UserShareGeneralDO) userShareDO);
+        }
+    }
+
+    private void validateSelectiveDO(UserShareSelectiveDO selectiveDO) throws UserShareMgtServerException {
+
+        validateNotNull(selectiveDO.getUserCriteria(),
+                UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_INVALID.getMessage(),
+                UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_INVALID.getCode());
+        if (!selectiveDO.getUserCriteria().containsKey(USER_IDS) ||
+                selectiveDO.getUserCriteria().get(USER_IDS) == null) {
+            throwValidationException(UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_MISSING.getMessage(),
+                    UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_MISSING.getCode(),
+                    UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_MISSING.getDescription());
+        }
+        validateNotNull(selectiveDO.getOrganizations(),
+                UserSharingConstants.ErrorMessage.ERROR_CODE_ORGANIZATIONS_NULL.getMessage(),
+                UserSharingConstants.ErrorMessage.ERROR_CODE_ORGANIZATIONS_NULL.getCode());
+    }
+
+    private void validateGeneralDO(UserShareGeneralDO generalDO) throws UserShareMgtServerException {
+
+        validateNotNull(generalDO.getUserCriteria(),
+                UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_INVALID.getMessage(),
+                UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_INVALID.getCode());
+        if (!generalDO.getUserCriteria().containsKey(USER_IDS) || generalDO.getUserCriteria().get(USER_IDS) == null) {
+            throwValidationException(UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_MISSING.getMessage(),
+                    UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_MISSING.getCode(),
+                    UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_MISSING.getDescription());
+        }
+        validateNotNull(generalDO.getPolicy(), UserSharingConstants.ErrorMessage.ERROR_CODE_POLICY_NULL.getMessage(),
+                UserSharingConstants.ErrorMessage.ERROR_CODE_POLICY_NULL.getCode());
+        validateNotNull(generalDO.getRoles(), UserSharingConstants.ErrorMessage.ERROR_CODE_ROLES_NULL.getMessage(),
+                UserSharingConstants.ErrorMessage.ERROR_CODE_ROLES_NULL.getCode());
+    }
+
+    private void validateUserAndOrgDetails(String userId, Map<String, Object> orgDetails)
+            throws UserShareMgtServerException {
+
+        validateUserId(userId);
+        validateOrgDetails(orgDetails);
+    }
+
+    private void validateUserId(String userId) throws UserShareMgtServerException {
+
+        validateNotNull(userId, UserSharingConstants.ErrorMessage.ERROR_CODE_USER_ID_NULL.getMessage(),
+                UserSharingConstants.ErrorMessage.ERROR_CODE_USER_ID_NULL.getCode());
+    }
+
+    private void validateOrgDetails(Map<String, Object> orgDetails) throws UserShareMgtServerException {
+
+        validateNotNull(orgDetails, UserSharingConstants.ErrorMessage.ERROR_CODE_ORG_DETAILS_NULL.getMessage(),
+                UserSharingConstants.ErrorMessage.ERROR_CODE_ORG_DETAILS_NULL.getCode());
+        validateNotNull(orgDetails.get(UserSharingConstants.ORG_ID),
+                UserSharingConstants.ErrorMessage.ERROR_CODE_ORG_ID_NULL.getMessage(),
+                UserSharingConstants.ErrorMessage.ERROR_CODE_ORG_ID_NULL.getCode());
+        validateNotNull(orgDetails.get(UserSharingConstants.POLICY),
+                UserSharingConstants.ErrorMessage.ERROR_CODE_POLICY_NULL.getMessage(),
+                UserSharingConstants.ErrorMessage.ERROR_CODE_POLICY_NULL.getCode());
+        validateNotNull(orgDetails.get(UserSharingConstants.ROLES),
+                UserSharingConstants.ErrorMessage.ERROR_CODE_ROLES_NULL.getMessage(),
+                UserSharingConstants.ErrorMessage.ERROR_CODE_ROLES_NULL.getCode());
+    }
+
+    private void validateNotNull(Object obj, String errorMessage, String errorCode)
+            throws UserShareMgtServerException {
+
+        if (obj == null) {
+            throwValidationException(errorMessage, errorCode, errorMessage);
+        }
+    }
+
+    private void throwValidationException(String message, String errorCode, String description)
+            throws UserShareMgtServerException {
+
+        throw new UserShareMgtServerException(message, new NullPointerException(message), errorCode, description);
+    }
+
+    //Utility Methods.
 
     /**
      * Converts roles to role IDs.

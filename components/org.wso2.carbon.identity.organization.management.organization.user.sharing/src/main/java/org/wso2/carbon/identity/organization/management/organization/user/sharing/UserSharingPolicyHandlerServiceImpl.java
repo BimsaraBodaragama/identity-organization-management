@@ -59,6 +59,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
      */
     @Override
     public void propagateSelectiveShare(UserShareSelectiveDO userShareSelectiveDO) throws UserShareMgtServerException {
+
         try {
             UserSharingValidationHelper.validateInput(userShareSelectiveDO, VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO);
 
@@ -72,7 +73,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             throw e;
         } catch (Exception e) {
             LOG.error(ERROR_PROPAGATE_SELECTIVE_SHARE.getMessage() + e.getMessage(), e);
-            throw new UserShareMgtServerException(e, ERROR_PROPAGATE_SELECTIVE_SHARE.getCode(), ERROR_PROPAGATE_SELECTIVE_SHARE.getDescription());
+            throw new UserShareMgtServerException(e, ERROR_PROPAGATE_SELECTIVE_SHARE.getCode(),
+                    ERROR_PROPAGATE_SELECTIVE_SHARE.getDescription());
         }
     }
 
@@ -83,6 +85,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
      */
     @Override
     public void propagateGeneralShare(UserShareGeneralDO userShareGeneralDO) throws UserShareMgtServerException {
+
         try {
             UserSharingValidationHelper.validateInput(userShareGeneralDO, VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO);
 
@@ -97,7 +100,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             throw e;
         } catch (Exception e) {
             LOG.error(ERROR_PROPAGATE_GENERAL_SHARE.getMessage() + e.getMessage(), e);
-            throw new UserShareMgtServerException(e, ERROR_PROPAGATE_GENERAL_SHARE.getCode(), ERROR_PROPAGATE_GENERAL_SHARE.getDescription());
+            throw new UserShareMgtServerException(e, ERROR_PROPAGATE_GENERAL_SHARE.getCode(),
+                    ERROR_PROPAGATE_GENERAL_SHARE.getDescription());
         }
     }
 
@@ -111,7 +115,9 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         // TODO: To be implemented on general unsharing
     }
 
-    private void propagateSelectiveShareForUser(String userId, List<Map<String, Object>> organizations) throws UserShareMgtServerException {
+    private void propagateSelectiveShareForUser(String userId, List<Map<String, Object>> organizations)
+            throws UserShareMgtServerException {
+
         for (Map<String, Object> orgDetails : organizations) {
             UserShareSelective userShareSelective = createUserShareSelective(userId, orgDetails);
             shareUserWithOrganization(userShareSelective);
@@ -119,11 +125,14 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     }
 
     private void propagateGeneralShareForUser(String userId, String policy, List<String> roleIds) {
+
         UserShareGeneral userShareGeneral = createUserShareGeneral(userId, policy, roleIds);
         shareUserWithAllOrganizations(userShareGeneral);
     }
 
-    private UserShareSelective createUserShareSelective(String userId, Map<String, Object> orgDetails) throws UserShareMgtServerException {
+    private UserShareSelective createUserShareSelective(String userId, Map<String, Object> orgDetails)
+            throws UserShareMgtServerException {
+
         UserSharingValidationHelper.validateUserAndOrgDetails(userId, orgDetails);
 
         UserShareSelective userShareSelective = new UserShareSelective();
@@ -137,6 +146,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     }
 
     private UserShareGeneral createUserShareGeneral(String userId, String policy, List<String> roleIds) {
+
         UserShareGeneral userShareGeneral = new UserShareGeneral();
         userShareGeneral.setUserId(userId);
         userShareGeneral.setPolicy(policy);
@@ -144,16 +154,20 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         return userShareGeneral;
     }
 
-    private void setPolicyIfPresent(Map<String, Object> orgDetails, UserShareSelective userShareSelective) throws UserShareMgtServerException {
+    private void setPolicyIfPresent(Map<String, Object> orgDetails, UserShareSelective userShareSelective)
+            throws UserShareMgtServerException {
+
         String policy = (String) orgDetails.get(POLICY);
         if (policy != null) {
             userShareSelective.setPolicy(policy);
         } else {
-            throw new UserShareMgtServerException(NULL_POLICY, new NullPointerException(NULL_POLICY), ERROR_CODE_POLICY_NULL.getCode(), ERROR_CODE_POLICY_NULL.getDescription());
+            throw new UserShareMgtServerException(NULL_POLICY, new NullPointerException(NULL_POLICY),
+                    ERROR_CODE_POLICY_NULL.getCode(), ERROR_CODE_POLICY_NULL.getDescription());
         }
     }
 
     private void setRolesIfPresent(Map<String, Object> orgDetails, UserShareSelective userShareSelective) {
+
         List<String> roleIds = extractRoleIds(orgDetails.get(ROLES));
         if (!roleIds.isEmpty()) {
             userShareSelective.setRoles(roleIds);
@@ -193,6 +207,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
      * @return The list of role IDs.
      */
     private List<String> getRoleIds(List<Map<String, String>> roles) {
+
         List<String> roleIds = new ArrayList<>();
 
         // We have to get the role name, audience name and type and get the role id from the db and return the
@@ -208,6 +223,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
      * @return A list of role IDs.
      */
     private List<String> extractRoleIds(Object rolesObj) {
+
         List<String> roleIds = new ArrayList<>();
 
         if (rolesObj instanceof List<?>) {

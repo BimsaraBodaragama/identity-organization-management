@@ -30,26 +30,32 @@ public class UserShareGeneralDO {
     private List<Map<String, String>> roles;
 
     public Map<String, List<String>> getUserCriteria() {
+
         return userCriteria;
     }
 
     public void setUserCriteria(Map<String, List<String>> userCriteria) {
+
         this.userCriteria = userCriteria;
     }
 
     public String getPolicy() {
+
         return policy;
     }
 
     public void setPolicy(String policy) {
+
         this.policy = policy;
     }
 
     public List<Map<String, String>> getRoles() {
+
         return roles;
     }
 
     public void setRoles(List<Map<String, String>> roles) {
+
         this.roles = roles;
     }
 }

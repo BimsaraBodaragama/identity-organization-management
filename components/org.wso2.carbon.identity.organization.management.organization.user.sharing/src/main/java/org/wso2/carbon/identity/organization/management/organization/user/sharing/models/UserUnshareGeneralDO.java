@@ -28,10 +28,12 @@ public class UserUnshareGeneralDO {
     private Map<String, List<String>> userCriteria;
 
     public Map<String, List<String>> getUserCriteria() {
+
         return userCriteria;
     }
 
     public void setUserCriteria(Map<String, List<String>> userCriteria) {
+
         this.userCriteria = userCriteria;
     }
 }

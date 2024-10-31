@@ -29,26 +29,32 @@ public abstract class UserShareBase {
     private List<String> roles;
 
     public String getUserId() {
+
         return userId;
     }
 
     public void setUserId(String userId) {
+
         this.userId = userId;
     }
 
     public String getPolicy() {
+
         return policy;
     }
 
     public void setPolicy(String policy) {
+
         this.policy = policy;
     }
 
     public List<String> getRoles() {
+
         return roles;
     }
 
     public void setRoles(List<String> roles) {
+
         this.roles = roles;
     }
 }

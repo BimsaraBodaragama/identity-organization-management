@@ -30,18 +30,22 @@ public class UserShareSelectiveDO {
     private List<Map<String, Object>> organizations;
 
     public Map<String, List<String>> getUserCriteria() {
+
         return userCriteria;
     }
 
     public void setUserCriteria(Map<String, List<String>> userCriteria) {
+
         this.userCriteria = userCriteria;
     }
 
     public List<Map<String, Object>> getOrganizations() {
+
         return organizations;
     }
 
     public void setOrganizations(List<Map<String, Object>> organizations) {
+
         this.organizations = organizations;
     }
 }

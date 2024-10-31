@@ -81,7 +81,6 @@ public class UserSharingConstants {
                             APPLICATION_MGT_VIEW_PERMISSION, CORS_CONFIG_MGT_VIEW_PERMISSION, IDP_MGT_VIEW_PERMISSION,
                             CLAIM_META_DATA_MGT_VIEW_PERMISSION));
 
-
     /**
      * Enum for assignmentType.
      */

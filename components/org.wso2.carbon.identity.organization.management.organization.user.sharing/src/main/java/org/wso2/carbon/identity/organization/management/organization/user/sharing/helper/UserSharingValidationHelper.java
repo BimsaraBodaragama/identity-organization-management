@@ -21,6 +21,7 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtServerException;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareBaseDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareGeneralDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareSelectiveDO;
 
@@ -35,7 +36,7 @@ public class UserSharingValidationHelper {
 
     }
 
-    public static void validateInput(Object userShareDO, String context) throws UserShareMgtServerException {
+    public static void validateInput(UserShareBaseDO userShareDO, String context) throws UserShareMgtServerException {
 
         if (userShareDO == null) {
             throwValidationException(context + NULL_INPUT_MESSAGE_SUFFIX, ErrorMessage.ERROR_CODE_NULL_INPUT.getCode(),

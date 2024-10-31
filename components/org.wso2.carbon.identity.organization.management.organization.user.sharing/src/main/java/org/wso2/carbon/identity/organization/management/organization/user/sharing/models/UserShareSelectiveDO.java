@@ -24,10 +24,9 @@ import java.util.Map;
 /**
  * Model that contains the user share selective data object.
  */
-public class UserShareSelectiveDO extends UserShareBaseDO{
+public class UserShareSelectiveDO extends UserShareBaseDO {
 
     private List<Map<String, Object>> organizations;
-
 
     public List<Map<String, Object>> getOrganizations() {
 

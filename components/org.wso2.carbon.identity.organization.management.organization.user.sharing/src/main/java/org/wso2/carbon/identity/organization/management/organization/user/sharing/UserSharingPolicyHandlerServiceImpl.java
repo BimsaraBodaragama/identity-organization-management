@@ -60,22 +60,14 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     @Override
     public void propagateSelectiveShare(UserShareSelectiveDO userShareSelectiveDO) throws UserShareMgtServerException {
 
-        try {
-            UserSharingValidationHelper.validateInput(userShareSelectiveDO, VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO);
+        UserSharingValidationHelper.validateInput(userShareSelectiveDO, VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO);
 
-            for (String userId : userShareSelectiveDO.getUserCriteria().get(USER_IDS)) {
-                propagateSelectiveShareForUser(userId, userShareSelectiveDO.getOrganizations());
-            }
-
-            LOG.info(LOG_INFO_SELECTIVE_SHARE_COMPLETED);
-        } catch (UserShareMgtServerException e) {
-            LOG.error(ERROR_PROPAGATE_SELECTIVE_SHARE.getMessage() + e.getMessage(), e);
-            throw e;
-        } catch (Exception e) {
-            LOG.error(ERROR_PROPAGATE_SELECTIVE_SHARE.getMessage() + e.getMessage(), e);
-            throw new UserShareMgtServerException(e, ERROR_PROPAGATE_SELECTIVE_SHARE.getCode(),
-                    ERROR_PROPAGATE_SELECTIVE_SHARE.getDescription());
+        for (String userId : userShareSelectiveDO.getUserCriteria().get(USER_IDS)) {
+            propagateSelectiveShareForUser(userId, userShareSelectiveDO.getOrganizations());
         }
+
+        LOG.info(LOG_INFO_SELECTIVE_SHARE_COMPLETED);
+
     }
 
     /**
@@ -86,23 +78,15 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     @Override
     public void propagateGeneralShare(UserShareGeneralDO userShareGeneralDO) throws UserShareMgtServerException {
 
-        try {
-            UserSharingValidationHelper.validateInput(userShareGeneralDO, VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO);
+        UserSharingValidationHelper.validateInput(userShareGeneralDO, VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO);
 
-            for (String userId : userShareGeneralDO.getUserCriteria().get(USER_IDS)) {
-                propagateGeneralShareForUser(userId, userShareGeneralDO.getPolicy(),
-                        getRoleIds(userShareGeneralDO.getRoles()));
-            }
-
-            LOG.info(LOG_INFO_GENERAL_SHARE_COMPLETED);
-        } catch (UserShareMgtServerException e) {
-            LOG.error(ERROR_PROPAGATE_GENERAL_SHARE.getMessage() + e.getMessage(), e);
-            throw e;
-        } catch (Exception e) {
-            LOG.error(ERROR_PROPAGATE_GENERAL_SHARE.getMessage() + e.getMessage(), e);
-            throw new UserShareMgtServerException(e, ERROR_PROPAGATE_GENERAL_SHARE.getCode(),
-                    ERROR_PROPAGATE_GENERAL_SHARE.getDescription());
+        for (String userId : userShareGeneralDO.getUserCriteria().get(USER_IDS)) {
+            propagateGeneralShareForUser(userId, userShareGeneralDO.getPolicy(),
+                    getRoleIds(userShareGeneralDO.getRoles()));
         }
+
+        LOG.info(LOG_INFO_GENERAL_SHARE_COMPLETED);
+
     }
 
     @Override
@@ -114,6 +98,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     public void propagateGeneralUnshare(UserUnshareGeneralDO userUnshareGeneralDO) {
         // TODO: To be implemented on general unsharing
     }
+
+    //TODO: set Enums for policy?
 
     private void propagateSelectiveShareForUser(String userId, List<Map<String, Object>> organizations)
             throws UserShareMgtServerException {

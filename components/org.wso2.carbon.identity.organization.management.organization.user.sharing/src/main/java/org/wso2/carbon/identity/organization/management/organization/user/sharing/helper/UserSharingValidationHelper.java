@@ -24,6 +24,7 @@ import org.wso2.carbon.identity.organization.management.organization.user.sharin
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareGeneralDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareSelectiveDO;
 
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_INPUT_MESSAGE_SUFFIX;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_IDS;
 
 import java.util.Map;
@@ -34,7 +35,7 @@ public class UserSharingValidationHelper {
 
     public static void validateInput(Object userShareDO, String context) throws UserShareMgtServerException {
         if (userShareDO == null) {
-            throwValidationException(context + " is null", ErrorMessage.ERROR_CODE_NULL_INPUT.getCode(), ErrorMessage.ERROR_CODE_NULL_INPUT.getDescription());
+            throwValidationException(context + NULL_INPUT_MESSAGE_SUFFIX, ErrorMessage.ERROR_CODE_NULL_INPUT.getCode(), ErrorMessage.ERROR_CODE_NULL_INPUT.getDescription());
         }
 
         if (userShareDO instanceof UserShareSelectiveDO) {
@@ -54,7 +55,7 @@ public class UserSharingValidationHelper {
 
     public static void validateGeneralDO(UserShareGeneralDO generalDO) throws UserShareMgtServerException {
         validateNotNull(generalDO.getUserCriteria(), ErrorMessage.ERROR_CODE_USER_CRITERIA_INVALID.getMessage(), ErrorMessage.ERROR_CODE_USER_CRITERIA_INVALID.getCode());
-        if (!generalDO.getUserCriteria().containsKey("userIds") || generalDO.getUserCriteria().get("userIds") == null) {
+        if (!generalDO.getUserCriteria().containsKey(USER_IDS) || generalDO.getUserCriteria().get(USER_IDS) == null) {
             throwValidationException(ErrorMessage.ERROR_CODE_USER_CRITERIA_MISSING.getMessage(), ErrorMessage.ERROR_CODE_USER_CRITERIA_MISSING.getCode(), ErrorMessage.ERROR_CODE_USER_CRITERIA_MISSING.getDescription());
         }
         validateNotNull(generalDO.getPolicy(), ErrorMessage.ERROR_CODE_POLICY_NULL.getMessage(), ErrorMessage.ERROR_CODE_POLICY_NULL.getCode());

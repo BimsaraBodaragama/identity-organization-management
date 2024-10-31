@@ -36,6 +36,8 @@ public class UserSharingConstants {
 
     public static final String SHARING_ERROR_PREFIX = "OUS-";
 
+    public static final String NULL_INPUT_MESSAGE_SUFFIX = " is null";
+
     public static final String VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO = "UserShareSelectiveDO";
     public static final String VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO = "UserShareGeneralDO";
 

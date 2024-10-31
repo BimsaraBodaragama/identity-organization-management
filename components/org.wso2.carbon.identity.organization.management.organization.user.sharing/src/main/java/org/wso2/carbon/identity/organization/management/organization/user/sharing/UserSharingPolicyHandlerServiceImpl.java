@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtServerException;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareBaseDO;
@@ -35,6 +36,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum.validateAndGetPolicy;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.LOG_INFO_GENERAL_SHARE_COMPLETED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.LOG_INFO_SELECTIVE_SHARE_COMPLETED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_INPUT_MESSAGE_SUFFIX;
@@ -85,7 +87,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         validateInput(userShareGeneralDO, VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO);
 
         for (String userId : userShareGeneralDO.getUserCriteria().get(USER_IDS)) {
-            propagateGeneralShareForUser(userId, userShareGeneralDO.getPolicy(),
+            propagateGeneralShareForUser(userId, validateAndGetPolicy(userShareGeneralDO.getPolicy()),
                     getRoleIds(userShareGeneralDO.getRoles()));
         }
 
@@ -103,8 +105,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         // TODO: To be implemented on general unsharing
     }
 
-    //TODO: set Enums for policy?
-
     //Business Logic Methods.
 
     private void propagateSelectiveShareForUser(String userId, List<Map<String, Object>> organizations)
@@ -116,7 +116,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         }
     }
 
-    private void propagateGeneralShareForUser(String userId, String policy, List<String> roleIds) {
+    private void propagateGeneralShareForUser(String userId, PolicyEnum policy, List<String> roleIds) {
 
         UserShareGeneral userShareGeneral = createUserShareGeneral(userId, policy, roleIds);
         shareUserWithAllOrganizations(userShareGeneral);
@@ -137,7 +137,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         return userShareSelective;
     }
 
-    private UserShareGeneral createUserShareGeneral(String userId, String policy, List<String> roleIds) {
+    private UserShareGeneral createUserShareGeneral(String userId, PolicyEnum policy, List<String> roleIds) {
 
         UserShareGeneral userShareGeneral = new UserShareGeneral();
         userShareGeneral.setUserId(userId);
@@ -175,7 +175,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     private void setPolicyIfPresent(Map<String, Object> orgDetails, UserShareSelective userShareSelective)
             throws UserShareMgtServerException {
 
-        String policy = (String) orgDetails.get(POLICY);
+        Object requestedPolicy = orgDetails.get(POLICY);
+        PolicyEnum policy = validateAndGetPolicy(requestedPolicy);
         if (policy != null) {
             userShareSelective.setPolicy(policy);
         } else {

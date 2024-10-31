@@ -17,6 +17,8 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum;
+
 import java.util.List;
 
 /**
@@ -25,7 +27,7 @@ import java.util.List;
 public abstract class UserShareBase {
 
     private String userId;
-    private String policy;
+    private PolicyEnum policy;
     private List<String> roles;
 
     public String getUserId() {
@@ -38,12 +40,12 @@ public abstract class UserShareBase {
         this.userId = userId;
     }
 
-    public String getPolicy() {
+    public PolicyEnum getPolicy() {
 
         return policy;
     }
 
-    public void setPolicy(String policy) {
+    public void setPolicy(PolicyEnum policy) {
 
         this.policy = policy;
     }

@@ -21,30 +21,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Model that contains the user share general data object.
+ * Abstract class for common properties and methods for user share data objects.
  */
-public class UserShareGeneralDO extends UserShareBaseDO{
+public abstract class UserShareBaseDO {
 
-    private String policy;
-    private List<Map<String, String>> roles;
+    private Map<String, List<String>> userCriteria;
 
-    public String getPolicy() {
-
-        return policy;
+    public Map<String, List<String>> getUserCriteria() {
+        return userCriteria;
     }
 
-    public void setPolicy(String policy) {
-
-        this.policy = policy;
-    }
-
-    public List<Map<String, String>> getRoles() {
-
-        return roles;
-    }
-
-    public void setRoles(List<Map<String, String>> roles) {
-
-        this.roles = roles;
+    public void setUserCriteria(Map<String, List<String>> userCriteria) {
+        this.userCriteria = userCriteria;
     }
 }

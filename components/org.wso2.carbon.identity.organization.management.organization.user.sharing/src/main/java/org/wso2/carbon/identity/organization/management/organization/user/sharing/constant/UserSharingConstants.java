@@ -139,7 +139,10 @@ public class UserSharingConstants {
                 "Error occurred during selective share propagation for a given user."),
         ERROR_GENERAL_SHARE("10027",
                 "Error occurred during general share propagation for userId: %s - %s",
-                "Error occurred during general share propagation for a given user.");
+                "Error occurred during general share propagation for a given user."),
+        ERROR_CODE_GET_TENANT_FROM_ORG("10027",
+                "Unable to get the tenant domain.",
+                "Unable to get the tenant domain for the organization %s.");
 
         private final String code;
         private final String message;

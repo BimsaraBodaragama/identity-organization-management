@@ -23,13 +23,16 @@ import org.wso2.carbon.identity.organization.management.organization.user.sharin
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareSelectiveDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserUnshareGeneralDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserUnshareSelectiveDO;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.identity.role.v2.mgt.core.exception.IdentityRoleManagementException;
 
 /**
  * Service that manages the user sharing policy handler.
  */
 public interface UserSharingPolicyHandlerService {
 
-    void propagateSelectiveShare(UserShareSelectiveDO userShareSelectiveDO) throws UserShareMgtException;
+    void propagateSelectiveShare(UserShareSelectiveDO userShareSelectiveDO)
+            throws UserShareMgtException, OrganizationManagementException, IdentityRoleManagementException;
 
     void propagateGeneralShare(UserShareGeneralDO userShareGeneralDO) throws UserShareMgtException;
 

@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtServerException;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.internal.OrganizationUserSharingDataHolder;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareBaseDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareGeneral;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareGeneralDO;
@@ -30,6 +31,10 @@ import org.wso2.carbon.identity.organization.management.organization.user.sharin
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareSelectiveDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserUnshareGeneralDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserUnshareSelectiveDO;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.identity.role.v2.mgt.core.RoleManagementService;
+import org.wso2.carbon.identity.role.v2.mgt.core.exception.IdentityRoleManagementException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,7 +69,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
      * @param userShareSelectiveDO Contains details for selective sharing.
      */
     @Override
-    public void propagateSelectiveShare(UserShareSelectiveDO userShareSelectiveDO) throws UserShareMgtServerException {
+    public void propagateSelectiveShare(UserShareSelectiveDO userShareSelectiveDO)
+            throws UserShareMgtServerException, OrganizationManagementException, IdentityRoleManagementException {
 
         validateInput(userShareSelectiveDO, VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO);
 
@@ -108,7 +114,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     //Business Logic Methods.
 
     private void propagateSelectiveShareForUser(String userId, List<Map<String, Object>> organizations)
-            throws UserShareMgtServerException {
+            throws UserShareMgtServerException, OrganizationManagementException, IdentityRoleManagementException {
 
         for (Map<String, Object> orgDetails : organizations) {
             UserShareSelective userShareSelective = createUserShareSelective(userId, orgDetails);
@@ -119,7 +125,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     private void propagateGeneralShareForUser(String userId, PolicyEnum policy, List<String> roleIds) {
 
         UserShareGeneral userShareGeneral = createUserShareGeneral(userId, policy, roleIds);
-        shareUserWithAllOrganizations(userShareGeneral);
+        shareUserWithAllOrganizations(userShareGeneral, policy);
     }
 
     private UserShareSelective createUserShareSelective(String userId, Map<String, Object> orgDetails)
@@ -151,10 +157,77 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
      *
      * @param userShareSelective Contains details for sharing a user with an organization.
      */
-    private void shareUserWithOrganization(UserShareSelective userShareSelective) {
+    private void shareUserWithOrganization(UserShareSelective userShareSelective)
+            throws OrganizationManagementException, UserShareMgtServerException, IdentityRoleManagementException {
 
         // In this method we create an UserAssociation model and share the user
         // We do the role assign here as well
+
+        saveForFuturePropagationsIfNeeded(userShareSelective, userShareSelective.getPolicy());
+
+        String originalUser = userShareSelective.getUserId();
+        List<String> organizationsToShareWith =
+                getOrgsToShareUserWithPerPolicy(userShareSelective.getOrganizationId(), userShareSelective.getPolicy());
+
+        for(String eachOrganization : organizationsToShareWith) {
+
+            boolean uniqueUser = isUserUniquenessInTargetOrg(originalUser, eachOrganization);
+
+            if(uniqueUser) {
+                getOrganizationUserSharingService().shareOrganizationUser(eachOrganization, originalUser,
+                        userShareSelective.getOrganizationId());
+                //TODO: Set as pushed user (either here or in above method)
+                String sharedUser = getOrganizationUserSharingService()
+                        .getUserAssociationOfAssociatedUserByOrgId(originalUser,
+                                eachOrganization).getUserId(); //252 of InvitationMgtCoreImpl
+
+                if (!userShareSelective.getRoles().isEmpty()) {
+                    assignRolesToTheSharedUser(sharedUser, eachOrganization, userShareSelective.getRoles());
+                }
+            }else{
+                //do something - add to a instance variable list and finally return the list in the response as well
+            }
+        }
+
+    }
+
+    private void assignRolesToTheSharedUser(String sharedUser, String sharedOrganization, List<String> roles)
+            throws UserShareMgtServerException, IdentityRoleManagementException {
+
+        String sharedTenantDomain = resolveTenantDomain(sharedOrganization);
+        //assign the roles to the sharedUser
+        for (String role : roles) {
+
+            getRoleManagementService().updateUserListOfRole(role, Collections.singletonList(sharedUser),
+                    Collections.emptyList(), sharedTenantDomain);
+
+        }
+    }
+
+    private String resolveTenantDomain(String orgId) throws UserShareMgtServerException {
+
+        try {
+            return getOrganizationManager().resolveTenantDomain(orgId);
+        } catch (OrganizationManagementException e) {
+            throw new UserShareMgtServerException(ERROR_CODE_GET_TENANT_FROM_ORG.getCode(), e,
+                    ERROR_CODE_GET_TENANT_FROM_ORG.getMessage(),
+                    String.format(ERROR_CODE_GET_TENANT_FROM_ORG.getDescription(), orgId));
+        }
+    }
+
+    private OrganizationManager getOrganizationManager() {
+
+        return OrganizationUserSharingDataHolder.getInstance().getOrganizationManager();
+    }
+
+    private OrganizationUserSharingService getOrganizationUserSharingService() {
+
+        return OrganizationUserSharingDataHolder.getInstance().getOrganizationUserSharingService();
+    }
+
+    private RoleManagementService getRoleManagementService() {
+
+        return OrganizationUserSharingDataHolder.getInstance().getRoleManagementService();
     }
 
     /**
@@ -162,12 +235,32 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
      *
      * @param userShareGeneral Contains details for sharing a user with all organizations.
      */
-    private void shareUserWithAllOrganizations(UserShareGeneral userShareGeneral) {
+    private void shareUserWithAllOrganizations(UserShareGeneral userShareGeneral, PolicyEnum policy) {
 
         // We get all orgs under the policy given by userShareGeneral.
         // We can use private List<String> getOrganizationsBasedOnPolicy(String policy) for that
         // Then we iterate through those orgs and create an UserAssociation model and share the user
         // Then inside that loop, we do the role assign for each inside that
+    }
+
+    private void saveForFuturePropagationsIfNeeded(UserShareSelective userShareSelective, PolicyEnum policy){
+        //Check if the policy is for future and save to UM_RESOURCE_SHARING_POLICY table and UM_SHARING_REQUEST_ROLES
+        // table
+    }
+
+    private boolean isUserUniquenessInTargetOrg(String userId, String eachOrganization) {
+        //Need to decide how the usher share is handled in the duplicate user issue.
+
+        return true;
+    }
+
+    private List<String> getOrgsToShareUserWithPerPolicy(String policyHoldingOrg, PolicyEnum policy) {
+        List<String> organizationsToShareWithPerPolicy = new ArrayList<>();
+        organizationsToShareWithPerPolicy.add(policyHoldingOrg);
+
+        //get the orgs which user need to be shared (Don't forget the policy holding org as well)
+
+        return organizationsToShareWithPerPolicy;
     }
 
     //Setter Methods.
@@ -300,6 +393,19 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         // We have to get the role name, audience name and type and get the role id from the db and return the
         // roleId list
+
+        //call roleMgtService and get a method to do this. Save the not-found roles in a instance variable List or skip
+//        if (getRoleManagementService().isExistingRole(roleAssignments.getRoleId(),
+//                invitedTenantDomain)) {
+//            getRoleManagementService().updateUserListOfRole(roleAssignments.getRoleId(),
+//                    Collections.singletonList(associatedUserId), Collections.emptyList(),
+//                    invitedTenantDomain);
+//        } else {
+//            if (LOG.isDebugEnabled()) {
+//                LOG.debug("Role: " + roleAssignments.getRoleId()
+//                        + " is not exist in the invitedTenantDomain : " + invitedTenantDomain);
+//            }
+//        }
 
         return roleIds;
     }

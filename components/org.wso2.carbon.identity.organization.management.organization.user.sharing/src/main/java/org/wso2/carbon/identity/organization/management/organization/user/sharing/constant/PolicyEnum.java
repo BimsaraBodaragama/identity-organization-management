@@ -25,7 +25,7 @@ import java.util.Optional;
 public enum PolicyEnum {
 
     ALL_EXISTING_ORGS_ONLY(
-            "GEN-001",
+            "GEN-EO-0001",
             "AllExistingOrgsOnly",
             "ALL_EXISTING_ORGS_ONLY",
             "User",
@@ -33,7 +33,7 @@ public enum PolicyEnum {
             "This policy applies when the resource needs to be shared with all existing organizations. " +
                     "Newly created organizations will not be included under this policy."),
     ALL_EXISTING_AND_FUTURE_ORGS(
-            "GEN-002",
+            "GEN-EF-0002",
             "AllExistingAndFutureOrgs",
             "ALL_EXISTING_AND_FUTURE_ORGS",
             "User",
@@ -41,7 +41,7 @@ public enum PolicyEnum {
             "This policy applies when the resource needs to be shared with all existing and future " +
                     "organizations."),
     IMMEDIATE_EXISTING_ORGS_ONLY(
-            "GEN-003",
+            "GEN-EO-0003",
             "ImmediateExistingOrgsOnly",
             "IMMEDIATE_EXISTING_ORGS_ONLY",
             "Users",
@@ -50,7 +50,7 @@ public enum PolicyEnum {
                     "organizations. Newly created immediate child organizations will not be included under this " +
                     "policy."),
     IMMEDIATE_EXISTING_AND_FUTURE_ORGS(
-            "GEN-004",
+            "GEN-EF-0004",
             "ImmediateExistingAndFutureOrgs",
             "IMMEDIATE_EXISTING_AND_FUTURE_ORGS",
             "Users",
@@ -58,7 +58,7 @@ public enum PolicyEnum {
             "This policy applies when the resource needs to be shared with all immediate child " +
                     "organizations, including future additions to the immediate child level."),
     SELECTED_ORG_ONLY(
-            "SEL-001",
+            "SEL-EO-0001",
             "SelectedOrgOnly",
             "SELECTED_ORG_ONLY",
             "User",
@@ -67,7 +67,7 @@ public enum PolicyEnum {
                     "organization. Newly created child organizations of this organization will not be included " +
                     "under this policy."),
     SELECTED_ORG_WITH_ALL_EXISTING_CHILDREN_ONLY(
-            "SEL-002",
+            "SEL-EO-0002",
             "SelectedOrgWithAllExistingChildrenOnly",
             "SELECTED_ORG_WITH_ALL_EXISTING_CHILDREN_ONLY",
             "User",
@@ -76,7 +76,7 @@ public enum PolicyEnum {
                     "all of its existing children. Newly created child organizations of this organization will not " +
                     "be included under this policy."),
     SELECTED_ORG_WITH_ALL_EXISTING_AND_FUTURE_CHILDREN(
-            "SEL-003",
+            "SEL-EF-0003",
             "SelectedOrgWithAllExistingAndFutureChildren",
             "SELECTED_ORG_WITH_ALL_EXISTING_AND_FUTURE_CHILDREN",
             "User",
@@ -84,7 +84,7 @@ public enum PolicyEnum {
             "This policy applies when the resource needs to be shared with the selected organization and " +
                     "all of its children, existing and future."),
     SELECTED_ORG_WITH_EXISTING_IMMEDIATE_CHILDREN_ONLY(
-            "SEL-004",
+            "SEL-EO-0004",
             "SelectedOrgWithExistingImmediateChildrenOnly",
             "SELECTED_ORG_WITH_EXISTING_IMMEDIATE_CHILDREN_ONLY",
             "User",
@@ -93,7 +93,7 @@ public enum PolicyEnum {
                     "all of its existing immediate children. Newly created immediate children will not be included " +
                     "under this policy."),
     SELECTED_ORG_WITH_EXISTING_IMMEDIATE_AND_FUTURE_CHILDREN(
-            "SEL-005",
+            "SEL-EF-0005",
             "SelectedOrgWithExistingImmediateAndFutureChildren",
             "SELECTED_ORG_WITH_EXISTING_IMMEDIATE_AND_FUTURE_CHILDREN",
             "User",

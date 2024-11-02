@@ -184,8 +184,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         AbstractUserStoreManager userStoreManager = getUserStoreManager(tenantId);
         String originalUserName = userStoreManager.getUserNameFromUserID(originalUserId);
-
-        //TODO: HOW TO GET THE ORIGINAL ORG OF THE ORIGINAL USER - "10084a8d-113f-4211-a0d5-efe36b082211";
         PolicyEnum policy = userShareSelective.getPolicy();
 
         List<String> organizationsToShareUserWith =
@@ -214,6 +212,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
                 //Save to UM_RESOURCE_SHARING_POLICY
                 if(getPoliciesForFuturePropagation().contains(policy.getPolicyCode())) {
+                    //TODO: Still doesn't work
                     saveForFuturePropagations(originalUserId, originalUserResidenceOrgId, organizationToShareUserWith,
                             policy);
                 }
@@ -239,7 +238,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         return policiesForFuturePropagation;
     }
-
 
     private void assignRolesToTheSharedUser(String sharedUser, String sharedOrganization, List<String> roles)
             throws IdentityRoleManagementException, OrganizationManagementException {
@@ -536,7 +534,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         return roleIds;
     }
-
 
     private void validateUserShareSelectiveDO(UserShareSelectiveDO userShareSelectiveDO) {
         // TODO: HOPE EVERYTHING HAS ALREADY BEEN TAKEN CARE OF AT DB LEVEL

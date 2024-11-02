@@ -17,6 +17,8 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.constant;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -28,84 +30,63 @@ public enum PolicyEnum {
             "GEN-EO-0001",
             "AllExistingOrgsOnly",
             "ALL_EXISTING_ORGS_ONLY",
-            "User",
-            "All existing organizations",
-            "This policy applies when the resource needs to be shared with all existing organizations. " +
-                    "Newly created organizations will not be included under this policy."),
+            Arrays.asList("User"),
+            "This policy applies when the resource needs to be shared with all existing organizations at " +
+                    "the current time. Newly created organizations after the policy is applied will not be included " +
+                    "under this policy."),
     ALL_EXISTING_AND_FUTURE_ORGS(
             "GEN-EF-0002",
             "AllExistingAndFutureOrgs",
             "ALL_EXISTING_AND_FUTURE_ORGS",
-            "User",
-            "All existing organizations and future organizations",
-            "This policy applies when the resource needs to be shared with all existing and future " +
-                    "organizations."),
+            Arrays.asList("User"),
+            "This policy allows sharing the resource with all current and any future organizations. It ensures that any new organizations created after the policy is set are automatically included."),
     IMMEDIATE_EXISTING_ORGS_ONLY(
             "GEN-EO-0003",
             "ImmediateExistingOrgsOnly",
             "IMMEDIATE_EXISTING_ORGS_ONLY",
-            "Users",
-            "Only existing immediate organizations",
-            "This policy applies when the resource needs to be shared with all existing immediate child " +
-                    "organizations. Newly created immediate child organizations will not be included under this " +
-                    "policy."),
+            Arrays.asList("User"),
+            "This policy is used to share the resource exclusively with all immediate existing child organizations. Newly created immediate child organizations after the policy is applied are not included."),
     IMMEDIATE_EXISTING_AND_FUTURE_ORGS(
             "GEN-EF-0004",
             "ImmediateExistingAndFutureOrgs",
             "IMMEDIATE_EXISTING_AND_FUTURE_ORGS",
-            "Users",
-            "Only existing immediate organizations and future immediate organizations",
-            "This policy applies when the resource needs to be shared with all immediate child " +
-                    "organizations, including future additions to the immediate child level."),
+            Arrays.asList("User"),
+            "This policy is used to share the resource exclusively with all immediate existing child organizations. Newly created immediate child organizations after the policy is applied are not included."),
     SELECTED_ORG_ONLY(
             "SEL-EO-0001",
             "SelectedOrgOnly",
             "SELECTED_ORG_ONLY",
-            "User",
-            "Only the selected organization",
-            "This policy applies when the resource needs to be shared with only the selected " +
-                    "organization. Newly created child organizations of this organization will not be included " +
-                    "under this policy."),
+            Arrays.asList("User"),
+            "This policy applies when the resource is to be shared with a single, specific organization only. Newly created child organizations under this selected organization will not be included."),
     SELECTED_ORG_WITH_ALL_EXISTING_CHILDREN_ONLY(
             "SEL-EO-0002",
             "SelectedOrgWithAllExistingChildrenOnly",
             "SELECTED_ORG_WITH_ALL_EXISTING_CHILDREN_ONLY",
-            "User",
-            "The selected organization and all existing children",
-            "This policy applies when the resource needs to be shared with the selected organization and " +
-                    "all of its existing children. Newly created child organizations of this organization will not " +
-                    "be included under this policy."),
+            Arrays.asList("User"),
+            "This policy ensures the resource is shared with a selected organization and all of its existing child organizations. New child organizations created under this selected organization after the policy is applied will not be included."),
     SELECTED_ORG_WITH_ALL_EXISTING_AND_FUTURE_CHILDREN(
             "SEL-EF-0003",
             "SelectedOrgWithAllExistingAndFutureChildren",
             "SELECTED_ORG_WITH_ALL_EXISTING_AND_FUTURE_CHILDREN",
-            "User",
-            "This organization and all existing and future children",
-            "This policy applies when the resource needs to be shared with the selected organization and " +
-                    "all of its children, existing and future."),
+            Arrays.asList("User"),
+            "This policy ensures the resource is shared with a selected organization and all of its child organizations, including those created in the future."),
     SELECTED_ORG_WITH_EXISTING_IMMEDIATE_CHILDREN_ONLY(
             "SEL-EO-0004",
             "SelectedOrgWithExistingImmediateChildrenOnly",
             "SELECTED_ORG_WITH_EXISTING_IMMEDIATE_CHILDREN_ONLY",
-            "User",
-            "The selected organization and all existing immediate children",
-            "This policy applies when the resource needs to be shared with the selected organization and " +
-                    "all of its existing immediate children. Newly created immediate children will not be included " +
-                    "under this policy."),
+            Arrays.asList("User"),
+            "This policy shares the resource with a selected organization and all of its existing immediate child organizations. Newly created immediate children will not be included after the policy is applied."),
     SELECTED_ORG_WITH_EXISTING_IMMEDIATE_AND_FUTURE_CHILDREN(
             "SEL-EF-0005",
             "SelectedOrgWithExistingImmediateAndFutureChildren",
             "SELECTED_ORG_WITH_EXISTING_IMMEDIATE_AND_FUTURE_CHILDREN",
-            "User",
-            "This organization and all existing and future immediate children",
-            "This policy applies when the resource needs to be shared with the selected organization and " +
-                    "all of its immediate children, including future additions.");
+            Arrays.asList("User"),
+            "This policy allows sharing the resource with a selected organization and all of its immediate child organizations, including those created in the future.");
 
     private final String policyCode;
     private final String policyName;
     private final String value;
-    private final String applicableResources;
-    private final String policyDetails;
+    private final List<String> applicableResources;
     private final String description;
 
     /**
@@ -115,17 +96,15 @@ public enum PolicyEnum {
      * @param policyName          Name of the sharing policy (e.g., All_Orgs, Immediate_Children).
      * @param applicableResources Type of resources to which the policy applies (General/Selective).
      * @param description         Short description of the sharing policy.
-     * @param policyDetails       Additional details of the sharing policy.
      */
-    PolicyEnum(String policyCode, String policyName, String value, String applicableResources, String description,
-               String policyDetails) {
+    PolicyEnum(String policyCode, String policyName, String value, List<String> applicableResources,
+               String description) {
 
         this.policyCode = policyCode;
         this.policyName = policyName;
         this.value = value;
         this.applicableResources = applicableResources;
         this.description = description;
-        this.policyDetails = policyDetails;
     }
 
     /**
@@ -163,7 +142,7 @@ public enum PolicyEnum {
      *
      * @return Type of the applicable resource.
      */
-    public String getApplicableResources() {
+    public List<String> getApplicableResources() {
 
         return applicableResources;
     }
@@ -176,16 +155,6 @@ public enum PolicyEnum {
     public String getDescription() {
 
         return description;
-    }
-
-    /**
-     * Get additional details for the sharing policy.
-     *
-     * @return Details of the sharing policy.
-     */
-    public String getPolicyDetails() {
-
-        return policyDetails;
     }
 
     /**

@@ -22,20 +22,42 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Model that contains the user share selective data object.
+ * Model that contains the user share selective org details data object.
  */
-public class UserShareSelectiveDO extends UserShareBaseDO {
+public class UserShareSelectiveOrgDetailsDO {
 
-    private List<UserShareSelectiveOrgDetailsDO> organizations;
+    private String organizationId;
+    private String policy;
+    private List<RoleWithAudienceDO> roles;
 
-    public List<UserShareSelectiveOrgDetailsDO> getOrganizations() {
+    public String getOrganizationId() {
 
-        return organizations;
+        return organizationId;
     }
 
-    public void setOrganizations(
-            List<UserShareSelectiveOrgDetailsDO> organizations) {
+    public void setOrganizationId(String organizationId) {
 
-        this.organizations = organizations;
+        this.organizationId = organizationId;
+    }
+
+    public String getPolicy() {
+
+        return policy;
+    }
+
+    public void setPolicy(String policy) {
+
+        this.policy = policy;
+    }
+
+    public List<RoleWithAudienceDO> getRoles() {
+
+        return roles;
+    }
+
+    public void setRoles(
+            List<RoleWithAudienceDO> roles) {
+
+        this.roles = roles;
     }
 }

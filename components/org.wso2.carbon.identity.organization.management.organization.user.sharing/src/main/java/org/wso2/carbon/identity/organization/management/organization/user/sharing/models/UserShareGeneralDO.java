@@ -26,7 +26,7 @@ import java.util.Map;
 public class UserShareGeneralDO extends UserShareBaseDO{
 
     private String policy;
-    private List<Map<String, String>> roles;
+    private List<RoleWithAudienceDO> roles;
 
     public String getPolicy() {
 
@@ -38,12 +38,13 @@ public class UserShareGeneralDO extends UserShareBaseDO{
         this.policy = policy;
     }
 
-    public List<Map<String, String>> getRoles() {
+    public List<RoleWithAudienceDO> getRoles() {
 
         return roles;
     }
 
-    public void setRoles(List<Map<String, String>> roles) {
+    public void setRoles(
+            List<RoleWithAudienceDO> roles) {
 
         this.roles = roles;
     }

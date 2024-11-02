@@ -18,24 +18,42 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
-import java.util.List;
-import java.util.Map;
-
 /**
- * Model that contains the user share selective data object.
+ * Model that contains the user share role with audience details data object.
  */
-public class UserShareSelectiveDO extends UserShareBaseDO {
+public class RoleWithAudienceDO {
 
-    private List<UserShareSelectiveOrgDetailsDO> organizations;
+    private String roleName;
+    private String audienceName;
+    private String audienceType;
 
-    public List<UserShareSelectiveOrgDetailsDO> getOrganizations() {
+    public String getRoleName() {
 
-        return organizations;
+        return roleName;
     }
 
-    public void setOrganizations(
-            List<UserShareSelectiveOrgDetailsDO> organizations) {
+    public void setRoleName(String roleName) {
 
-        this.organizations = organizations;
+        this.roleName = roleName;
+    }
+
+    public String getAudienceName() {
+
+        return audienceName;
+    }
+
+    public void setAudienceName(String audienceName) {
+
+        this.audienceName = audienceName;
+    }
+
+    public String getAudienceType() {
+
+        return audienceType;
+    }
+
+    public void setAudienceType(String audienceType) {
+
+        this.audienceType = audienceType;
     }
 }

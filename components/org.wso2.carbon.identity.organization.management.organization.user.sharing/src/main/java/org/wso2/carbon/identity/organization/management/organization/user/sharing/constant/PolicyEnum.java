@@ -196,7 +196,7 @@ public enum PolicyEnum {
      * @return Corresponding PolicyEnum.
      * @throws IllegalArgumentException if the requested policy is invalid or not found.
      */
-    public static PolicyEnum validateAndGetPolicy(Object requestedPolicy) {
+    public static PolicyEnum validateAndGetPolicyEnum(Object requestedPolicy) {
 
         if (requestedPolicy instanceof String) {
             String policyStr = (String) requestedPolicy;

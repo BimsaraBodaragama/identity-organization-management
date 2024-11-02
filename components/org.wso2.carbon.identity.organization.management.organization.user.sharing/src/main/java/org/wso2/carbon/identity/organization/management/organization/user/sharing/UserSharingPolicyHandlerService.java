@@ -36,7 +36,8 @@ public interface UserSharingPolicyHandlerService {
             throws UserShareMgtException, OrganizationManagementException, IdentityRoleManagementException,
             UserStoreException;
 
-    void propagateUserGeneralShare(UserShareGeneralDO userShareGeneralDO) throws UserShareMgtException;
+    void propagateUserGeneralShare(UserShareGeneralDO userShareGeneralDO)
+            throws UserShareMgtException, OrganizationManagementException, IdentityRoleManagementException;
 
     void propagateUserSelectiveUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO);
 

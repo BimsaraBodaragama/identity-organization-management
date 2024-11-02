@@ -143,9 +143,18 @@ public class UserSharingConstants {
         ERROR_GENERAL_SHARE("10027",
                 "Error occurred during general share propagation for userId: %s - %s",
                 "Error occurred during general share propagation for a given user."),
-        ERROR_CODE_GET_TENANT_FROM_ORG("10027",
+        ERROR_CODE_GET_TENANT_FROM_ORG("10029",
                 "Unable to get the tenant domain.",
-                "Unable to get the tenant domain for the organization %s.");
+                "Unable to get the tenant domain for the organization %s."),
+        ERROR_CODE_ROLE_NAME_NULL("10030",
+                "Role name is null.",
+                "Role name must be provided."),
+        ERROR_CODE_AUDIENCE_NAME_NULL("10031",
+                "Audience name is null.",
+                "Audience name must be provided."),
+        ERROR_CODE_AUDIENCE_TYPE_NULL("10032",
+                "Audience type is null.",
+                "Audience type must be provided.");
 
         private final String code;
         private final String message;

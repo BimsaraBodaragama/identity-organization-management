@@ -315,7 +315,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
         AbstractUserStoreManager userStoreManager = getUserStoreManager(tenantId);
 
-        return userStoreManager.isExistingUser(userName);
+        return !userStoreManager.isExistingUser(userName);
     }
 
     private List<String> getOrgsToShareUserWithPerPolicy(String policyHoldingOrg, PolicyEnum policy)
@@ -513,9 +513,9 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             String originalOrganizationId = getOrganizationId();
             String originalTenantDomain = getOrganizationManager().resolveTenantDomain(originalOrganizationId);
 
-            if(audienceType=="Organization"){
+            if(audienceType.equals("organization")){
                 audienceId = originalOrganizationId;
-            } else if (audienceType=="Application"){
+            } else if (audienceType.equals("application")){
                 //audienceId =getRoleManagementService().;
                 audienceId = originalTenantDomain;
             } else {

@@ -38,6 +38,9 @@ public class UserSharingConstants {
 
     public static final String NULL_INPUT_MESSAGE_SUFFIX = " is null";
 
+    public static final String POLICY_CODE_FOR_EXISTING_AND_FUTURE = "-EF-";
+    public static final String POLICY_CODE_FOR_FUTURE_ONLY = "-FO-";
+
     public static final String VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO = "UserShareSelectiveDO";
     public static final String VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO = "UserShareGeneralDO";
 

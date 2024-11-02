@@ -22,6 +22,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.dao.OrganizationUserSharingDAO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.dao.OrganizationUserSharingDAOImpl;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.dao.ResourceSharingPolicyHandlerDAO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.dao.ResourceSharingPolicyHandlerDAOImpl;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtServerException;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.internal.OrganizationUserSharingDataHolder;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareBaseDO;
@@ -33,6 +37,7 @@ import org.wso2.carbon.identity.organization.management.organization.user.sharin
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserUnshareSelectiveDO;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
 import org.wso2.carbon.identity.role.v2.mgt.core.RoleManagementService;
 import org.wso2.carbon.identity.role.v2.mgt.core.exception.IdentityRoleManagementException;
 
@@ -48,6 +53,8 @@ import static org.wso2.carbon.identity.organization.management.organization.user
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_POLICY;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORG_ID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY_CODE_FOR_EXISTING_AND_FUTURE;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY_CODE_FOR_FUTURE_ONLY;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ROLES;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_IDS;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.*;
@@ -60,6 +67,9 @@ import static org.wso2.carbon.identity.organization.management.organization.user
 public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHandlerService {
 
     private static final Log LOG = LogFactory.getLog(UserSharingPolicyHandlerServiceImpl.class);
+    private static final OrganizationUserSharingDAO organizationUserSharingDAO = new OrganizationUserSharingDAOImpl();
+    private static final ResourceSharingPolicyHandlerDAO resourceSharingPolicyHandlerDAO =
+            new ResourceSharingPolicyHandlerDAOImpl();
 
     //Core Methods.
 
@@ -163,33 +173,60 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         // In this method we create an UserAssociation model and share the user
         // We do the role assign here as well
 
-        saveForFuturePropagationsIfNeeded(userShareSelective, userShareSelective.getPolicy());
-
         String originalUser = userShareSelective.getUserId();
-        List<String> organizationsToShareWith =
-                getOrgsToShareUserWithPerPolicy(userShareSelective.getOrganizationId(), userShareSelective.getPolicy());
+        String originalUserResidenceOrgId = "10084a8d-113f-4211-a0d5-efe36b082211";
+        //TODO: HOW TO GET THE ORIGINAL ORG OF THE ORIGINAL USER
+        PolicyEnum policy = userShareSelective.getPolicy();
 
-        for(String eachOrganization : organizationsToShareWith) {
+        List<String> organizationsToShareUserWith =
+                getOrgsToShareUserWithPerPolicy(userShareSelective.getOrganizationId(), policy);
 
-            boolean uniqueUser = isUserUniquenessInTargetOrg(originalUser, eachOrganization);
+        OrganizationUserSharingService organizationUserSharingService = getOrganizationUserSharingService();
+
+        for(String organizationToShareUserWith : organizationsToShareUserWith) {
+
+            boolean uniqueUser = isUserUniquenessInTargetOrg(originalUser, organizationToShareUserWith);
 
             if(uniqueUser) {
-                getOrganizationUserSharingService().shareOrganizationUser(eachOrganization, originalUser,
-                        userShareSelective.getOrganizationId());
-                //TODO: Set as pushed user (either here or in above method)
-                String sharedUser = getOrganizationUserSharingService()
+                organizationUserSharingService.shareOrganizationUser(organizationToShareUserWith, originalUser,
+                        originalUserResidenceOrgId);
+                //TODO: Set as pushed user (either here or in above method) (I recommend to do this in the above method)
+                String sharedUser = organizationUserSharingService
                         .getUserAssociationOfAssociatedUserByOrgId(originalUser,
-                                eachOrganization).getUserId(); //252 of InvitationMgtCoreImpl
+                                organizationToShareUserWith).getUserId(); //252 of InvitationMgtCoreImpl
 
                 if (!userShareSelective.getRoles().isEmpty()) {
-                    assignRolesToTheSharedUser(sharedUser, eachOrganization, userShareSelective.getRoles());
+                    assignRolesToTheSharedUser(sharedUser, organizationToShareUserWith, userShareSelective.getRoles());
                 }
+
+                //Save to UM_RESOURCE_SHARING_POLICY
+                if(getPoliciesForFuturePropagation().contains(policy.getPolicyCode())) {
+                    saveForFuturePropagations(originalUser, originalUserResidenceOrgId, organizationToShareUserWith,
+                            policy);
+                }
+
             }else{
                 //do something - add to a instance variable list and finally return the list in the response as well
+                //My suggestion- manage original org with user and ask for tenant in login if duplicate users found
             }
         }
 
     }
+
+    private List<String> getPoliciesForFuturePropagation() {
+
+        List<String> policiesForFuturePropagation = new ArrayList<>();
+
+        for (PolicyEnum policy : PolicyEnum.values()) {
+            if (policy.getPolicyCode().contains(POLICY_CODE_FOR_EXISTING_AND_FUTURE) ||
+                    policy.getPolicyCode().contains(POLICY_CODE_FOR_FUTURE_ONLY)) {
+                policiesForFuturePropagation.add(policy.getPolicyCode());
+            }
+        }
+
+        return policiesForFuturePropagation;
+    }
+
 
     private void assignRolesToTheSharedUser(String sharedUser, String sharedOrganization, List<String> roles)
             throws UserShareMgtServerException, IdentityRoleManagementException {
@@ -243,9 +280,16 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         // Then inside that loop, we do the role assign for each inside that
     }
 
-    private void saveForFuturePropagationsIfNeeded(UserShareSelective userShareSelective, PolicyEnum policy){
+    private void saveForFuturePropagations(String originalUser, String initiatedOrg, String policyHoldingOrg,
+                                                   PolicyEnum policy) throws OrganizationManagementServerException {
         //Check if the policy is for future and save to UM_RESOURCE_SHARING_POLICY table and UM_SHARING_REQUEST_ROLES
         // table
+        // Save the resource type as User.
+
+        resourceSharingPolicyHandlerDAO.createResourceSharingPolicyRecord(originalUser, "User", initiatedOrg,
+                policyHoldingOrg, policy.getPolicyCode());
+
+        //error handling (db level errors?)
     }
 
     private boolean isUserUniquenessInTargetOrg(String userId, String eachOrganization) {

@@ -78,7 +78,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     private static final ResourceSharingPolicyHandlerDAO resourceSharingPolicyHandlerDAO =
             new ResourceSharingPolicyHandlerDAOImpl();
 
-    //Core Methods.
+    //SELECTIVE SHARE
 
     /**
      * Propagates the selective share of a user to specific organizations.
@@ -100,40 +100,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
     }
 
-    /**
-     * Propagates the general share of a user to all organizations.
-     *
-     * @param userShareGeneralDO Contains details for general sharing.
-     */
-    @Override
-    public void propagateUserGeneralShare(UserShareGeneralDO userShareGeneralDO)
-            throws UserShareMgtServerException, OrganizationManagementException, IdentityRoleManagementException {
-
-        validateInput(userShareGeneralDO, VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO);
-
-        for (String userId : userShareGeneralDO.getUserCriteria().get(USER_IDS)) {
-            propagateGeneralShareForUser(userId, validateAndGetPolicyEnum(userShareGeneralDO.getPolicy()),
-                    getRoleIdsFromRoleNameAndAudience(userShareGeneralDO.getRoles()));
-        }
-
-        LOG.info(LOG_INFO_GENERAL_SHARE_COMPLETED);
-
-    }
-
-    @Override
-    public void propagateUserSelectiveUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO) {
-        // TODO: To be implemented on selective unsharing
-    }
-
-    @Override
-    public void propagateUserGeneralUnshare(UserUnshareGeneralDO userUnshareGeneralDO) {
-        // TODO: To be implemented on general unsharing
-    }
-
-    //Business Logic Methods.
-
     private void propagateUserSelectiveShareForGivenUser(String userId, List<UserShareSelectiveOrgDetailsDO> organizations)
-            throws UserShareMgtServerException, OrganizationManagementException, IdentityRoleManagementException,
+            throws OrganizationManagementException, IdentityRoleManagementException,
             UserStoreException {
 
         for (UserShareSelectiveOrgDetailsDO orgDetails : organizations) {
@@ -142,14 +110,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         }
     }
 
-    private void propagateGeneralShareForUser(String userId, PolicyEnum policy, List<String> roleIds) {
-
-        UserShareGeneral userShareGeneral = createUserShareGeneral(userId, policy, roleIds);
-        shareUserWithAllOrganizations(userShareGeneral, policy);
-    }
-
     private UserShareSelective createUserShareSelective(String userId, UserShareSelectiveOrgDetailsDO orgDetails)
-            throws UserShareMgtServerException, OrganizationManagementException, IdentityRoleManagementException {
+            throws OrganizationManagementException, IdentityRoleManagementException {
 
         UserShareSelective userShareSelective = new UserShareSelective();
         userShareSelective.setUserId(userId);
@@ -160,14 +122,48 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         return userShareSelective;
     }
 
+    /**
+     * Converts roles to role IDs.
+     *
+     * @param roles The list of roles containing display name and audience details.
+     * @return The list of role IDs.
+     */
+    private List<String> getRoleIdsFromRoleNameAndAudience(List<RoleWithAudienceDO> roles)
+            throws OrganizationManagementException, IdentityRoleManagementException {
 
-    private UserShareGeneral createUserShareGeneral(String userId, PolicyEnum policy, List<String> roleIds) {
+        List<String> roleIds = new ArrayList<>();
 
-        UserShareGeneral userShareGeneral = new UserShareGeneral();
-        userShareGeneral.setUserId(userId);
-        userShareGeneral.setPolicy(policy);
-        userShareGeneral.setRoles(roleIds);
-        return userShareGeneral;
+        for(RoleWithAudienceDO role : roles) {
+            String roleName = role.getRoleName();
+            String audienceName = role.getAudienceName();
+            String audienceType = role.getAudienceType();
+            String audienceId;
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            String originalOrganizationId = getOrganizationId();
+            String originalTenantDomain = getOrganizationManager().resolveTenantDomain(originalOrganizationId);
+
+            if(audienceType.equals("organization")){
+                audienceId = originalOrganizationId;
+            } else if (audienceType.equals("application")){
+                //audienceId =getRoleManagementService().;
+                audienceId = originalTenantDomain;
+            } else {
+                throw new OrganizationManagementException("Invalid audience type: " + audienceType);
+            }
+
+            String roleId = getRoleManagementService().getRoleIdByName(roleName, audienceName, audienceId,
+                    originalTenantDomain);
+            roleIds.add(roleId);
+        }
+
+        //TODO:
+        // roleName, audienceName, audienceType
+        // if audienceType: org -> getOrgIdOfTheParent UUID ~ This is audienceId
+        // if audienceType: app -> audienceName, parentTenantId -> get app UUID ~ This is audienceId
+        // call RoleMgtService: getRoleManagementService().getRoleIdByName(params)
+        // return roleIDs
+
+        return roleIds;
     }
 
     /**
@@ -224,98 +220,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         }
 
     }
-
-    private List<String> getPoliciesForFuturePropagation() {
-
-        List<String> policiesForFuturePropagation = new ArrayList<>();
-
-        for (PolicyEnum policy : PolicyEnum.values()) {
-            if (policy.getPolicyCode().contains(POLICY_CODE_FOR_EXISTING_AND_FUTURE) ||
-                    policy.getPolicyCode().contains(POLICY_CODE_FOR_FUTURE_ONLY)) {
-                policiesForFuturePropagation.add(policy.getPolicyCode());
-            }
-        }
-
-        return policiesForFuturePropagation;
-    }
-
-    private void assignRolesToTheSharedUser(String sharedUser, String sharedOrganization, List<String> roles)
-            throws IdentityRoleManagementException, OrganizationManagementException {
-
-        String sharedOrgTenantDomain = getOrganizationManager().resolveTenantDomain(sharedOrganization);
-
-        Map<String, String> mainRoleToSharedRoleMappingsBySubOrg =
-                getRoleManagementService().getMainRoleToSharedRoleMappingsBySubOrg(roles, sharedOrgTenantDomain);
-
-        for (String role : mainRoleToSharedRoleMappingsBySubOrg.values()) {
-            getRoleManagementService().updateUserListOfRole(role, Collections.singletonList(sharedUser),
-                    Collections.emptyList(), sharedOrgTenantDomain);
-        }
-
-    }
-
-    private String resolveTenantDomain(String orgId) throws UserShareMgtServerException {
-
-        try {
-            return getOrganizationManager().resolveTenantDomain(orgId);
-        } catch (OrganizationManagementException e) {
-            throw new UserShareMgtServerException(ERROR_CODE_GET_TENANT_FROM_ORG.getCode(), e,
-                    ERROR_CODE_GET_TENANT_FROM_ORG.getMessage(),
-                    String.format(ERROR_CODE_GET_TENANT_FROM_ORG.getDescription(), orgId));
-        }
-    }
-
-    private OrganizationManager getOrganizationManager() {
-
-        return OrganizationUserSharingDataHolder.getInstance().getOrganizationManager();
-    }
-
-    private OrganizationUserSharingService getOrganizationUserSharingService() {
-
-        return OrganizationUserSharingDataHolder.getInstance().getOrganizationUserSharingService();
-    }
-
-    private RoleManagementService getRoleManagementService() {
-
-        return OrganizationUserSharingDataHolder.getInstance().getRoleManagementService();
-    }
-
-    /**
-     * Handles storing or processing the general user share.
-     *
-     * @param userShareGeneral Contains details for sharing a user with all organizations.
-     */
-    private void shareUserWithAllOrganizations(UserShareGeneral userShareGeneral, PolicyEnum policy) {
-
-        // We get all orgs under the policy given by userShareGeneral.
-        // We can use private List<String> getOrganizationsBasedOnPolicy(String policy) for that
-        // Then we iterate through those orgs and create an UserAssociation model and share the user
-        // Then inside that loop, we do the role assign for each inside that
-    }
-
-    private void saveForFuturePropagations(String originalUser, String initiatedOrg, String policyHoldingOrg,
-                                                   PolicyEnum policy) throws OrganizationManagementServerException {
-        //Check if the policy is for future and save to UM_RESOURCE_SHARING_POLICY table and UM_SHARING_REQUEST_ROLES
-        // table
-        // Save the resource type as User.
-
-        resourceSharingPolicyHandlerDAO.createResourceSharingPolicyRecord(originalUser, "User", initiatedOrg,
-                policyHoldingOrg, policy.getPolicyCode());
-
-        //error handling (db level errors?)
-    }
-
-    private boolean isUserUniqueInTargetOrg(String userName, String organizationId)
-            throws OrganizationManagementException, UserStoreException {
-        //Need to decide how the usher share is handled in the duplicate user issue.
-
-        String tenantDomain = getOrganizationManager().resolveTenantDomain(organizationId);
-        int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
-        AbstractUserStoreManager userStoreManager = getUserStoreManager(tenantId);
-
-        return !userStoreManager.isExistingUser(userName);
-    }
-
     private List<String> getOrgsToShareUserWithPerPolicy(String policyHoldingOrg, PolicyEnum policy)
             throws OrganizationManagementException {
         Set<String> organizationsToShareWithPerPolicy = new HashSet<>();
@@ -367,6 +271,156 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         // Convert to a List only at the end
         return new ArrayList<>(organizationsToShareWithPerPolicy);
+    }
+
+    private boolean isUserUniqueInTargetOrg(String userName, String organizationId)
+            throws OrganizationManagementException, UserStoreException {
+        //Need to decide how the usher share is handled in the duplicate user issue.
+
+        String tenantDomain = getOrganizationManager().resolveTenantDomain(organizationId);
+        int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
+        AbstractUserStoreManager userStoreManager = getUserStoreManager(tenantId);
+
+        return !userStoreManager.isExistingUser(userName);
+    }
+
+    private void assignRolesToTheSharedUser(String sharedUser, String sharedOrganization, List<String> roles)
+            throws IdentityRoleManagementException, OrganizationManagementException {
+
+        String sharedOrgTenantDomain = getOrganizationManager().resolveTenantDomain(sharedOrganization);
+
+        Map<String, String> mainRoleToSharedRoleMappingsBySubOrg =
+                getRoleManagementService().getMainRoleToSharedRoleMappingsBySubOrg(roles, sharedOrgTenantDomain);
+
+        for (String role : mainRoleToSharedRoleMappingsBySubOrg.values()) {
+            getRoleManagementService().updateUserListOfRole(role, Collections.singletonList(sharedUser),
+                    Collections.emptyList(), sharedOrgTenantDomain);
+        }
+
+    }
+
+    private List<String> getPoliciesForFuturePropagation() {
+
+        List<String> policiesForFuturePropagation = new ArrayList<>();
+
+        for (PolicyEnum policy : PolicyEnum.values()) {
+            if (policy.getPolicyCode().contains(POLICY_CODE_FOR_EXISTING_AND_FUTURE) ||
+                    policy.getPolicyCode().contains(POLICY_CODE_FOR_FUTURE_ONLY)) {
+                policiesForFuturePropagation.add(policy.getPolicyCode());
+            }
+        }
+
+        return policiesForFuturePropagation;
+    }
+
+    private void saveForFuturePropagations(String originalUser, String initiatedOrg, String policyHoldingOrg,
+                                           PolicyEnum policy) throws OrganizationManagementServerException {
+        //Check if the policy is for future and save to UM_RESOURCE_SHARING_POLICY table and UM_SHARING_REQUEST_ROLES
+        // table
+        // Save the resource type as User.
+
+        resourceSharingPolicyHandlerDAO.createResourceSharingPolicyRecord(originalUser, "User", initiatedOrg,
+                policyHoldingOrg, policy.getPolicyCode());
+
+        //error handling (db level errors?)
+    }
+
+
+    //GENERAL SHARE
+
+    /**
+     * Propagates the general share of a user to all organizations.
+     *
+     * @param userShareGeneralDO Contains details for general sharing.
+     */
+    @Override
+    public void propagateUserGeneralShare(UserShareGeneralDO userShareGeneralDO)
+            throws UserShareMgtServerException, OrganizationManagementException, IdentityRoleManagementException {
+
+        validateInput(userShareGeneralDO, VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO);
+
+        for (String userId : userShareGeneralDO.getUserCriteria().get(USER_IDS)) {
+            propagateGeneralShareForUser(userId, validateAndGetPolicyEnum(userShareGeneralDO.getPolicy()),
+                    getRoleIdsFromRoleNameAndAudience(userShareGeneralDO.getRoles()));
+        }
+
+        LOG.info(LOG_INFO_GENERAL_SHARE_COMPLETED);
+
+    }
+
+
+
+
+
+
+
+    private void propagateGeneralShareForUser(String userId, PolicyEnum policy, List<String> roleIds) {
+
+        UserShareGeneral userShareGeneral = createUserShareGeneral(userId, policy, roleIds);
+        shareUserWithAllOrganizations(userShareGeneral, policy);
+    }
+
+
+
+    private UserShareGeneral createUserShareGeneral(String userId, PolicyEnum policy, List<String> roleIds) {
+
+        UserShareGeneral userShareGeneral = new UserShareGeneral();
+        userShareGeneral.setUserId(userId);
+        userShareGeneral.setPolicy(policy);
+        userShareGeneral.setRoles(roleIds);
+        return userShareGeneral;
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Handles storing or processing the general user share.
+     *
+     * @param userShareGeneral Contains details for sharing a user with all organizations.
+     */
+    private void shareUserWithAllOrganizations(UserShareGeneral userShareGeneral, PolicyEnum policy) {
+
+        // We get all orgs under the policy given by userShareGeneral.
+        // We can use private List<String> getOrganizationsBasedOnPolicy(String policy) for that
+        // Then we iterate through those orgs and create an UserAssociation model and share the user
+        // Then inside that loop, we do the role assign for each inside that
+    }
+
+
+    @Override
+    public void propagateUserSelectiveUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO) {
+        // TODO: To be implemented on selective unsharing
+    }
+
+    @Override
+    public void propagateUserGeneralUnshare(UserUnshareGeneralDO userUnshareGeneralDO) {
+        // TODO: To be implemented on general unsharing
+    }
+
+
+    //Get Services
+
+    private OrganizationManager getOrganizationManager() {
+
+        return OrganizationUserSharingDataHolder.getInstance().getOrganizationManager();
+    }
+
+    private OrganizationUserSharingService getOrganizationUserSharingService() {
+
+        return OrganizationUserSharingDataHolder.getInstance().getOrganizationUserSharingService();
+    }
+
+    private RoleManagementService getRoleManagementService() {
+
+        return OrganizationUserSharingDataHolder.getInstance().getRoleManagementService();
     }
 
     //Validation Methods.
@@ -491,50 +545,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
     //Utility Methods.
 
-    /**
-     * Converts roles to role IDs.
-     *
-     * @param roles The list of roles containing display name and audience details.
-     * @return The list of role IDs.
-     */
-    private List<String> getRoleIdsFromRoleNameAndAudience(List<RoleWithAudienceDO> roles)
-            throws OrganizationManagementException, IdentityRoleManagementException {
-
-        List<String> roleIds = new ArrayList<>();
-
-        for(RoleWithAudienceDO role : roles) {
-            String roleName = role.getRoleName();
-            String audienceName = role.getAudienceName();
-            String audienceType = role.getAudienceType();
-            String audienceId;
-            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            String originalOrganizationId = getOrganizationId();
-            String originalTenantDomain = getOrganizationManager().resolveTenantDomain(originalOrganizationId);
-
-            if(audienceType.equals("organization")){
-                audienceId = originalOrganizationId;
-            } else if (audienceType.equals("application")){
-                //audienceId =getRoleManagementService().;
-                audienceId = originalTenantDomain;
-            } else {
-                throw new OrganizationManagementException("Invalid audience type: " + audienceType);
-            }
-
-            String roleId = getRoleManagementService().getRoleIdByName(roleName, audienceName, audienceId,
-                    originalTenantDomain);
-            roleIds.add(roleId);
-        }
-
-        //TODO:
-        // roleName, audienceName, audienceType
-        // if audienceType: org -> getOrgIdOfTheParent UUID ~ This is audienceId
-        // if audienceType: app -> audienceName, parentTenantId -> get app UUID ~ This is audienceId
-        // call RoleMgtService: getRoleManagementService().getRoleIdByName(params)
-        // return roleIDs
-
-        return roleIds;
-    }
-
     private void validateUserShareSelectiveDO(UserShareSelectiveDO userShareSelectiveDO) {
         // TODO: HOPE EVERYTHING HAS ALREADY BEEN TAKEN CARE OF AT DB LEVEL
         //  1. validate if the user is in db
@@ -543,5 +553,16 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         //  4. validate each roles are in db --not priority
         //  5. validate if roles have any conflicts with the roles in the given org
 
+    }
+
+    private String resolveTenantDomain(String orgId) throws UserShareMgtServerException {
+
+        try {
+            return getOrganizationManager().resolveTenantDomain(orgId);
+        } catch (OrganizationManagementException e) {
+            throw new UserShareMgtServerException(ERROR_CODE_GET_TENANT_FROM_ORG.getCode(), e,
+                    ERROR_CODE_GET_TENANT_FROM_ORG.getMessage(),
+                    String.format(ERROR_CODE_GET_TENANT_FROM_ORG.getDescription(), orgId));
+        }
     }
 }

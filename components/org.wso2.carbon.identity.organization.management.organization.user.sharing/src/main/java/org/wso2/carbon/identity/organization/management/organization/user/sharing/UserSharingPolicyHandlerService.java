@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing;
 
+import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtException;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareGeneralDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareSelectiveDO;
@@ -34,10 +35,11 @@ public interface UserSharingPolicyHandlerService {
 
     void propagateUserSelectiveShare(UserShareSelectiveDO userShareSelectiveDO)
             throws UserShareMgtException, OrganizationManagementException, IdentityRoleManagementException,
-            UserStoreException;
+            UserStoreException, IdentityApplicationManagementException;
 
     void propagateUserGeneralShare(UserShareGeneralDO userShareGeneralDO)
-            throws UserShareMgtException, OrganizationManagementException, IdentityRoleManagementException;
+            throws UserShareMgtException, OrganizationManagementException, IdentityRoleManagementException,
+            IdentityApplicationManagementException;
 
     void propagateUserSelectiveUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO);
 

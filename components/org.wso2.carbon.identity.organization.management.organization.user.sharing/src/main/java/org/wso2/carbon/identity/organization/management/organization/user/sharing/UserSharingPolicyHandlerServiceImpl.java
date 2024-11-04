@@ -21,6 +21,8 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
+import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants;
@@ -88,7 +90,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     @Override
     public void propagateUserSelectiveShare(UserShareSelectiveDO userShareSelectiveDO)
             throws UserShareMgtServerException, OrganizationManagementException, IdentityRoleManagementException,
-            UserStoreException {
+            UserStoreException, IdentityApplicationManagementException {
 
         validateInput(userShareSelectiveDO, VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO);
 
@@ -102,7 +104,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
     private void propagateUserSelectiveShareForGivenUser(String userId, List<UserShareSelectiveOrgDetailsDO> organizations)
             throws OrganizationManagementException, IdentityRoleManagementException,
-            UserStoreException {
+            UserStoreException, IdentityApplicationManagementException {
 
         for (UserShareSelectiveOrgDetailsDO orgDetails : organizations) {
             UserShareSelective userShareSelective = createUserShareSelective(userId, orgDetails);
@@ -111,7 +113,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     }
 
     private UserShareSelective createUserShareSelective(String userId, UserShareSelectiveOrgDetailsDO orgDetails)
-            throws OrganizationManagementException, IdentityRoleManagementException {
+            throws OrganizationManagementException, IdentityRoleManagementException,
+            IdentityApplicationManagementException {
 
         UserShareSelective userShareSelective = new UserShareSelective();
         userShareSelective.setUserId(userId);
@@ -129,7 +132,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
      * @return The list of role IDs.
      */
     private List<String> getRoleIdsFromRoleNameAndAudience(List<RoleWithAudienceDO> roles)
-            throws OrganizationManagementException, IdentityRoleManagementException {
+            throws OrganizationManagementException, IdentityRoleManagementException,
+            IdentityApplicationManagementException {
 
         List<String> roleIds = new ArrayList<>();
 
@@ -146,12 +150,14 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                 audienceId = originalOrganizationId;
             } else if (audienceType.equals("application")){
                 //audienceId =getRoleManagementService().;
-                audienceId = originalTenantDomain;
+                audienceId = getApplicationManagementService().getApplicationBasicInfoByName(audienceName,
+                        originalTenantDomain).getApplicationResourceId();
+                //audienceId = originalTenantDomain;
             } else {
                 throw new OrganizationManagementException("Invalid audience type: " + audienceType);
             }
 
-            String roleId = getRoleManagementService().getRoleIdByName(roleName, audienceName, audienceId,
+            String roleId = getRoleManagementService().getRoleIdByName(roleName, audienceType, audienceId,
                     originalTenantDomain);
             roleIds.add(roleId);
         }
@@ -335,7 +341,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
      */
     @Override
     public void propagateUserGeneralShare(UserShareGeneralDO userShareGeneralDO)
-            throws UserShareMgtServerException, OrganizationManagementException, IdentityRoleManagementException {
+            throws UserShareMgtServerException, OrganizationManagementException, IdentityRoleManagementException,
+            IdentityApplicationManagementException {
 
         validateInput(userShareGeneralDO, VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO);
 
@@ -421,6 +428,10 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     private RoleManagementService getRoleManagementService() {
 
         return OrganizationUserSharingDataHolder.getInstance().getRoleManagementService();
+    }
+
+    private ApplicationManagementService getApplicationManagementService() {
+        return OrganizationUserSharingDataHolder.getInstance().getApplicationManagementService();
     }
 
     //Validation Methods.

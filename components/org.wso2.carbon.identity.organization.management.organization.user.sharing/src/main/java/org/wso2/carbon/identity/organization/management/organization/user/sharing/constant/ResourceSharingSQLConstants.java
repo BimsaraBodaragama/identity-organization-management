@@ -24,8 +24,9 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 public class ResourceSharingSQLConstants {
 
     // SQL for creating a resource sharing policy
-    public static final String CREATE_RESOURCE_SHARING_POLICY = "INSERT INTO UM_RESOURCE_SHARING_POLICY(" +
-            "UM_RESOURCE, UM_RESOURCE_TYPE, UM_INITIATED_ORG, UM_POLICY_HOLDING_ORG, UM_POLICY) VALUES(?, ?, ?, ?, ?)";
+    public static final String CREATE_RESOURCE_SHARING_POLICY = "INSERT INTO UM_RESOURCE_SHARING_POLICY" +
+            "(UM_RESOURCE_ID, UM_RESOURCE_TYPE, UM_INITIATED_ORG_ID, UM_POLICY_HOLDING_ORG_ID, UM_SHARING_POLICY) " +
+            "VALUES(?, ?, ?, ?, ?)";
 
     // SQL for deleting a resource sharing policy
     public static final String DELETE_RESOURCE_SHARING_POLICY = "DELETE FROM UM_RESOURCE_SHARING_POLICY " +

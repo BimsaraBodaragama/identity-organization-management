@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum.validateAndGetPolicyEnum;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum.getPolicyByValue;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.LOG_INFO_GENERAL_SHARE_COMPLETED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.LOG_INFO_SELECTIVE_SHARE_COMPLETED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_INPUT_MESSAGE_SUFFIX;
@@ -119,7 +119,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         UserShareSelective userShareSelective = new UserShareSelective();
         userShareSelective.setUserId(userId);
         userShareSelective.setOrganizationId(orgDetails.getOrganizationId());
-        userShareSelective.setPolicy(validateAndGetPolicyEnum(orgDetails.getPolicy()));
+        userShareSelective.setPolicy(getPolicyByValue(orgDetails.getPolicy()));
         userShareSelective.setRoles(getRoleIdsFromRoleNameAndAudience(orgDetails.getRoles()));
 
         return userShareSelective;
@@ -220,25 +220,25 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                 }
 
             }else{
+                //TODO: Already Shared
                 //do something - add to a instance variable list and finally return the list in the response as well
                 //My suggestion- manage original org with user and ask for tenant in login if duplicate users found
             }
         }
 
     }
+
     private List<String> getOrgsToShareUserWithPerPolicy(String policyHoldingOrg, PolicyEnum policy)
             throws OrganizationManagementException {
         Set<String> organizationsToShareWithPerPolicy = new HashSet<>();
 
         // Retrieve the list of organizations according to the policy
-        List<BasicOrganization> allChildOrganizations = getOrganizationManager().getChildOrganizations(policyHoldingOrg, true);
-        List<BasicOrganization> immediateChildOrganizations = getOrganizationManager().getChildOrganizations(policyHoldingOrg, false);
 
         switch (policy) {
             case ALL_EXISTING_ORGS_ONLY:
             case ALL_EXISTING_AND_FUTURE_ORGS:
                 // Share with all existing organizations (entire hierarchy)
-                allChildOrganizations.stream()
+                getOrganizationManager().getChildOrganizations(policyHoldingOrg, true).stream()
                         .map(BasicOrganization::getId)
                         .forEach(organizationsToShareWithPerPolicy::add);
                 break;
@@ -246,7 +246,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             case IMMEDIATE_EXISTING_ORGS_ONLY:
             case IMMEDIATE_EXISTING_AND_FUTURE_ORGS:
                 // Share with only the immediate existing child organizations
-                immediateChildOrganizations.stream()
+                getOrganizationManager().getChildOrganizations(policyHoldingOrg, false).stream()
                         .map(BasicOrganization::getId)
                         .forEach(organizationsToShareWithPerPolicy::add);
                 break;
@@ -258,7 +258,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             case SELECTED_ORG_WITH_ALL_EXISTING_CHILDREN_ONLY:
             case SELECTED_ORG_WITH_ALL_EXISTING_AND_FUTURE_CHILDREN:
                 organizationsToShareWithPerPolicy.add(policyHoldingOrg);
-                allChildOrganizations.stream()
+                getOrganizationManager().getChildOrganizations(policyHoldingOrg, true).stream()
                         .map(BasicOrganization::getId)
                         .forEach(organizationsToShareWithPerPolicy::add);
                 break;
@@ -266,7 +266,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             case SELECTED_ORG_WITH_EXISTING_IMMEDIATE_CHILDREN_ONLY:
             case SELECTED_ORG_WITH_EXISTING_IMMEDIATE_AND_FUTURE_CHILDREN:
                 organizationsToShareWithPerPolicy.add(policyHoldingOrg);
-                immediateChildOrganizations.stream()
+                getOrganizationManager().getChildOrganizations(policyHoldingOrg, false).stream()
                         .map(BasicOrganization::getId)
                         .forEach(organizationsToShareWithPerPolicy::add);
                 break;
@@ -282,6 +282,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     private boolean isUserUniqueInTargetOrg(String userName, String organizationId)
             throws OrganizationManagementException, UserStoreException {
         //Need to decide how the usher share is handled in the duplicate user issue.
+        //TODO: Secondary user stores
 
         String tenantDomain = getOrganizationManager().resolveTenantDomain(organizationId);
         int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
@@ -347,7 +348,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         validateInput(userShareGeneralDO, VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO);
 
         for (String userId : userShareGeneralDO.getUserCriteria().get(USER_IDS)) {
-            propagateGeneralShareForUser(userId, validateAndGetPolicyEnum(userShareGeneralDO.getPolicy()),
+            propagateGeneralShareForUser(userId, getPolicyByValue(userShareGeneralDO.getPolicy()),
                     getRoleIdsFromRoleNameAndAudience(userShareGeneralDO.getRoles()));
         }
 

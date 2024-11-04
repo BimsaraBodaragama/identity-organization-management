@@ -196,17 +196,65 @@ public enum PolicyEnum {
      * @return Corresponding PolicyEnum.
      * @throws IllegalArgumentException if the requested policy is invalid or not found.
      */
-    public static PolicyEnum validateAndGetPolicyEnum(Object requestedPolicy) {
-
-        if (requestedPolicy instanceof String) {
-            String policyStr = (String) requestedPolicy;
-            for (PolicyEnum policy : PolicyEnum.values()) {
-                if (policy.value.equalsIgnoreCase(policyStr) || policy.policyCode.equalsIgnoreCase(policyStr) ||
-                        policy.policyName.equalsIgnoreCase(policyStr)) {
-                    return policy;
-                }
+    public static PolicyEnum validateAndGetPolicyEnum(String requestedPolicy) {
+        for (PolicyEnum policy : PolicyEnum.values()) {
+            if (policy.value.equalsIgnoreCase(requestedPolicy) ||
+                    policy.policyCode.equalsIgnoreCase(requestedPolicy) ||
+                    policy.policyName.equalsIgnoreCase(requestedPolicy)) {
+                return policy;
             }
         }
-        throw new IllegalArgumentException("Invalid requested policy: " + requestedPolicy);
+        // Handle the case where no matching policy is found
+        throw new IllegalArgumentException("Invalid policy: " + requestedPolicy);
     }
+
+    /**
+     * Get the PolicyEnum by matching value.
+     *
+     * @param value Policy value to match.
+     * @return Corresponding PolicyEnum.
+     * @throws IllegalArgumentException if the policy value is not found.
+     */
+    public static PolicyEnum getPolicyByValue(String value) {
+        for (PolicyEnum policy : PolicyEnum.values()) {
+            if (policy.value.equalsIgnoreCase(value)) {
+                return policy;
+            }
+        }
+        throw new IllegalArgumentException("Invalid policy value: " + value);
+    }
+
+    /**
+     * Get the PolicyEnum by matching policy code.
+     *
+     * @param policyCode Policy code to match.
+     * @return Corresponding PolicyEnum.
+     * @throws IllegalArgumentException if the policy code is not found.
+     */
+    public static PolicyEnum getPolicyByPolicyCode(String policyCode) {
+        for (PolicyEnum policy : PolicyEnum.values()) {
+            if (policy.policyCode.equalsIgnoreCase(policyCode)) {
+                return policy;
+            }
+        }
+        throw new IllegalArgumentException("Invalid policy code: " + policyCode);
+    }
+
+    /**
+     * Get the PolicyEnum by matching policy name.
+     *
+     * @param policyName Policy name to match.
+     * @return Corresponding PolicyEnum.
+     * @throws IllegalArgumentException if the policy name is not found.
+     */
+    public static PolicyEnum getPolicyByPolicyName(String policyName) {
+
+        for (PolicyEnum policy : PolicyEnum.values()) {
+            if (policy.policyName.equalsIgnoreCase(policyName)) {
+                return policy;
+            }
+        }
+        throw new IllegalArgumentException("Invalid policy name: " + policyName);
+    }
+
 }

@@ -142,17 +142,14 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             String audienceName = role.getAudienceName();
             String audienceType = role.getAudienceType();
             String audienceId;
-            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             String originalOrganizationId = getOrganizationId();
             String originalTenantDomain = getOrganizationManager().resolveTenantDomain(originalOrganizationId);
 
             if(audienceType.equals("organization")){
                 audienceId = originalOrganizationId;
             } else if (audienceType.equals("application")){
-                //audienceId =getRoleManagementService().;
                 audienceId = getApplicationManagementService().getApplicationBasicInfoByName(audienceName,
                         originalTenantDomain).getApplicationResourceId();
-                //audienceId = originalTenantDomain;
             } else {
                 throw new OrganizationManagementException("Invalid audience type: " + audienceType);
             }
@@ -161,13 +158,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                     originalTenantDomain);
             roleIds.add(roleId);
         }
-
-        //TODO:
-        // roleName, audienceName, audienceType
-        // if audienceType: org -> getOrgIdOfTheParent UUID ~ This is audienceId
-        // if audienceType: app -> audienceName, parentTenantId -> get app UUID ~ This is audienceId
-        // call RoleMgtService: getRoleManagementService().getRoleIdByName(params)
-        // return roleIDs
 
         return roleIds;
     }

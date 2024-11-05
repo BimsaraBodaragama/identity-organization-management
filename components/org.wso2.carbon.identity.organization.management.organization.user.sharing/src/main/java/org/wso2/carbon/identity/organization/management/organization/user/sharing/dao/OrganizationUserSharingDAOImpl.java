@@ -245,19 +245,13 @@ public class OrganizationUserSharingDAOImpl implements OrganizationUserSharingDA
 
         try {
             for (String columnName : columnNames) {
-                //TODO: Check for each column name before altering -> Alter only if the column name does't exists
-                //Dynamically generate the SQL statement to add each column with the specified default value if it doesn't already exist
-                String sql = String.format("ALTER TABLE %s ADD %s VARCHAR(255) DEFAULT '%s'", tableName, columnName, defaultValue);
-                namedJdbcTemplate.executeUpdate(sql);
+                if (!areRequiredColumnsPresent(tableName, columnName)) {
+                    String sql = String.format("ALTER TABLE %s ADD %s VARCHAR(255) DEFAULT '%s'", tableName, columnName, defaultValue);
+                    namedJdbcTemplate.executeUpdate(sql);
+                }
             }
         } catch (DataAccessException e) {
             throw handleServerException(ERROR_CODE_ERROR_GET_ORGANIZATION_USER_ASSOCIATIONS, e, tableName);
         }
     }
-
-
-
-
-
-
 }

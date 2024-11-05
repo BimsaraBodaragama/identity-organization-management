@@ -57,6 +57,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum.getPolicyByValue;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.APPLICATION;
@@ -65,6 +70,7 @@ import static org.wso2.carbon.identity.organization.management.organization.user
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORGANIZATION;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY_CODE_FOR_EXISTING_AND_FUTURE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY_CODE_FOR_FUTURE_ONLY;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_GROUPS;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_IDS;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO;
@@ -78,9 +84,9 @@ import static org.wso2.carbon.identity.organization.management.service.util.Util
 public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHandlerService {
 
     private static final Log LOG = LogFactory.getLog(UserSharingPolicyHandlerService2Impl.class);
-    private static final OrganizationUserSharingDAO organizationUserSharingDAO = new OrganizationUserSharingDAOImpl();
     private static final ResourceSharingPolicyHandlerDAO resourceSharingPolicyHandlerDAO =
             new ResourceSharingPolicyHandlerDAOImpl();
+    private static ConcurrentLinkedQueue<String> errorMessages;
 
     //SELECTIVE SHARE
 
@@ -104,31 +110,40 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         LOG.info(LOG_INFO_SELECTIVE_SHARE_COMPLETED);
 
-    }
-
-    private void propagateUserSelectiveShareWithOrganizationByUserCriteria(UserShareSelectiveOrgDetailsDO organization,
-                                                          Map<String, List<String>> userCriteria)
-            throws OrganizationManagementException, IdentityApplicationManagementException,
-            IdentityRoleManagementException, UserStoreException {
-
-        for(Map.Entry<String, List<String>> entry : userCriteria.entrySet()) {
-            String userCriterion = entry.getKey();
-            List<String> userCriterionValues = entry.getValue();
-            switch (userCriterion){
-                case USER_IDS:
-                    propagateUserSelectiveShareBasedOnUserIds(userCriterionValues, organization);
-                    break;
-                default:
-                    throw new OrganizationManagementException("Invalid user criterion provided: " + userCriterion);
-            }
-
+        // After parallel processing, check for errors and handle them
+        if (!errorMessages.isEmpty()) {
+            throw new OrganizationManagementException(
+                    "Failed to share user with some organizations: " + String.join(", ", errorMessages));
         }
 
     }
 
-    private void propagateUserSelectiveShareBasedOnUserIds(List<String> userIds, UserShareSelectiveOrgDetailsDO organization)
-            throws IdentityApplicationManagementException, OrganizationManagementException,
+    private void propagateUserSelectiveShareWithOrganizationByUserCriteria(UserShareSelectiveOrgDetailsDO organization,
+                                             Map<String, List<String>> userCriteria)
+            throws OrganizationManagementException, IdentityApplicationManagementException,
             IdentityRoleManagementException, UserStoreException {
+
+        for (Map.Entry<String, List<String>> criterion : userCriteria.entrySet()) {
+            String criterionKey = criterion.getKey();
+            List<String> criterionValues = criterion.getValue();
+
+            switch (criterionKey) {
+                case USER_IDS:
+                    propagateUserSelectiveShareBasedOnUserIds(criterionValues, organization);
+                    break;
+                case USER_GROUPS:
+                    // Placeholder for future user criteria.
+                    break;
+                default:
+                    throw new OrganizationManagementException("Invalid user criterion provided: " + criterionKey);
+            }
+        }
+    }
+
+    private void propagateUserSelectiveShareBasedOnUserIds(List<String> userIds,
+                                                           UserShareSelectiveOrgDetailsDO organization)
+            throws IdentityApplicationManagementException, OrganizationManagementException, UserStoreException,
+            IdentityRoleManagementException {
 
         for (String userId : userIds) {
             propagateUserSelectiveShare(userId, organization);
@@ -138,11 +153,10 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     private void propagateUserSelectiveShare(String userId, UserShareSelectiveOrgDetailsDO organization)
             throws IdentityApplicationManagementException, OrganizationManagementException,
             IdentityRoleManagementException, UserStoreException {
-        UserShareSelective userShareSelective = createUserShareSelective(userId, organization);
 
-        String organizationID = organization.getOrganizationId();
+        UserShareSelective userShareSelective = createUserShareSelective(userId, organization);
+        String organizationId = organization.getOrganizationId();
         PolicyEnum policy = getPolicyByValue(organization.getPolicy());
-        List<String> roleIds = getRoleIdsFromRoleNameAndAudience(organization.getRoles());
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         AbstractUserStoreManager userStoreManager = getUserStoreManager(tenantId);
@@ -150,59 +164,62 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         String originalUserResidenceOrgId = getOrganizationId();
         String originalUserName = userStoreManager.getUserNameFromUserID(originalUserId);
 
-        List<String> organizationsToShareUserWith = getOrgsToShareUserWithPerPolicy(organizationID, policy);
+        List<String> targetOrganizations = getOrgsToShareUserWithPerPolicy(organizationId, policy);
+        OrganizationUserSharingService sharingService = getOrganizationUserSharingService();
 
-        OrganizationUserSharingService organizationUserSharingService = getOrganizationUserSharingService();
-
-        ConcurrentLinkedQueue<String> errorMessages = new ConcurrentLinkedQueue<>();
-
-        for (String organizationToShareUserWith : organizationsToShareUserWith) {
-            try {
-                boolean isExistingUser = isExistingUserInTargetOrg(originalUserName, organizationToShareUserWith);
-
-                if (!isExistingUser) {
-                    organizationUserSharingService.shareOrganizationUser(organizationToShareUserWith, originalUserId,
-                            originalUserResidenceOrgId);
-                    // TODO: Set as pushed user
-                    String sharedUser = organizationUserSharingService
-                            .getUserAssociationOfAssociatedUserByOrgId(originalUserId, organizationToShareUserWith)
-                            .getUserId();
-
-                    // TODO: set claim - pushed or pulled
-
-                    if (!userShareSelective.getRoles().isEmpty()) {
-                        assignRolesToTheSharedUser(sharedUser, organizationToShareUserWith,
-                                userShareSelective.getRoles());
-                    }
-
-                    if (getPoliciesForFuturePropagation().contains(policy.getPolicyCode())) {
-                        saveForFuturePropagations(originalUserId, originalUserResidenceOrgId,
-                                organizationToShareUserWith, policy);
-                    }
-
-                } else {
-                    // TODO: Already Shared
-                    // Add message to the error list for already shared user scenario
-                    errorMessages.add("User already shared with organization: " + organizationToShareUserWith);
-                }
-            } catch (OrganizationManagementException | IdentityRoleManagementException | UserStoreException e) {
-                // Collect error instead of stopping the whole process
-                errorMessages.add("Error while sharing user with organization: " + organizationToShareUserWith + " - " +
-                        e.getMessage());
-            }
+        for (String targetOrg : targetOrganizations) {
+            LOG.info("Processing sharing for target organization: " + targetOrg);
+            processUserSelectiveSharing(
+                    sharingService, originalUserId, originalUserName, originalUserResidenceOrgId, targetOrg,
+                    userShareSelective, policy);
+           LOG.info("Completed sharing for target organization: " + targetOrg);
         }
-
-
-
-
-        // After parallel processing, check for errors and handle them
-        if (!errorMessages.isEmpty()) {
-            throw new OrganizationManagementException(
-                    "Failed to share user with some organizations: " + String.join(", ", errorMessages));
-        }
-
     }
 
+    private void processUserSelectiveSharing(
+            OrganizationUserSharingService sharingService, String originalUserId, String originalUserName,
+            String originalUserResidenceOrgId, String targetOrg, UserShareSelective userShareSelective,
+            PolicyEnum policy) {
+        String sharedUserId = null;
+        try {
+            if (isExistingUserInTargetOrg(originalUserName, targetOrg)) {
+                errorMessages.add("User already shared with organization: " + targetOrg);
+                return;
+            }
+
+            sharingService.shareOrganizationUser(targetOrg, originalUserId, originalUserResidenceOrgId);
+            sharedUserId = sharingService.getUserAssociationOfAssociatedUserByOrgId(originalUserId, targetOrg)
+                    .getUserId();
+
+            assignRolesIfPresent(userShareSelective, sharedUserId, targetOrg);
+            handleFuturePropagationIfRequired(originalUserId, originalUserResidenceOrgId, targetOrg, policy);
+
+        } catch (OrganizationManagementException | IdentityRoleManagementException | UserStoreException e) {
+            errorMessages.add("Error while sharing user with organization: " + targetOrg + " - " + e.getMessage());
+            if (sharedUserId != null) {
+                try {
+                    sharingService.unshareOrganizationUsers(sharedUserId, targetOrg);
+                } catch (OrganizationManagementException rollbackException) {
+                    errorMessages.add("Failed to rollback sharing for user: " + sharedUserId + " from organization: " + targetOrg + " - " + rollbackException.getMessage());
+                }
+            }
+        }
+    }
+
+    private void assignRolesIfPresent(UserShareSelective userShareSelective, String sharedUserId, String targetOrg)
+            throws IdentityRoleManagementException, OrganizationManagementException {
+        if (!userShareSelective.getRoles().isEmpty()) {
+            assignRolesToTheSharedUser(sharedUserId, targetOrg, userShareSelective.getRoles());
+        }
+    }
+
+    private void handleFuturePropagationIfRequired(String originalUserId, String originalUserResidenceOrgId,
+                                                   String targetOrg, PolicyEnum policy)
+            throws OrganizationManagementServerException {
+        if (getPoliciesForFuturePropagation().contains(policy.getPolicyCode())) {
+            saveForFuturePropagations(originalUserId, originalUserResidenceOrgId, targetOrg, policy);
+        }
+    }
 
 
     private UserShareSelective createUserShareSelective(String userId, UserShareSelectiveOrgDetailsDO orgDetails)
@@ -235,14 +252,10 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
     private void saveForFuturePropagations(String originalUser, String initiatedOrg, String policyHoldingOrg,
                                            PolicyEnum policy) throws OrganizationManagementServerException {
-        //Check if the policy is for future and save to UM_RESOURCE_SHARING_POLICY table and UM_SHARING_REQUEST_ROLES
-        // table
-        // Save the resource type as User.
 
         resourceSharingPolicyHandlerDAO.createResourceSharingPolicyRecord(originalUser, "User", initiatedOrg,
                 policyHoldingOrg, policy.getPolicyCode());
 
-        //error handling (db level errors?)
     }
 
 

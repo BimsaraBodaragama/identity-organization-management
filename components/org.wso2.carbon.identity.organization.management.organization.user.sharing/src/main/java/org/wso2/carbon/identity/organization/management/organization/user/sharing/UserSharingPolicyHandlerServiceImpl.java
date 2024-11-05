@@ -187,7 +187,12 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                 return;
             }
 
-            sharingService.shareOrganizationUser(targetOrg, originalUserId, originalUserResidenceOrgId);
+            //TODO: Confirm the 3rd param for the cases of resharing.
+            // I guess this current originalUserResidenceOrgId variable should be renamed as sharingUserOrgId cuz it is
+            // the user being shared (even in resahre) Hence this current originalUserResidenceOrgId is the request
+            // initiated organization. Hence we have to find the originalusersorganization in another way.
+            sharingService.shareOrganizationUser(targetOrg, originalUserId, originalUserResidenceOrgId,
+                    originalUserResidenceOrgId, "Shared");
             sharedUserId = sharingService.getUserAssociationOfAssociatedUserByOrgId(originalUserId, targetOrg)
                     .getUserId();
 

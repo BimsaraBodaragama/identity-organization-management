@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserAssociation;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
+import org.wso2.carbon.user.core.UserStoreException;
 
 import java.util.List;
 
@@ -39,6 +40,22 @@ public interface OrganizationUserSharingDAO {
      *                                               association.
      */
     void createOrganizationUserAssociation(String userId, String orgId, String associatedUserId, String associatedOrgId)
+            throws OrganizationManagementServerException;
+
+    /**
+     * Creates the association between the shared user and the actual user in the shared organization.
+     *
+     * @param userId                    ID of the user who gets created in the organization.
+     * @param orgId                     Organization ID of the user shared organization.
+     * @param associatedUserId          Actual user ID of the associated user.
+     * @param associatedOrgId           The organization ID where the associated user is managed.
+     * @param associationInitiatedOrgId The organization ID where the association was initiated.
+     * @param associationType           The type of association.
+     * @throws OrganizationManagementServerException If an error occurs while creating the organization user
+     *                                               association.
+     */
+    void createOrganizationUserAssociation(String userId, String orgId, String associatedUserId, String associatedOrgId,
+                                           String associationInitiatedOrgId, String associationType)
             throws OrganizationManagementServerException;
 
     /**
@@ -95,4 +112,50 @@ public interface OrganizationUserSharingDAO {
      */
     UserAssociation getUserAssociation(String userId, String organizationId)
             throws OrganizationManagementServerException;
+
+//    /**
+//     * Checks whether the necessary association columns "AssociationType" and "AssociationInitiatedOrgId" exist in the database.
+//     *
+//     * This method verifies the presence of the required columns for user associations,
+//     * specifically "AssociationType" and "AssociationInitiatedOrgId", in the database table.
+//     *
+//     * @return true if both required association columns are present, false otherwise.
+//     * @throws OrganizationManagementServerException If an error occurs while checking the columns in the database.
+//     */
+//    boolean areRequiredAssociationColumnsPresent() throws OrganizationManagementServerException;
+
+    /**
+     * Creates specified columns in the given database table if they do not already exist, with a defined default value.
+     *
+     * This method checks for the presence of each specified column in the given table. If any column is missing,
+     * it will be created with the specified default value.
+     *
+     * @param tableName    The name of the table in which to check and potentially create columns.
+     * @param defaultValue The default value to assign to each column if it needs to be created.
+     * @param columns      The names of the columns to ensure exist in the table.
+     * @throws UserStoreException                   If an error occurs while accessing the user store.
+     * @throws InterruptedException                 If the operation is interrupted while creating the columns.
+     * @throws OrganizationManagementServerException If an error occurs while creating columns in the table.
+     */
+    void createMissingColumns(String tableName, String defaultValue, String... columns)
+            throws UserStoreException, OrganizationManagementServerException;
+
+    /**
+     * Checks if the specified columns are present in the given table in the database.
+     *
+     * This method verifies the presence of each of the specified columns in the specified table.
+     * It returns true if all required columns exist, and false if any are missing.
+     *
+     * @param tableName   The name of the table to check for the presence of required columns.
+     * @param columnNames The names of the columns that are required to exist in the table.
+     * @return true if all specified columns are present in the table, false otherwise.
+     * @throws UserStoreException If an error occurs while accessing the user store.
+     * @throws InterruptedException If the operation is interrupted.
+     */
+    boolean areRequiredColumnsPresent(String tableName, String... columnNames)
+            throws UserStoreException, OrganizationManagementServerException;
+
+
+
+
 }

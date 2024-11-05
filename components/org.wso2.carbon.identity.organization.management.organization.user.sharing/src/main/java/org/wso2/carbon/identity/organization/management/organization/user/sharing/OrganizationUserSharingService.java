@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserAssociation;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.List;
 
@@ -37,6 +38,20 @@ public interface OrganizationUserSharingService {
      * @throws OrganizationManagementException If an error occurs while creating the organization user association.
      */
     void shareOrganizationUser(String orgId, String associatedUserId, String associatedOrgId)
+            throws OrganizationManagementException, UserStoreException;
+
+    /**
+     * Creates the association between the shared user and the actual user in the organization.
+     *
+     * @param orgId                        Organization ID of the user is shared.
+     * @param associatedUserId             Actual user who is associated for a shared user.
+     * @param associatedOrgId              The organization ID associated user.
+     * @param associationInitiatedOrgId    The organization ID where the association was initiated.
+     * @param associationType              The type of association.
+     * @throws OrganizationManagementException If an error occurs while creating the organization user association.
+     */
+    void shareOrganizationUser(String orgId, String associatedUserId, String associatedOrgId,
+                               String associationInitiatedOrgId, String associationType)
             throws OrganizationManagementException;
 
     /**

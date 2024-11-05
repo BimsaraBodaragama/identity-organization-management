@@ -39,6 +39,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.DEFAULT_VALUE_NOT_SPECIFIED;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.SQLPlaceholders.COLUMN_NAME_ASSOCIATION_INITIATED_ORG_ID;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.SQLPlaceholders.COLUMN_NAME_ASSOCIATION_TYPE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.CLAIM_MANAGED_ORGANIZATION;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.DEFAULT_PROFILE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ID_CLAIM_READ_ONLY;
@@ -77,17 +80,14 @@ public class OrganizationUserSharingServiceImpl implements OrganizationUserShari
     public void shareOrganizationUser(String orgId, String associatedUserId, String associatedOrgId)
             throws OrganizationManagementException, UserStoreException {
 
-        // Default values for the new parameters.
-        String defaultAssociationInitiatedOrgId = "NOT_SPECIFIED";
-        String defaultAssociationType = "NOT_SPECIFIED";
-
         if (!organizationUserSharingDAO.areRequiredColumnsPresent("UM_ORG_USER_ASSOCIATION",
-                "UM_ASSOCIATION_INITIATED_ORG_ID", "UM_ASSOCIATION_TYPE")) {
+                COLUMN_NAME_ASSOCIATION_INITIATED_ORG_ID, COLUMN_NAME_ASSOCIATION_TYPE)) {
             createAndEnsureRelevantColumnsExist("UM_ORG_USER_ASSOCIATION",
-                            "UM_ASSOCIATION_INITIATED_ORG_ID", "UM_ASSOCIATION_TYPE");
+                    COLUMN_NAME_ASSOCIATION_INITIATED_ORG_ID, COLUMN_NAME_ASSOCIATION_TYPE);
         }
 
-        shareOrganizationUser(orgId, associatedUserId, associatedOrgId, defaultAssociationInitiatedOrgId, defaultAssociationType);
+        shareOrganizationUser(orgId, associatedUserId, associatedOrgId, DEFAULT_VALUE_NOT_SPECIFIED,
+                DEFAULT_VALUE_NOT_SPECIFIED);
 
     }
 
@@ -216,11 +216,10 @@ public class OrganizationUserSharingServiceImpl implements OrganizationUserShari
 
         try {
             // Attempt to create the missing columns.
-            organizationUserSharingDAO.createMissingColumns(tableName, "NOT_SPECIFIED", columnNames);
+            organizationUserSharingDAO.createMissingColumns(tableName, DEFAULT_VALUE_NOT_SPECIFIED, columnNames);
 
             // Recheck if the columns were successfully created.
-            if (!organizationUserSharingDAO.areRequiredColumnsPresent("UM_ORG_USER_ASSOCIATION",
-                    "UM_ASSOCIATION_INITIATED_ORG_ID", "UM_ASSOCIATION_TYPE")) {
+            if (!organizationUserSharingDAO.areRequiredColumnsPresent(tableName, columnNames)) {
                 throw new UserStoreException("Failed to create the required columns in table: " + tableName);
             }
         } catch (OrganizationManagementServerException e) {

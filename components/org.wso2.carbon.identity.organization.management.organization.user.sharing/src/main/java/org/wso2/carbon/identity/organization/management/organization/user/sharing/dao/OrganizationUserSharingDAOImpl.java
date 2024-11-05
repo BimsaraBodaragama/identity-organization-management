@@ -32,6 +32,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.ADD_COLUMN_TO_TABLE;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.CHECK_COLUMN_EXISTENCE_IN_TABLE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.CREATE_ORGANIZATION_USER_ASSOCIATION;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.CREATE_ORGANIZATION_USER_ASSOCIATION_EXTENDED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.DELETE_ORGANIZATION_USER_ASSOCIATIONS_FOR_ROOT_USER;
@@ -43,6 +45,7 @@ import static org.wso2.carbon.identity.organization.management.organization.user
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.SQLPlaceholders.COLUMN_NAME_ASSOCIATED_USER_ID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.SQLPlaceholders.COLUMN_NAME_ORG_ID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.SQLPlaceholders.COLUMN_NAME_USER_ID;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.SQLPlaceholders.COUNT_ALIAS;
 import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ERROR_CREATE_ORGANIZATION_USER_ASSOCIATION;
 import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ERROR_DELETE_ORGANIZATION_USER_ASSOCIATIONS;
 import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ERROR_DELETE_ORGANIZATION_USER_ASSOCIATION_FOR_SHARED_USER;
@@ -220,8 +223,8 @@ public class OrganizationUserSharingDAOImpl implements OrganizationUserSharingDA
             for (String columnName : columnNames) {
                 // Check if the specified column exists in the table
                 boolean columnExists = namedJdbcTemplate.executeQuery(
-                        "SELECT COUNT(*) AS count FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?",
-                        (resultSet, rowNumber) -> resultSet.getInt("count") > 0,
+                        CHECK_COLUMN_EXISTENCE_IN_TABLE,
+                        (resultSet, rowNumber) -> resultSet.getInt(COUNT_ALIAS) > 0,
                         namedPreparedStatement -> {
                             namedPreparedStatement.setString(1, tableName);
                             namedPreparedStatement.setString(2, columnName);
@@ -246,7 +249,7 @@ public class OrganizationUserSharingDAOImpl implements OrganizationUserSharingDA
         try {
             for (String columnName : columnNames) {
                 if (!areRequiredColumnsPresent(tableName, columnName)) {
-                    String sql = String.format("ALTER TABLE %s ADD %s VARCHAR(255) DEFAULT '%s'", tableName, columnName, defaultValue);
+                    String sql = String.format(ADD_COLUMN_TO_TABLE, tableName, columnName, defaultValue);
                     namedJdbcTemplate.executeUpdate(sql);
                 }
             }

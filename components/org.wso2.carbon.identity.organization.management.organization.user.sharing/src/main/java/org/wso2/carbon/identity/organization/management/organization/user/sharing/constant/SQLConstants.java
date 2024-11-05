@@ -41,6 +41,11 @@ public class SQLConstants {
     public static final String GET_ORGANIZATION_USER_ASSOCIATIONS_FOR_SHARED_USER = "SELECT UM_USER_ID, UM_ORG_ID, " +
             "UM_ASSOCIATED_USER_ID, UM_ASSOCIATED_ORG_ID FROM UM_ORG_USER_ASSOCIATION " +
             "WHERE UM_USER_ID = ? AND UM_ORG_ID = ?";
+    public static final String CHECK_COLUMN_EXISTENCE_IN_TABLE = "SELECT COUNT(*) AS count FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?";
+    public static final String ADD_COLUMN_TO_TABLE = "ALTER TABLE %s ADD %s VARCHAR(255) DEFAULT '%s'";
+
+    public static final String DEFAULT_VALUE_NOT_SPECIFIED = "NOT_SPECIFIED";
+
     /**
      * SQL placeholders related to organization user sharing SQL operations.
      */
@@ -50,6 +55,9 @@ public class SQLConstants {
         public static final String COLUMN_NAME_ORG_ID = "UM_ORG_ID";
         public static final String COLUMN_NAME_ASSOCIATED_USER_ID = "UM_ASSOCIATED_USER_ID";
         public static final String COLUMN_NAME_ASSOCIATED_ORG_ID = "UM_ASSOCIATED_ORG_ID";
+        public static final String COLUMN_NAME_ASSOCIATION_INITIATED_ORG_ID = "UM_ASSOCIATION_INITIATED_ORG_ID";
+        public static final String COLUMN_NAME_ASSOCIATION_TYPE = "UM_ASSOCIATION_TYPE";
+        public static final String COUNT_ALIAS = "count";
     }
 
 }

@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum.getPolicyByValue;
@@ -175,53 +176,64 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
      * @param userShareSelective Contains details for sharing a user with an organization.
      */
     private void propagateUserSelectiveShareToSelectedOrganization(UserShareSelective userShareSelective)
-            throws OrganizationManagementException, IdentityRoleManagementException,
-            UserStoreException {
+            throws OrganizationManagementException, UserStoreException {
 
-        String originalUserId = userShareSelective.getUserId();
-        String originalUserResidenceOrgId = getOrganizationId();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         AbstractUserStoreManager userStoreManager = getUserStoreManager(tenantId);
-        String originalUserName = userStoreManager.getUserNameFromUserID(originalUserId);
         PolicyEnum policy = userShareSelective.getPolicy();
+        String originalUserId = userShareSelective.getUserId();
+        String originalUserResidenceOrgId = getOrganizationId();
+        String originalUserName = userStoreManager.getUserNameFromUserID(originalUserId);
 
         List<String> organizationsToShareUserWith =
                 getOrgsToShareUserWithPerPolicy(userShareSelective.getOrganizationId(), policy);
 
         OrganizationUserSharingService organizationUserSharingService = getOrganizationUserSharingService();
 
-        for(String organizationToShareUserWith : organizationsToShareUserWith) {
+        // Use a concurrent collection to store errors that occur during parallel processing
+        ConcurrentLinkedQueue<String> errorMessages = new ConcurrentLinkedQueue<>();
 
-            boolean uniqueUser = isUserUniqueInTargetOrg(originalUserName, organizationToShareUserWith);
+        organizationsToShareUserWith.parallelStream().forEach(organizationToShareUserWith -> {
+            try {
+                boolean isExistingUser = isExistingUserInTargetOrg(originalUserName, organizationToShareUserWith);
 
-            if(uniqueUser) {
-                organizationUserSharingService.shareOrganizationUser(organizationToShareUserWith, originalUserId,
-                        originalUserResidenceOrgId);
-                //TODO: Set as pushed user
-                String sharedUser = organizationUserSharingService
-                        .getUserAssociationOfAssociatedUserByOrgId(originalUserId,
-                                organizationToShareUserWith).getUserId(); //252 of InvitationMgtCoreImpl
+                if (!isExistingUser) {
+                    organizationUserSharingService.shareOrganizationUser(organizationToShareUserWith, originalUserId,
+                            originalUserResidenceOrgId);
+                    // TODO: Set as pushed user
+                    String sharedUser = organizationUserSharingService
+                            .getUserAssociationOfAssociatedUserByOrgId(originalUserId, organizationToShareUserWith)
+                            .getUserId();
 
-                //TODO: set claim - pushed or pulled
+                    // TODO: set claim - pushed or pulled
 
-                if (!userShareSelective.getRoles().isEmpty()) {
-                    assignRolesToTheSharedUser(sharedUser, organizationToShareUserWith, userShareSelective.getRoles());
+                    if (!userShareSelective.getRoles().isEmpty()) {
+                        assignRolesToTheSharedUser(sharedUser, organizationToShareUserWith,
+                                userShareSelective.getRoles());
+                    }
+
+                    if (getPoliciesForFuturePropagation().contains(policy.getPolicyCode())) {
+                        saveForFuturePropagations(originalUserId, originalUserResidenceOrgId,
+                                organizationToShareUserWith, policy);
+                    }
+
+                } else {
+                    // TODO: Already Shared
+                    // Add message to the error list for already shared user scenario
+                    errorMessages.add("User already shared with organization: " + organizationToShareUserWith);
                 }
-
-                //Save to UM_RESOURCE_SHARING_POLICY
-                if(getPoliciesForFuturePropagation().contains(policy.getPolicyCode())) {
-                    //TODO: Still doesn't work
-                    saveForFuturePropagations(originalUserId, originalUserResidenceOrgId, organizationToShareUserWith,
-                            policy);
-                }
-
-            }else{
-                //TODO: Already Shared
-                //do something - add to a instance variable list and finally return the list in the response as well
-                //My suggestion- manage original org with user and ask for tenant in login if duplicate users found
+            } catch (OrganizationManagementException | IdentityRoleManagementException | UserStoreException e) {
+                // Collect error instead of stopping the whole process
+                errorMessages.add("Error while sharing user with organization: " + organizationToShareUserWith + " - " +
+                        e.getMessage());
             }
-        }
+        });
 
+        // After parallel processing, check for errors and handle them
+        if (!errorMessages.isEmpty()) {
+            throw new OrganizationManagementException(
+                    "Failed to share user with some organizations: " + String.join(", ", errorMessages));
+        }
     }
 
     private List<String> getOrgsToShareUserWithPerPolicy(String policyHoldingOrg, PolicyEnum policy)
@@ -275,7 +287,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         return new ArrayList<>(organizationsToShareWithPerPolicy);
     }
 
-    private boolean isUserUniqueInTargetOrg(String userName, String organizationId)
+    private boolean isExistingUserInTargetOrg(String userName, String organizationId)
             throws OrganizationManagementException, UserStoreException {
         //Need to decide how the usher share is handled in the duplicate user issue.
         //TODO: Secondary user stores
@@ -284,7 +296,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
         AbstractUserStoreManager userStoreManager = getUserStoreManager(tenantId);
 
-        return !userStoreManager.isExistingUser(userName);
+        return userStoreManager.isExistingUser(userName);
     }
 
     private void assignRolesToTheSharedUser(String sharedUser, String sharedOrganization, List<String> roles)

@@ -113,17 +113,6 @@ public interface OrganizationUserSharingDAO {
     UserAssociation getUserAssociation(String userId, String organizationId)
             throws OrganizationManagementServerException;
 
-//    /**
-//     * Checks whether the necessary association columns "AssociationType" and "AssociationInitiatedOrgId" exist in the database.
-//     *
-//     * This method verifies the presence of the required columns for user associations,
-//     * specifically "AssociationType" and "AssociationInitiatedOrgId", in the database table.
-//     *
-//     * @return true if both required association columns are present, false otherwise.
-//     * @throws OrganizationManagementServerException If an error occurs while checking the columns in the database.
-//     */
-//    boolean areRequiredAssociationColumnsPresent() throws OrganizationManagementServerException;
-
     /**
      * Creates specified columns in the given database table if they do not already exist, with a defined default value.
      *

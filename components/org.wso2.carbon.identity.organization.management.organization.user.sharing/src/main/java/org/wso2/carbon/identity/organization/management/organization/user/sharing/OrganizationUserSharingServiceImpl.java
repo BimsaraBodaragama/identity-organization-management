@@ -211,23 +211,6 @@ public class OrganizationUserSharingServiceImpl implements OrganizationUserShari
         return uuid.toString().substring(0, 12);
     }
 
-//    private void createAndEnsureAssociationColumnsExist() throws UserStoreException, InterruptedException {
-//
-//        try {
-//            // Attempt to create the missing columns.
-//            boolean columnsCreated =
-//                    organizationUserSharingDAO.createAssociationColumnsIfMissing("UM_ORG_USER_ASSOCIATION",
-//                            "UM_ASSOCIATION_INITIATED_ORG_ID", "UM_ASSOCIATION_TYPE");
-//
-//            // Recheck if the columns were successfully created.
-//            if (!columnsCreated) {
-//                throw new UserStoreException("Failed to create the required association columns.");
-//            }
-//        } catch (OrganizationManagementServerException e) {
-//            throw new UserStoreException("An error occurred while creating the required association columns.", e);
-//        }
-//    }
-
     private void createAndEnsureRelevantColumnsExist(String tableName, String... columnNames)
             throws UserStoreException {
 

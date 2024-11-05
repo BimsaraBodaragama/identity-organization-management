@@ -585,4 +585,13 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                     String.format(ERROR_CODE_GET_TENANT_FROM_ORG.getDescription(), orgId));
         }
     }
+
+    //TODO:
+    // (1) user->org to org->user loop
+    // (2) atomic inside (!isExistingUser) block
+    // (3) parallel sharing if orgA and orgA-1 is given in the org list at the same time (must look for broder scope
+    // as well) - no issue
+    // (4) if A1 has been shared earlier, now share to A with a broder scope, have to delete orgA1 share and reshare
+    // the user (update)
+    // (5) Max thread count - get it from server config for parallel stream (try now to hardcode)
 }

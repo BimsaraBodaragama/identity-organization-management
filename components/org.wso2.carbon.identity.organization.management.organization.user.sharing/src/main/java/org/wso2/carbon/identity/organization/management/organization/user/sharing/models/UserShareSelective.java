@@ -17,6 +17,10 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum;
+
+import java.util.List;
+
 /**
  * Model that contains the user share selective data object.
  */
@@ -32,5 +36,29 @@ public class UserShareSelective extends UserShareBase {
     public void setOrganizationId(String organizationId) {
 
         this.organizationId = organizationId;
+    }
+
+    // Chaining method
+    public UserShareSelective withOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
+        return this;
+    }
+
+    @Override
+    public UserShareSelective withUserId(String userId) {
+        super.withUserId(userId);
+        return this;
+    }
+
+    @Override
+    public UserShareSelective withPolicy(PolicyEnum policy) {
+        super.withPolicy(policy);
+        return this;
+    }
+
+    @Override
+    public UserShareSelective withRoles(List<String> roles) {
+        super.withRoles(roles);
+        return this;
     }
 }

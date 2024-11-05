@@ -31,6 +31,8 @@ public class UserSharingConstants {
     public static final String ORG_ID = "orgId";
     public static final String POLICY = "policy";
     public static final String ROLES = "roles";
+    public static final String ORGANIZATION = "organization";
+    public static final String APPLICATION = "application";
 
     public static final String NULL_POLICY = "Policy is null";
 

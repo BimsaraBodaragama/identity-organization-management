@@ -56,11 +56,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum.getPolicyByValue;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.APPLICATION;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.LOG_INFO_GENERAL_SHARE_COMPLETED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.LOG_INFO_SELECTIVE_SHARE_COMPLETED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_INPUT_MESSAGE_SUFFIX;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORGANIZATION;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY_CODE_FOR_EXISTING_AND_FUTURE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY_CODE_FOR_FUTURE_ONLY;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_IDS;
@@ -113,54 +116,58 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     }
 
     private UserShareSelective createUserShareSelective(String userId, UserShareSelectiveOrgDetailsDO orgDetails)
-            throws OrganizationManagementException, IdentityRoleManagementException,
-            IdentityApplicationManagementException {
+            throws OrganizationManagementException, IdentityApplicationManagementException,
+            IdentityRoleManagementException {
 
-        UserShareSelective userShareSelective = new UserShareSelective();
-        userShareSelective.setUserId(userId);
-        userShareSelective.setOrganizationId(orgDetails.getOrganizationId());
-        userShareSelective.setPolicy(getPolicyByValue(orgDetails.getPolicy()));
-        userShareSelective.setRoles(getRoleIdsFromRoleNameAndAudience(orgDetails.getRoles()));
-
-        return userShareSelective;
+        return new UserShareSelective()
+                .withUserId(userId)
+                .withOrganizationId(orgDetails.getOrganizationId())
+                .withPolicy(getPolicyByValue(orgDetails.getPolicy()))
+                .withRoles(getRoleIdsFromRoleNameAndAudience(orgDetails.getRoles()));
     }
 
-    /**
-     * Converts roles to role IDs.
-     *
-     * @param roles The list of roles containing display name and audience details.
-     * @return The list of role IDs.
-     */
-    private List<String> getRoleIdsFromRoleNameAndAudience(List<RoleWithAudienceDO> roles)
-            throws OrganizationManagementException, IdentityRoleManagementException,
-            IdentityApplicationManagementException {
+    private List<String> getRoleIdsFromRoleNameAndAudience(List<RoleWithAudienceDO> rolesWithAudience)
+            throws OrganizationManagementException, IdentityApplicationManagementException,
+            IdentityRoleManagementException {
 
-        List<String> roleIds = new ArrayList<>();
+        String originalOrgId = getOrganizationId();
+        String originalTenantDomain = getOrganizationManager().resolveTenantDomain(originalOrgId);
 
-        for(RoleWithAudienceDO role : roles) {
-            String roleName = role.getRoleName();
-            String audienceName = role.getAudienceName();
-            String audienceType = role.getAudienceType();
-            String audienceId;
-            String originalOrganizationId = getOrganizationId();
-            String originalTenantDomain = getOrganizationManager().resolveTenantDomain(originalOrganizationId);
-
-            if(audienceType.equals("organization")){
-                audienceId = originalOrganizationId;
-            } else if (audienceType.equals("application")){
-                audienceId = getApplicationManagementService().getApplicationBasicInfoByName(audienceName,
-                        originalTenantDomain).getApplicationResourceId();
-            } else {
-                throw new OrganizationManagementException("Invalid audience type: " + audienceType);
-            }
-
-            String roleId = getRoleManagementService().getRoleIdByName(roleName, audienceType, audienceId,
+        List<String> list = new ArrayList<>();
+        for (RoleWithAudienceDO roleWithAudienceDO : rolesWithAudience) {
+            String audienceId = getAudienceId(roleWithAudienceDO, originalOrgId, originalTenantDomain);
+            String roleId = getRoleIdFromAudience(
+                    roleWithAudienceDO.getRoleName(),
+                    roleWithAudienceDO.getAudienceType(),
+                    audienceId,
                     originalTenantDomain);
-            roleIds.add(roleId);
+            list.add(roleId);
         }
+        return list;
 
-        return roleIds;
     }
+
+    private String getRoleIdFromAudience(String roleName, String audienceType, String audienceId, String tenantDomain)
+            throws IdentityRoleManagementException {
+
+        return getRoleManagementService().getRoleIdByName(roleName, audienceType, audienceId, tenantDomain);
+    }
+
+    private String getAudienceId(RoleWithAudienceDO role, String originalOrgId, String tenantDomain)
+            throws IdentityApplicationManagementException, OrganizationManagementException {
+
+        switch (role.getAudienceType()) {
+            case ORGANIZATION:
+                return originalOrgId;
+            case APPLICATION:
+                return getApplicationManagementService()
+                        .getApplicationBasicInfoByName(role.getAudienceName(), tenantDomain)
+                        .getApplicationResourceId();
+            default:
+                throw new OrganizationManagementException("Invalid audience type: " + role.getAudienceType());
+        }
+    }
+
 
     /**
      * Handles storing or processing the user-organization share.
@@ -190,8 +197,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             if(uniqueUser) {
                 organizationUserSharingService.shareOrganizationUser(organizationToShareUserWith, originalUserId,
                         originalUserResidenceOrgId);
-                //TODO: Set as pushed user [Can use CLAIMS] (either here or in above method) (I recommend to do this in
-                // the above method)
+                //TODO: Set as pushed user
                 String sharedUser = organizationUserSharingService
                         .getUserAssociationOfAssociatedUserByOrgId(originalUserId,
                                 organizationToShareUserWith).getUserId(); //252 of InvitationMgtCoreImpl

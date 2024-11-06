@@ -27,6 +27,7 @@ import java.util.List;
  */
 public class UserSharingConstants {
 
+    public static final String USER_ID = "userId";
     public static final String USER_IDS = "userIds";
     public static final String USER_GROUPS = "userGroups";
     public static final String ORG_ID = "orgId";

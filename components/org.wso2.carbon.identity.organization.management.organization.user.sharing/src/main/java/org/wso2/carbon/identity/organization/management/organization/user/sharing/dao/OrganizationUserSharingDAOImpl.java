@@ -25,17 +25,24 @@ import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserAssociation;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
 
+import java.util.HashMap;
 import java.util.List;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.Optional;
 
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.GET_ORGANIZATION_USER_ASSOCIATIONS_FOR_SHARED_USER_BY_USER_ID;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_ID;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORG_ID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.ADD_COLUMN_TO_TABLE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.CHECK_COLUMN_EXISTENCE_IN_TABLE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.CREATE_ORGANIZATION_USER_ASSOCIATION;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.CREATE_ORGANIZATION_USER_ASSOCIATION_EXTENDED;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.DEFAULT_VALUE_NOT_SPECIFIED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.DELETE_ORGANIZATION_USER_ASSOCIATIONS_FOR_ROOT_USER;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.DELETE_ORGANIZATION_USER_ASSOCIATION_FOR_SHARED_USER;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.GET_ORGANIZATION_USER_ASSOCIATIONS_FOR_SHARED_USER;
@@ -53,6 +60,7 @@ import static org.wso2.carbon.identity.organization.management.service.constant.
 import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ERROR_GET_ORGANIZATION_USER_ASSOCIATION_FOR_USER_AT_SHARED_ORG;
 import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ERROR_GET_ORGANIZATION_USER_ASSOCIATION_OF_SHARED_USER;
 import static org.wso2.carbon.identity.organization.management.service.util.Utils.getNewTemplate;
+import static org.wso2.carbon.identity.organization.management.service.util.Utils.getOrganizationId;
 import static org.wso2.carbon.identity.organization.management.service.util.Utils.handleServerException;
 
 /**
@@ -257,4 +265,41 @@ public class OrganizationUserSharingDAOImpl implements OrganizationUserSharingDA
             throw handleServerException(ERROR_CODE_ERROR_GET_ORGANIZATION_USER_ASSOCIATIONS, e, tableName);
         }
     }
+
+    @Override
+    public Map<String, String> getUserAssociationDetailsByUserId(String userId)
+            throws OrganizationManagementServerException {
+
+        NamedJdbcTemplate namedJdbcTemplate = getNewTemplate();
+
+        Map<String, String> resultMap = new HashMap<>();
+        try {
+            List<UserAssociation> userAssociations = namedJdbcTemplate.executeQuery(
+                    GET_ORGANIZATION_USER_ASSOCIATIONS_FOR_SHARED_USER_BY_USER_ID,
+                    (resultSet, rowNumber) -> {
+                        UserAssociation userAssociation = new UserAssociation();
+                        userAssociation.setUserId(resultSet.getString(COLUMN_NAME_USER_ID));
+                        userAssociation.setAssociatedUserId(resultSet.getString(COLUMN_NAME_ASSOCIATED_USER_ID));
+                        userAssociation.setUserResidentOrganizationId(resultSet.getString(COLUMN_NAME_ASSOCIATED_ORG_ID));
+                        return userAssociation;
+                    },
+                    namedPreparedStatement -> namedPreparedStatement.setString(1, userId));
+
+            if (userAssociations.isEmpty()) {
+                // No records found; return the input userId and default resident org value
+                resultMap.put(USER_ID, userId);
+                resultMap.put(ORG_ID, getOrganizationId());
+            } else {
+                // Get the first record
+                UserAssociation firstAssociation = userAssociations.get(0);
+                resultMap.put(USER_ID, firstAssociation.getAssociatedUserId());
+                resultMap.put(ORG_ID, firstAssociation.getUserResidentOrganizationId());
+            }
+
+            return resultMap;
+        } catch (DataAccessException e) {
+            throw handleServerException(ERROR_CODE_ERROR_GET_ORGANIZATION_USER_ASSOCIATIONS, e, userId);
+        }
+    }
+
 }

@@ -37,6 +37,7 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.DEFAULT_VALUE_NOT_SPECIFIED;
@@ -45,9 +46,12 @@ import static org.wso2.carbon.identity.organization.management.organization.user
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.CLAIM_MANAGED_ORGANIZATION;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.DEFAULT_PROFILE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ID_CLAIM_READ_ONLY;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORG_ID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.PRIMARY_DOMAIN;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_ID;
 import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ERROR_CREATE_SHARED_USER;
 import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ERROR_DELETE_SHARED_USER;
+import static org.wso2.carbon.identity.organization.management.service.util.Utils.getOrganizationId;
 import static org.wso2.carbon.identity.organization.management.service.util.Utils.handleServerException;
 
 /**
@@ -82,6 +86,7 @@ public class OrganizationUserSharingServiceImpl implements OrganizationUserShari
 
         if (!organizationUserSharingDAO.areRequiredColumnsPresent("UM_ORG_USER_ASSOCIATION",
                 COLUMN_NAME_ASSOCIATION_INITIATED_ORG_ID, COLUMN_NAME_ASSOCIATION_TYPE)) {
+            //TODO: Go for the old method
             createAndEnsureRelevantColumnsExist("UM_ORG_USER_ASSOCIATION",
                     COLUMN_NAME_ASSOCIATION_INITIATED_ORG_ID, COLUMN_NAME_ASSOCIATION_TYPE);
         }
@@ -95,6 +100,8 @@ public class OrganizationUserSharingServiceImpl implements OrganizationUserShari
     public void shareOrganizationUser(String orgId, String associatedUserId, String associatedOrgId,
                                       String associationInitiatedOrgId, String associationType)
             throws OrganizationManagementException {
+
+        // TODO: Check for the columns
 
         try {
             int associatedUserTenantId =
@@ -191,6 +198,20 @@ public class OrganizationUserSharingServiceImpl implements OrganizationUserShari
             throws OrganizationManagementException {
 
         return organizationUserSharingDAO.getUserAssociationsOfAssociatedUser(actualUserId, residentOrgId);
+    }
+
+    @Override
+    public Map<String, String> getOriginalUserDetailsFromSharingUser(String sharingUserId) {
+        Map<String, String> userDetails = new HashMap<>();
+
+        try {
+            userDetails = organizationUserSharingDAO.getUserAssociationDetailsByUserId(sharingUserId);
+        } catch (OrganizationManagementServerException e) {
+            userDetails.put(USER_ID, sharingUserId);
+            userDetails.put(ORG_ID, getOrganizationId());
+        }
+
+        return userDetails;
     }
 
     private AbstractUserStoreManager getAbstractUserStoreManager(int tenantId) throws UserStoreException {

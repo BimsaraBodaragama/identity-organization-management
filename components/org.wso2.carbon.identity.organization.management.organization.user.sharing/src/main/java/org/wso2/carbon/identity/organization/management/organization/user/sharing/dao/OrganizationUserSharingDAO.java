@@ -23,6 +23,7 @@ import org.wso2.carbon.identity.organization.management.service.exception.Organi
 import org.wso2.carbon.user.core.UserStoreException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * DAO interface for organization user sharing.
@@ -144,7 +145,21 @@ public interface OrganizationUserSharingDAO {
     boolean areRequiredColumnsPresent(String tableName, String... columnNames)
             throws UserStoreException, OrganizationManagementServerException;
 
-
-
+    /**
+     * Retrieves the user association details for the given user ID.
+     *
+     * This method queries the UM_ORG_USER_ASSOCIATION table to fetch records based on the given user ID.
+     * It returns a map containing the original user and organization details:
+     * - If no records are found, the returned map contains the original user as the given user ID, and
+     *   "originalOrg" as "Resident org of the input".
+     * - If a single record is found, the map contains "originalUser" as the associated user ID, and
+     *   "originalOrg" as the associated organization ID from the record.
+     * - If multiple records are found, the map contains "originalUser" and "originalOrg" from the first record.
+     *
+     * @param userId The ID of the user for whom to fetch the association details.
+     * @return A map with keys "originalUser" and "originalOrg", containing the corresponding user and organization details.
+     * @throws OrganizationManagementServerException If an error occurs while retrieving the user association details.
+     */
+    Map<String, String> getUserAssociationDetailsByUserId(String userId) throws OrganizationManagementServerException;
 
 }

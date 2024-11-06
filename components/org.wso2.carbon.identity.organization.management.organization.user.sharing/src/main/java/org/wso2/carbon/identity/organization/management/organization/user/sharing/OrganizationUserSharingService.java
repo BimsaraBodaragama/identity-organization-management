@@ -23,6 +23,7 @@ import org.wso2.carbon.identity.organization.management.service.exception.Organi
 import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service that manages the organization user sharing.
@@ -95,6 +96,22 @@ public interface OrganizationUserSharingService {
      * @throws OrganizationManagementException If an error occurs while retrieving the user association.
      */
     UserAssociation getUserAssociation(String userId, String orgId) throws OrganizationManagementException;
+
+    /**
+     * Retrieves the original user details for a given sharing user ID.
+     *
+     * This method calls the DAO layer to get the association details of the given sharing user.
+     * The returned map contains:
+     * - If no records are found, the original user is set as the given sharing user ID, and "originalOrg" is set as
+     *   "Resident org of the input".
+     * - If a single record is found, the original user and organization details are obtained from the retrieved record.
+     * - If multiple records are found, the original user and organization details are derived from the first record.
+     *
+     * @param sharingUserId The ID of the user whose original user details need to be retrieved.
+     * @return A map with keys "originalUser" and "originalOrg", containing the corresponding user and organization details.
+     * @throws OrganizationManagementException If an error occurs while retrieving the original user details.
+     */
+    Map<String, String> getOriginalUserDetailsFromSharingUser(String sharingUserId) throws OrganizationManagementException;
 
     /**
      * Get all the user associations for a given user.

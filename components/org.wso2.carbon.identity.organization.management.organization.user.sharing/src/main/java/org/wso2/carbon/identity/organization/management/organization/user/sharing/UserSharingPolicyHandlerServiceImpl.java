@@ -52,6 +52,7 @@ import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -68,9 +69,11 @@ import static org.wso2.carbon.identity.organization.management.organization.user
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.LOG_INFO_SELECTIVE_SHARE_COMPLETED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_INPUT_MESSAGE_SUFFIX;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORGANIZATION;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORG_ID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY_CODE_FOR_EXISTING_AND_FUTURE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY_CODE_FOR_FUTURE_ONLY;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_GROUPS;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_ID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_IDS;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO;
@@ -154,32 +157,39 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             throws IdentityApplicationManagementException, OrganizationManagementException,
             IdentityRoleManagementException, UserStoreException {
 
+        OrganizationUserSharingService sharingService = getOrganizationUserSharingService();
+
         UserShareSelective userShareSelective = createUserShareSelective(userId, organization);
         String organizationId = organization.getOrganizationId();
         PolicyEnum policy = getPolicyByValue(organization.getPolicy());
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         AbstractUserStoreManager userStoreManager = getUserStoreManager(tenantId);
-        String originalUserId = userShareSelective.getUserId();
-        String originalUserResidenceOrgId = getOrganizationId();
-        String originalUserName = userStoreManager.getUserNameFromUserID(originalUserId);
+        String sharingUserId = userShareSelective.getUserId();
+        Map<String, String> originalUserDetails = sharingService.getOriginalUserDetailsFromSharingUser(sharingUserId);
+        String originalUserId = originalUserDetails.get(USER_ID);
+        String originalUserResidenceOrgId = originalUserDetails.get(ORG_ID);
+        String originalUserName = userStoreManager.getUserNameFromUserID(sharingUserId);
+
+        String sharingInitiatedOrgId = getOrganizationId();
 
         List<String> targetOrganizations = getOrgsToShareUserWithPerPolicy(organizationId, policy);
-        OrganizationUserSharingService sharingService = getOrganizationUserSharingService();
 
         for (String targetOrg : targetOrganizations) {
             LOG.info("Processing sharing for target organization: " + targetOrg);
             processUserSelectiveSharing(
                     sharingService, originalUserId, originalUserName, originalUserResidenceOrgId, targetOrg,
-                    userShareSelective, policy);
+                    userShareSelective, policy, sharingInitiatedOrgId);
            LOG.info("Completed sharing for target organization: " + targetOrg);
         }
     }
 
+    // TODO: Validate policy broad or narrow
+
     private void processUserSelectiveSharing(
             OrganizationUserSharingService sharingService, String originalUserId, String originalUserName,
             String originalUserResidenceOrgId, String targetOrg, UserShareSelective userShareSelective,
-            PolicyEnum policy) {
+            PolicyEnum policy, String sharingInitiatedOrgId) {
         String sharedUserId = null;
         try {
             if (isExistingUserInTargetOrg(originalUserName, targetOrg)) {
@@ -187,12 +197,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                 return;
             }
 
-            //TODO: Confirm the 3rd param for the cases of resharing.
-            // I guess this current originalUserResidenceOrgId variable should be renamed as sharingUserOrgId cuz it is
-            // the user being shared (even in resahre) Hence this current originalUserResidenceOrgId is the request
-            // initiated organization. Hence we have to find the originalusersorganization in another way.
             sharingService.shareOrganizationUser(targetOrg, originalUserId, originalUserResidenceOrgId,
-                    originalUserResidenceOrgId, "Shared");
+                    sharingInitiatedOrgId, "Shared");
             sharedUserId = sharingService.getUserAssociationOfAssociatedUserByOrgId(originalUserId, targetOrg)
                     .getUserId();
 

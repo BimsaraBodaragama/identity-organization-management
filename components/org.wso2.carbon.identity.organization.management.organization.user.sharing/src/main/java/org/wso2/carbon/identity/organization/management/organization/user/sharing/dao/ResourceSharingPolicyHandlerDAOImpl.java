@@ -51,8 +51,7 @@ public class ResourceSharingPolicyHandlerDAOImpl implements ResourceSharingPolic
                 }, null, false);
                 return null;
             });
-        }
-        catch (TransactionException e) {
+        } catch (TransactionException e) {
             //TODO: RENAME THE ERROR
             throw handleServerException(ERROR_CODE_ERROR_CREATE_ORGANIZATION_USER_ASSOCIATION, e, resource);
         }
@@ -72,8 +71,7 @@ public class ResourceSharingPolicyHandlerDAOImpl implements ResourceSharingPolic
                 namedPreparedStatement.setString(4, policyHoldingOrganization);
             });
             return true;
-        }
-        catch (DataAccessException e) {
+        } catch (DataAccessException e) {
             //TODO: RENAME THE ERROR
             throw handleServerException(ERROR_CODE_ERROR_DELETE_ORGANIZATION_USER_ASSOCIATION_FOR_SHARED_USER, e,
                     resource);

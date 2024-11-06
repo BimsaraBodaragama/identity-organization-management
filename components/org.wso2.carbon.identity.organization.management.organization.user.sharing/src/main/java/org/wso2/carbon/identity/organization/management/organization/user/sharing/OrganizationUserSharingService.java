@@ -44,11 +44,11 @@ public interface OrganizationUserSharingService {
     /**
      * Creates the association between the shared user and the actual user in the organization.
      *
-     * @param orgId                        Organization ID of the user is shared.
-     * @param associatedUserId             Actual user who is associated for a shared user.
-     * @param associatedOrgId              The organization ID associated user.
-     * @param associationInitiatedOrgId    The organization ID where the association was initiated.
-     * @param associationType              The type of association.
+     * @param orgId                     Organization ID of the user is shared.
+     * @param associatedUserId          Actual user who is associated for a shared user.
+     * @param associatedOrgId           The organization ID associated user.
+     * @param associationInitiatedOrgId The organization ID where the association was initiated.
+     * @param associationType           The type of association.
      * @throws OrganizationManagementException If an error occurs while creating the organization user association.
      */
     void shareOrganizationUser(String orgId, String associatedUserId, String associatedOrgId,
@@ -69,7 +69,7 @@ public interface OrganizationUserSharingService {
     /**
      * Delete the organization user association of the shared user.
      *
-     * @param userId            The ID of the user.
+     * @param userId          The ID of the user.
      * @param associatedOrgId The ID of organization where the user's identity is managed.
      * @return True if the organization user association is deleted successfully.
      * @throws OrganizationManagementException If an error occurs while deleting the organization user association.
@@ -99,19 +99,21 @@ public interface OrganizationUserSharingService {
 
     /**
      * Retrieves the original user details for a given sharing user ID.
-     *
+     * <p>
      * This method calls the DAO layer to get the association details of the given sharing user.
      * The returned map contains:
      * - If no records are found, the original user is set as the given sharing user ID, and "originalOrg" is set as
-     *   "Resident org of the input".
+     * "Resident org of the input".
      * - If a single record is found, the original user and organization details are obtained from the retrieved record.
      * - If multiple records are found, the original user and organization details are derived from the first record.
      *
      * @param sharingUserId The ID of the user whose original user details need to be retrieved.
-     * @return A map with keys "originalUser" and "originalOrg", containing the corresponding user and organization details.
+     * @return A map with keys "originalUser" and "originalOrg", containing the corresponding user and organization
+     * details.
      * @throws OrganizationManagementException If an error occurs while retrieving the original user details.
      */
-    Map<String, String> getOriginalUserDetailsFromSharingUser(String sharingUserId) throws OrganizationManagementException;
+    Map<String, String> getOriginalUserDetailsFromSharingUser(String sharingUserId)
+            throws OrganizationManagementException;
 
     /**
      * Get all the user associations for a given user.

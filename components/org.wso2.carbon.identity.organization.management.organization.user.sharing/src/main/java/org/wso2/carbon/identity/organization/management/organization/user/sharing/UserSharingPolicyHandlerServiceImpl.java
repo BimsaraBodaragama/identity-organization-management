@@ -190,7 +190,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             OrganizationUserSharingService sharingService, UserSharingDetails userSharingDetails)
             throws UserStoreException, OrganizationManagementException {
 
-        String sharingUserId = userSharingDetails.getSharingUserId();
+        // Keep a String to save sharingUserId which equals to userSharingDetails.getSharingUserId();
         String sharingInitiatedOrgId = userSharingDetails.getSharingInitiatedOrgId();
         String targetOrg = userSharingDetails.getTargetOrgId();
         String originalUserId = userSharingDetails.getOriginalUserId();

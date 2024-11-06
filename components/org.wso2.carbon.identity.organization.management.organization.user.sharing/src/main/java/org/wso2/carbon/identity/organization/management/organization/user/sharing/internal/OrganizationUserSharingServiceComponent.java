@@ -66,7 +66,8 @@ public class OrganizationUserSharingServiceComponent {
         bundleContext.registerService(AbstractEventHandler.class.getName(),
                 new SharingOrganizationCreatorUserEventHandler(), null);
         UserSharingPolicyHandlerService userSharingPolicyHandlerService = new UserSharingPolicyHandlerServiceImpl();
-        bundleContext.registerService(UserSharingPolicyHandlerService.class.getName(), userSharingPolicyHandlerService, null);
+        bundleContext.registerService(UserSharingPolicyHandlerService.class.getName(), userSharingPolicyHandlerService,
+                null);
 
         LOG.info("OrganizationUserSharingServiceComponent activated successfully.");
     }

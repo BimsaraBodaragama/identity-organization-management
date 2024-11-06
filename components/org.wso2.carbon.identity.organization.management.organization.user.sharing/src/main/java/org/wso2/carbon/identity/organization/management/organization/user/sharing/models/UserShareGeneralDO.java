@@ -18,12 +18,11 @@
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Model that contains the user share general data object.
  */
-public class UserShareGeneralDO extends UserShareBaseDO{
+public class UserShareGeneralDO extends UserShareBaseDO {
 
     private String policy;
     private List<RoleWithAudienceDO> roles;

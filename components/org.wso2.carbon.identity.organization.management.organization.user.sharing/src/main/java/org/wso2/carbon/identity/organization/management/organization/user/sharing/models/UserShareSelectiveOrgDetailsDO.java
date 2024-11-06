@@ -19,7 +19,6 @@
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Model that contains the user share selective org details data object.

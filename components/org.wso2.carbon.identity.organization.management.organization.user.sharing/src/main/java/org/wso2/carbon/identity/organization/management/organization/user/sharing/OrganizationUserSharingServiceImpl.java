@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing;
 
-import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.dao.OrganizationUserSharingDAO;
@@ -60,25 +59,6 @@ import static org.wso2.carbon.identity.organization.management.service.util.Util
 public class OrganizationUserSharingServiceImpl implements OrganizationUserSharingService {
 
     private final OrganizationUserSharingDAO organizationUserSharingDAO = new OrganizationUserSharingDAOImpl();
-
-    /*@Override
-    public void shareOrganizationUser(String orgId, String associatedUserId, String associatedOrgId)
-            throws OrganizationManagementException {
-
-        // Default values for the new parameters.
-        String defaultAssociationInitiatedOrgId = "NOT_SPECIFIED";
-        String defaultAssociationType = "NOT_SPECIFIED";
-
-        // Check if the required new columns exist, and add them if they don't.
-        if(organizationUserSharingDAO.ensureColumnsExist()){
-            shareOrganizationUser(orgId, associatedUserId, associatedOrgId, defaultAssociationInitiatedOrgId, defaultAssociationType);
-        }else{
-            System.out.println("NOOOOO==============================================");
-        }
-        // Call the overloaded method with default values.
-        //shareOrganizationUser(orgId, associatedUserId, associatedOrgId, defaultAssociationInitiatedOrgId,defaultAssociationType);
-
-    }*/
 
     @Override
     public void shareOrganizationUser(String orgId, String associatedUserId, String associatedOrgId)
@@ -150,7 +130,6 @@ public class OrganizationUserSharingServiceImpl implements OrganizationUserShari
         }
     }
 
-
     @Override
     public boolean unshareOrganizationUsers(String associatedUserId, String associatedOrgId)
             throws OrganizationManagementException {
@@ -202,6 +181,7 @@ public class OrganizationUserSharingServiceImpl implements OrganizationUserShari
 
     @Override
     public Map<String, String> getOriginalUserDetailsFromSharingUser(String sharingUserId) {
+
         Map<String, String> userDetails = new HashMap<>();
 
         try {

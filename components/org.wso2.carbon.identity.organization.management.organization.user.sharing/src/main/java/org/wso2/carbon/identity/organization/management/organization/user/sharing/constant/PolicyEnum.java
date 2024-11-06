@@ -39,49 +39,61 @@ public enum PolicyEnum {
             "AllExistingAndFutureOrgs",
             "ALL_EXISTING_AND_FUTURE_ORGS",
             Arrays.asList("User"),
-            "This policy allows sharing the resource with all current and any future organizations. It ensures that any new organizations created after the policy is set are automatically included."),
+            "This policy allows sharing the resource with all current and any future organizations. It " +
+                    "ensures that any new organizations created after the policy is set are automatically included."),
     IMMEDIATE_EXISTING_ORGS_ONLY(
             "GEN-EO-0003",
             "ImmediateExistingOrgsOnly",
             "IMMEDIATE_EXISTING_ORGS_ONLY",
             Arrays.asList("User"),
-            "This policy is used to share the resource exclusively with all immediate existing child organizations. Newly created immediate child organizations after the policy is applied are not included."),
+            "This policy is used to share the resource exclusively with all immediate existing child " +
+                    "organizations. Newly created immediate child organizations after the policy is applied are " +
+                    "not included."),
     IMMEDIATE_EXISTING_AND_FUTURE_ORGS(
             "GEN-EF-0004",
             "ImmediateExistingAndFutureOrgs",
             "IMMEDIATE_EXISTING_AND_FUTURE_ORGS",
             Arrays.asList("User"),
-            "This policy is used to share the resource exclusively with all immediate existing child organizations. Newly created immediate child organizations after the policy is applied are not included."),
+            "This policy is used to share the resource exclusively with all immediate existing child " +
+                    "organizations. Newly created immediate child organizations after the policy is applied are " +
+                    "not included."),
     SELECTED_ORG_ONLY(
             "SEL-EO-0001",
             "SelectedOrgOnly",
             "SELECTED_ORG_ONLY",
             Arrays.asList("User"),
-            "This policy applies when the resource is to be shared with a single, specific organization only. Newly created child organizations under this selected organization will not be included."),
+            "This policy applies when the resource is to be shared with a single, specific organization " +
+                    "only. Newly created child organizations under this selected organization will not be included."),
     SELECTED_ORG_WITH_ALL_EXISTING_CHILDREN_ONLY(
             "SEL-EO-0002",
             "SelectedOrgWithAllExistingChildrenOnly",
             "SELECTED_ORG_WITH_ALL_EXISTING_CHILDREN_ONLY",
             Arrays.asList("User"),
-            "This policy ensures the resource is shared with a selected organization and all of its existing child organizations. New child organizations created under this selected organization after the policy is applied will not be included."),
+            "This policy ensures the resource is shared with a selected organization and all of its " +
+                    "existing child organizations. New child organizations created under this selected organization " +
+                    "after the policy is applied will not be included."),
     SELECTED_ORG_WITH_ALL_EXISTING_AND_FUTURE_CHILDREN(
             "SEL-EF-0003",
             "SelectedOrgWithAllExistingAndFutureChildren",
             "SELECTED_ORG_WITH_ALL_EXISTING_AND_FUTURE_CHILDREN",
             Arrays.asList("User"),
-            "This policy ensures the resource is shared with a selected organization and all of its child organizations, including those created in the future."),
+            "This policy ensures the resource is shared with a selected organization and all of its child " +
+                    "organizations, including those created in the future."),
     SELECTED_ORG_WITH_EXISTING_IMMEDIATE_CHILDREN_ONLY(
             "SEL-EO-0004",
             "SelectedOrgWithExistingImmediateChildrenOnly",
             "SELECTED_ORG_WITH_EXISTING_IMMEDIATE_CHILDREN_ONLY",
             Arrays.asList("User"),
-            "This policy shares the resource with a selected organization and all of its existing immediate child organizations. Newly created immediate children will not be included after the policy is applied."),
+            "This policy shares the resource with a selected organization and all of its existing " +
+                    "immediate child organizations. Newly created immediate children will not be included after " +
+                    "the policy is applied."),
     SELECTED_ORG_WITH_EXISTING_IMMEDIATE_AND_FUTURE_CHILDREN(
             "SEL-EF-0005",
             "SelectedOrgWithExistingImmediateAndFutureChildren",
             "SELECTED_ORG_WITH_EXISTING_IMMEDIATE_AND_FUTURE_CHILDREN",
             Arrays.asList("User"),
-            "This policy allows sharing the resource with a selected organization and all of its immediate child organizations, including those created in the future.");
+            "This policy allows sharing the resource with a selected organization and all of its " +
+                    "immediate child organizations, including those created in the future.");
 
     private final String policyCode;
     private final String policyName;

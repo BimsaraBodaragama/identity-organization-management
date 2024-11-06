@@ -36,6 +36,10 @@ public class UserSharingConstants {
     public static final String ORGANIZATION = "organization";
     public static final String APPLICATION = "application";
 
+    public static final String SHARING_TYPE_SHARED = "Shared";
+    public static final String SHARING_TYPE_INVITED = "Invited";
+    public static final String SHARING_TYPE_INHERITED = "Inherited"; //Sub-org Owner.
+
     public static final String NULL_POLICY = "Policy is null";
 
     public static final String SHARING_ERROR_PREFIX = "OUS-";

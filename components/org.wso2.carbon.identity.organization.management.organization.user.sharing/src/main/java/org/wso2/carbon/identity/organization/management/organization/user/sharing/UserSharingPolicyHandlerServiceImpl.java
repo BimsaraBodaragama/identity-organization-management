@@ -66,6 +66,7 @@ import static org.wso2.carbon.identity.organization.management.organization.user
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY_CODE_FOR_EXISTING_AND_FUTURE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY_CODE_FOR_FUTURE_ONLY;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.SHARING_TYPE_SHARED;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_GROUPS;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_ID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_IDS;
@@ -156,20 +157,22 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         AbstractUserStoreManager userStoreManager = getUserStoreManager(tenantId);
+
         String sharingUserId = userShareSelective.getUserId();
+        String sharingInitiatedOrgId = getOrganizationId();
+
         Map<String, String> originalUserDetails = sharingService.getOriginalUserDetailsFromSharingUser(sharingUserId);
         String originalUserId = originalUserDetails.get(USER_ID);
         String originalUserResidenceOrgId = originalUserDetails.get(ORG_ID);
         String originalUserName = userStoreManager.getUserNameFromUserID(sharingUserId);
-        String sharingInitiatedOrgId = getOrganizationId();
 
         UserSharingDetails userSharingDetails =
                 new UserSharingDetails()
                         .withSharingUserId(sharingUserId)
                         .withSharingInitiatedOrgId(sharingInitiatedOrgId)
                         .withOriginalUserId(originalUserId)
-                        .withOriginalUserName(originalUserName)
                         .withOriginalOrgId(originalUserResidenceOrgId)
+                        .withOriginalUserName(originalUserName)
                         .withSharingType(SHARING_TYPE_SHARED)
                         .withRoleIds(userShareSelective.getRoles())
                         .withAppliedSharingPolicy(userShareSelective.getPolicy());
@@ -190,7 +193,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             OrganizationUserSharingService sharingService, UserSharingDetails userSharingDetails)
             throws UserStoreException, OrganizationManagementException {
 
-        // Keep a String to save sharingUserId which equals to userSharingDetails.getSharingUserId();
+        // Keep a String to save sharingUserId which equals to userSharingDetails.getSharingUserId()
         String sharingInitiatedOrgId = userSharingDetails.getSharingInitiatedOrgId();
         String targetOrg = userSharingDetails.getTargetOrgId();
         String originalUserId = userSharingDetails.getOriginalUserId();
@@ -216,7 +219,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             assignRolesIfPresent(roleIds, sharedUserId, targetOrg);
 
             // Handle future propagation if policy indicates it is required
-            handleFuturePropagationIfRequired(originalUserId, originalUserResidenceOrgId, targetOrg,
+            handleFuturePropagationIfRequired(USER, originalUserId, originalUserResidenceOrgId, targetOrg,
                     appliedSharingPolicy);
 
         } catch (OrganizationManagementException | IdentityRoleManagementException e) {
@@ -227,8 +230,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
     private String shareUserWithTargetOrg(
             OrganizationUserSharingService sharingService, String originalUserId, String originalUserResidenceOrgId,
-            String targetOrg,
-            String sharingInitiatedOrgId, String sharingType) throws OrganizationManagementException {
+            String targetOrg, String sharingInitiatedOrgId, String sharingType)
+            throws OrganizationManagementException {
 
         sharingService.shareOrganizationUser(targetOrg, originalUserId, originalUserResidenceOrgId,
                 sharingInitiatedOrgId, sharingType);
@@ -262,12 +265,13 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         }
     }
 
-    private void handleFuturePropagationIfRequired(String originalUserId, String originalUserResidenceOrgId,
-                                                   String targetOrg, PolicyEnum policy)
+    private void handleFuturePropagationIfRequired(String resourceType, String originalUserId,
+                                                   String originalUserResidenceOrgId, String targetOrg,
+                                                   PolicyEnum policy)
             throws OrganizationManagementServerException {
 
         if (getPoliciesForFuturePropagation().contains(policy.getPolicyCode())) {
-            saveForFuturePropagations(originalUserId, originalUserResidenceOrgId, targetOrg, policy);
+            saveForFuturePropagations(resourceType, originalUserId, originalUserResidenceOrgId, targetOrg, policy);
         }
     }
 
@@ -298,10 +302,11 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         return policiesForFuturePropagation;
     }
 
-    private void saveForFuturePropagations(String originalUser, String initiatedOrg, String policyHoldingOrg,
-                                           PolicyEnum policy) throws OrganizationManagementServerException {
+    private void saveForFuturePropagations(String resourceType, String originalUser, String initiatedOrg,
+                                           String policyHoldingOrg, PolicyEnum policy)
+            throws OrganizationManagementServerException {
 
-        resourceSharingPolicyHandlerDAO.createResourceSharingPolicyRecord(originalUser, "User", initiatedOrg,
+        resourceSharingPolicyHandlerDAO.createResourceSharingPolicyRecord(originalUser, resourceType, initiatedOrg,
                 policyHoldingOrg, policy.getPolicyCode());
 
     }
@@ -380,12 +385,9 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         Set<String> organizationsToShareWithPerPolicy = new HashSet<>();
 
-        // Retrieve the list of organizations according to the policy
-
         switch (policy) {
             case ALL_EXISTING_ORGS_ONLY:
             case ALL_EXISTING_AND_FUTURE_ORGS:
-                // Share with all existing organizations (entire hierarchy)
                 getOrganizationManager().getChildOrganizations(policyHoldingOrgId, true).stream()
                         .map(BasicOrganization::getId)
                         .forEach(organizationsToShareWithPerPolicy::add);
@@ -393,7 +395,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
             case IMMEDIATE_EXISTING_ORGS_ONLY:
             case IMMEDIATE_EXISTING_AND_FUTURE_ORGS:
-                // Share with only the immediate existing child organizations
                 getOrganizationManager().getChildOrganizations(policyHoldingOrgId, false).stream()
                         .map(BasicOrganization::getId)
                         .forEach(organizationsToShareWithPerPolicy::add);
@@ -423,7 +424,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                 throw new OrganizationManagementException("Invalid policy provided: " + policy.getPolicyName());
         }
 
-        // Convert to a List only at the end
         return new ArrayList<>(organizationsToShareWithPerPolicy);
     }
 
@@ -572,9 +572,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     //Business Logics
 
     @Override
-    public void propagateUserGeneralShare(UserShareGeneralDO userShareGeneralDO)
-            throws UserShareMgtException, OrganizationManagementException, IdentityRoleManagementException,
-            IdentityApplicationManagementException {
+    public void propagateUserGeneralShare(UserShareGeneralDO userShareGeneralDO) {
 
     }
 

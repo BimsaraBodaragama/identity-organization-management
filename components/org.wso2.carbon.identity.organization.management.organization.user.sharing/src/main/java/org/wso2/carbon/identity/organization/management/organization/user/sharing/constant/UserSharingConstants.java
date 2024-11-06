@@ -35,6 +35,7 @@ public class UserSharingConstants {
     public static final String ROLES = "roles";
     public static final String ORGANIZATION = "organization";
     public static final String APPLICATION = "application";
+    public static final String USER = "User";
 
     public static final String SHARING_TYPE_SHARED = "Shared";
     public static final String SHARING_TYPE_INVITED = "Invited";

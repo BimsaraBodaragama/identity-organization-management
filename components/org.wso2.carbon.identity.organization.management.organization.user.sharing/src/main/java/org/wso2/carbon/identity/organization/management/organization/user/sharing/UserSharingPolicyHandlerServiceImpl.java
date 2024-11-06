@@ -151,7 +151,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         UserShareSelective userShareSelective = createUserShareSelective(userId, organization);
         String organizationId = organization.getOrganizationId();
-        PolicyEnum policy = getPolicyByValue(organization.getPolicy());
+        //PolicyEnum policy = getPolicyByValue(organization.getPolicy());
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         AbstractUserStoreManager userStoreManager = getUserStoreManager(tenantId);
@@ -163,13 +163,13 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         String sharingInitiatedOrgId = getOrganizationId();
 
-        List<String> targetOrganizations = getOrgsToShareUserWithPerPolicy(organizationId, policy);
+        List<String> targetOrganizations = getOrgsToShareUserWithPerPolicy(organizationId, userShareSelective.getPolicy());
 
         for (String targetOrg : targetOrganizations) {
             LOG.info("Processing sharing for target organization: " + targetOrg);
             processUserSelectiveSharing(
                     sharingService, originalUserId, originalUserName, originalUserResidenceOrgId, targetOrg,
-                    userShareSelective, policy, sharingInitiatedOrgId);
+                    userShareSelective, sharingInitiatedOrgId);
            LOG.info("Completed sharing for target organization: " + targetOrg);
         }
     }
@@ -178,34 +178,56 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
     private void processUserSelectiveSharing(
             OrganizationUserSharingService sharingService, String originalUserId, String originalUserName,
-            String originalUserResidenceOrgId, String targetOrg, UserShareSelective userShareSelective,
-            PolicyEnum policy, String sharingInitiatedOrgId) {
+            String originalUserResidenceOrgId, String targetOrg, UserShareSelective userShareSelective, String sharingInitiatedOrgId)
+            throws UserStoreException, OrganizationManagementException {
+
+        if (isExistingUserInTargetOrg(originalUserName, targetOrg)) {
+            errorMessages.add("User already shared with organization: " + targetOrg);
+            return;
+        }
+
         String sharedUserId = null;
         try {
-            if (isExistingUserInTargetOrg(originalUserName, targetOrg)) {
-                errorMessages.add("User already shared with organization: " + targetOrg);
-                return;
-            }
 
-            sharingService.shareOrganizationUser(targetOrg, originalUserId, originalUserResidenceOrgId,
-                    sharingInitiatedOrgId, "Shared");
-            sharedUserId = sharingService.getUserAssociationOfAssociatedUserByOrgId(originalUserId, targetOrg)
-                    .getUserId();
+            // Get shared user ID for further operations
+            sharedUserId = shareUserWithTargetOrg(sharingService, originalUserId, originalUserResidenceOrgId,
+                    targetOrg, sharingInitiatedOrgId);
 
+            // Assign roles if any are present
             assignRolesIfPresent(userShareSelective, sharedUserId, targetOrg);
-            handleFuturePropagationIfRequired(originalUserId, originalUserResidenceOrgId, targetOrg, policy);
 
-        } catch (OrganizationManagementException | IdentityRoleManagementException | UserStoreException e) {
-            errorMessages.add("Error while sharing user with organization: " + targetOrg + " - " + e.getMessage());
-            if (sharedUserId != null) {
-                try {
-                    sharingService.unshareOrganizationUsers(sharedUserId, targetOrg);
-                } catch (OrganizationManagementException rollbackException) {
-                    errorMessages.add("Failed to rollback sharing for user: " + sharedUserId + " from organization: " + targetOrg + " - " + rollbackException.getMessage());
-                }
+            // Handle future propagation if policy indicates it is required
+            handleFuturePropagationIfRequired(originalUserId, originalUserResidenceOrgId, targetOrg,
+                    userShareSelective.getPolicy());
+
+        } catch (OrganizationManagementException | IdentityRoleManagementException e) {
+            handleErrorWhileSharingUser(targetOrg, e);
+            rollbackSharingIfNecessary(sharingService, sharedUserId, targetOrg);
+        }
+    }
+
+    private String shareUserWithTargetOrg(
+            OrganizationUserSharingService sharingService, String originalUserId, String originalUserResidenceOrgId, String targetOrg,
+            String sharingInitiatedOrgId) throws OrganizationManagementException {
+
+        sharingService.shareOrganizationUser(targetOrg, originalUserId, originalUserResidenceOrgId, sharingInitiatedOrgId, "Shared");
+        return sharingService.getUserAssociationOfAssociatedUserByOrgId(originalUserId, targetOrg).getUserId();
+    }
+
+    private void handleErrorWhileSharingUser(String targetOrg, Exception e) {
+        errorMessages.add("Error while sharing user with organization: " + targetOrg + " - " + e.getMessage());
+    }
+
+    private void rollbackSharingIfNecessary(OrganizationUserSharingService sharingService, String sharedUserId, String targetOrg) {
+        if (sharedUserId != null) {
+            try {
+                sharingService.unshareOrganizationUsers(sharedUserId, targetOrg);
+            } catch (OrganizationManagementException rollbackException) {
+                errorMessages.add("Failed to rollback sharing for user: " + sharedUserId + " from organization: " + targetOrg + " - " + rollbackException.getMessage());
             }
         }
     }
+
 
     private void assignRolesIfPresent(UserShareSelective userShareSelective, String sharedUserId, String targetOrg)
             throws IdentityRoleManagementException, OrganizationManagementException {

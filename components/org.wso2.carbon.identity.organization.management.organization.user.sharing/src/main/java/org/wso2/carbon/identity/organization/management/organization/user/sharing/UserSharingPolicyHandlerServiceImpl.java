@@ -26,8 +26,6 @@ import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.dao.OrganizationUserSharingDAO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.dao.OrganizationUserSharingDAOImpl;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.dao.ResourceSharingPolicyHandlerDAO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.dao.ResourceSharingPolicyHandlerDAOImpl;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtException;
@@ -52,17 +50,11 @@ import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum.getPolicyByValue;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.APPLICATION;
@@ -75,9 +67,7 @@ import static org.wso2.carbon.identity.organization.management.organization.user
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_GROUPS;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_ID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_IDS;
-import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO;
-import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.*;
 import static org.wso2.carbon.identity.organization.management.service.util.Utils.getOrganizationId;
 import static org.wso2.carbon.identity.organization.management.service.util.Utils.getUserStoreManager;
 
@@ -86,7 +76,7 @@ import static org.wso2.carbon.identity.organization.management.service.util.Util
  */
 public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHandlerService {
 
-    private static final Log LOG = LogFactory.getLog(UserSharingPolicyHandlerService2Impl.class);
+    private static final Log LOG = LogFactory.getLog(UserSharingPolicyHandlerServiceImpl.class);
     private static final ResourceSharingPolicyHandlerDAO resourceSharingPolicyHandlerDAO =
             new ResourceSharingPolicyHandlerDAOImpl();
     private static ConcurrentLinkedQueue<String> errorMessages;

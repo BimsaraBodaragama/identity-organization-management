@@ -21,19 +21,12 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 import org.wso2.carbon.database.utils.jdbc.NamedJdbcTemplate;
 import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
 import org.wso2.carbon.database.utils.jdbc.exceptions.TransactionException;
-import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserAssociation;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
 
 import java.util.HashMap;
 import java.util.List;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.GET_ORGANIZATION_USER_ASSOCIATIONS_FOR_SHARED_USER_BY_USER_ID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_ID;
@@ -42,7 +35,6 @@ import static org.wso2.carbon.identity.organization.management.organization.user
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.CHECK_COLUMN_EXISTENCE_IN_TABLE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.CREATE_ORGANIZATION_USER_ASSOCIATION;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.CREATE_ORGANIZATION_USER_ASSOCIATION_EXTENDED;
-import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.DEFAULT_VALUE_NOT_SPECIFIED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.DELETE_ORGANIZATION_USER_ASSOCIATIONS_FOR_ROOT_USER;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.DELETE_ORGANIZATION_USER_ASSOCIATION_FOR_SHARED_USER;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.GET_ORGANIZATION_USER_ASSOCIATIONS_FOR_SHARED_USER;

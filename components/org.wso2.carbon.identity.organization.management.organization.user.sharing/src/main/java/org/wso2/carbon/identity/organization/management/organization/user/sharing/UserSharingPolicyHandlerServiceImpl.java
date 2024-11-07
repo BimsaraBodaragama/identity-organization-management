@@ -230,7 +230,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     private String shareUserWithTargetOrg(
             OrganizationUserSharingService sharingService, String originalUserId, String originalUserResidenceOrgId,
             String targetOrg, String sharingInitiatedOrgId, String sharingType)
-            throws OrganizationManagementException {
+            throws OrganizationManagementException, UserStoreException {
 
         sharingService.shareOrganizationUser(targetOrg, originalUserId, originalUserResidenceOrgId,
                 sharingInitiatedOrgId, sharingType);

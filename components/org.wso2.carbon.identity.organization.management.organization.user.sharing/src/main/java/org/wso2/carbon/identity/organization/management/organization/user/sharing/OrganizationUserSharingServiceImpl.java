@@ -42,6 +42,7 @@ import java.util.UUID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.DEFAULT_VALUE_NOT_SPECIFIED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.SQLPlaceholders.COLUMN_NAME_ASSOCIATION_INITIATED_ORG_ID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.SQLPlaceholders.COLUMN_NAME_ASSOCIATION_TYPE;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.SQLPlaceholders.TABLE_NAME_UM_ORG_USER_ASSOCIATION;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.CLAIM_MANAGED_ORGANIZATION;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.DEFAULT_PROFILE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ID_CLAIM_READ_ONLY;
@@ -64,13 +65,6 @@ public class OrganizationUserSharingServiceImpl implements OrganizationUserShari
     public void shareOrganizationUser(String orgId, String associatedUserId, String associatedOrgId)
             throws OrganizationManagementException, UserStoreException {
 
-        if (!organizationUserSharingDAO.areRequiredColumnsPresent("UM_ORG_USER_ASSOCIATION",
-                COLUMN_NAME_ASSOCIATION_INITIATED_ORG_ID, COLUMN_NAME_ASSOCIATION_TYPE)) {
-            //TODO: Go for the old method
-            createAndEnsureRelevantColumnsExist("UM_ORG_USER_ASSOCIATION",
-                    COLUMN_NAME_ASSOCIATION_INITIATED_ORG_ID, COLUMN_NAME_ASSOCIATION_TYPE);
-        }
-
         shareOrganizationUser(orgId, associatedUserId, associatedOrgId, DEFAULT_VALUE_NOT_SPECIFIED,
                 DEFAULT_VALUE_NOT_SPECIFIED);
 
@@ -79,9 +73,14 @@ public class OrganizationUserSharingServiceImpl implements OrganizationUserShari
     @Override
     public void shareOrganizationUser(String orgId, String associatedUserId, String associatedOrgId,
                                       String associationInitiatedOrgId, String associationType)
-            throws OrganizationManagementException {
+            throws OrganizationManagementException, UserStoreException {
 
-        // TODO: Check for the columns
+        if (!organizationUserSharingDAO.areRequiredColumnsPresent(TABLE_NAME_UM_ORG_USER_ASSOCIATION,
+                COLUMN_NAME_ASSOCIATION_INITIATED_ORG_ID, COLUMN_NAME_ASSOCIATION_TYPE)) {
+            //TODO: Go for the old method
+            createAndEnsureRelevantColumnsExist(TABLE_NAME_UM_ORG_USER_ASSOCIATION,
+                    COLUMN_NAME_ASSOCIATION_INITIATED_ORG_ID, COLUMN_NAME_ASSOCIATION_TYPE);
+        }
 
         try {
             int associatedUserTenantId =

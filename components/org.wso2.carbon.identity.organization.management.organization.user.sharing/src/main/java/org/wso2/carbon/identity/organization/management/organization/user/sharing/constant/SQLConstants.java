@@ -55,6 +55,7 @@ public class SQLConstants {
      */
     public static final class SQLPlaceholders {
 
+        public static final String TABLE_NAME_UM_ORG_USER_ASSOCIATION = "UM_ORG_USER_ASSOCIATION";
         public static final String COLUMN_NAME_USER_ID = "UM_USER_ID";
         public static final String COLUMN_NAME_ORG_ID = "UM_ORG_ID";
         public static final String COLUMN_NAME_ASSOCIATED_USER_ID = "UM_ASSOCIATED_USER_ID";

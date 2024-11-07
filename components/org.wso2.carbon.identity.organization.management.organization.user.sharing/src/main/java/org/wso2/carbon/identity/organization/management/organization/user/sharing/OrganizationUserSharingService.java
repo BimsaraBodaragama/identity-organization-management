@@ -37,6 +37,7 @@ public interface OrganizationUserSharingService {
      * @param associatedUserId Actual user who is associated for a shared user.
      * @param associatedOrgId  The organization ID associated user.
      * @throws OrganizationManagementException If an error occurs while creating the organization user association.
+     * @throws UserStoreException             If an error occurs in the user store during the association process.
      */
     void shareOrganizationUser(String orgId, String associatedUserId, String associatedOrgId)
             throws OrganizationManagementException, UserStoreException;
@@ -50,10 +51,11 @@ public interface OrganizationUserSharingService {
      * @param associationInitiatedOrgId The organization ID where the association was initiated.
      * @param associationType           The type of association.
      * @throws OrganizationManagementException If an error occurs while creating the organization user association.
+     * @throws UserStoreException             If an error occurs in the user store during the association process.
      */
     void shareOrganizationUser(String orgId, String associatedUserId, String associatedOrgId,
                                String associationInitiatedOrgId, String associationType)
-            throws OrganizationManagementException;
+            throws OrganizationManagementException, UserStoreException;
 
     /**
      * Unshare all the shared users for the given user.

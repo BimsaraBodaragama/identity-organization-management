@@ -260,7 +260,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             throws IdentityRoleManagementException, OrganizationManagementException {
 
         if (!roleIds.isEmpty()) {
-            assignRolesToTheSharedUser(sharedUserId, targetOrg, roleIds);
+            assignRolesToTheSharedUser(roleIds, sharedUserId, targetOrg);
         }
     }
 
@@ -310,17 +310,22 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
     }
 
-    private void assignRolesToTheSharedUser(String sharedUser, String sharedOrganization, List<String> roles)
+    private void assignRolesToTheSharedUser(List<String> roles, String sharedUser, String targetOrg)
             throws IdentityRoleManagementException, OrganizationManagementException {
 
-        String sharedOrgTenantDomain = getOrganizationManager().resolveTenantDomain(sharedOrganization);
+        String targetOrgTenantDomain = getOrganizationManager().resolveTenantDomain(targetOrg);
+
+        //TODO: For each role in the roles, I want to find the UM_MAIN_ROLE_ID (and then get uuid)
+        // Then I have to pass that list to the below method
+
+        List<String> originalRoles = getRoleManagementService().getMainRoleUUIDsForSharedRoles(roles);
 
         Map<String, String> mainRoleToSharedRoleMappingsBySubOrg =
-                getRoleManagementService().getMainRoleToSharedRoleMappingsBySubOrg(roles, sharedOrgTenantDomain);
+                getRoleManagementService().getMainRoleToSharedRoleMappingsBySubOrg(originalRoles, targetOrgTenantDomain);
 
         for (String role : mainRoleToSharedRoleMappingsBySubOrg.values()) {
             getRoleManagementService().updateUserListOfRole(role, Collections.singletonList(sharedUser),
-                    Collections.emptyList(), sharedOrgTenantDomain);
+                    Collections.emptyList(), targetOrgTenantDomain);
         }
 
     }
@@ -341,17 +346,17 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             throws OrganizationManagementException, IdentityApplicationManagementException,
             IdentityRoleManagementException {
 
-        String originalOrgId = getOrganizationId();
-        String originalTenantDomain = getOrganizationManager().resolveTenantDomain(originalOrgId);
+        String sharingInitiatedOrgId = getOrganizationId();
+        String sharingInitiatedTenantDomain = getOrganizationManager().resolveTenantDomain(sharingInitiatedOrgId);
 
         List<String> list = new ArrayList<>();
         for (RoleWithAudienceDO roleWithAudienceDO : rolesWithAudience) {
-            String audienceId = getAudienceId(roleWithAudienceDO, originalOrgId, originalTenantDomain);
+            String audienceId = getAudienceId(roleWithAudienceDO, sharingInitiatedOrgId, sharingInitiatedTenantDomain);
             String roleId = getRoleIdFromAudience(
                     roleWithAudienceDO.getRoleName(),
                     roleWithAudienceDO.getAudienceType(),
                     audienceId,
-                    originalTenantDomain);
+                    sharingInitiatedTenantDomain);
             list.add(roleId);
         }
         return list;

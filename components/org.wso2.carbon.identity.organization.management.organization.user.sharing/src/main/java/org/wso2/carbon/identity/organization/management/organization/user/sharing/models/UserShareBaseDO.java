@@ -17,22 +17,23 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria.UserCriteriaType;
+
 import java.util.List;
 import java.util.Map;
 
 /**
  * Abstract class for common properties and methods for user share data objects.
  */
-public abstract class UserShareBaseDO {
+public abstract class UserShareBaseDO<T extends UserCriteriaType> {
 
-    //TODO: Use Generics
-    private Map<String, List<String>> userCriteria;
+    private Map<String, T> userCriteria;
 
-    public Map<String, List<String>> getUserCriteria() {
+    public Map<String, T> getUserCriteria() {
         return userCriteria;
     }
 
-    public void setUserCriteria(Map<String, List<String>> userCriteria) {
+    public void setUserCriteria(Map<String, T> userCriteria) {
         this.userCriteria = userCriteria;
     }
 }

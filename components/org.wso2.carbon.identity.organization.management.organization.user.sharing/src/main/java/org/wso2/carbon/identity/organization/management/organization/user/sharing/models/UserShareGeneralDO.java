@@ -17,12 +17,14 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria.UserCriteriaType;
+
 import java.util.List;
 
 /**
  * Model that contains the user share general data object.
  */
-public class UserShareGeneralDO extends UserShareBaseDO {
+public class UserShareGeneralDO extends UserShareBaseDO<UserCriteriaType> {
 
     private String policy;
     private List<RoleWithAudienceDO> roles;

@@ -14,7 +14,8 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
+ *//*
+
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing;
 
@@ -71,9 +72,11 @@ import static org.wso2.carbon.identity.organization.management.organization.user
 import static org.wso2.carbon.identity.organization.management.service.util.Utils.getOrganizationId;
 import static org.wso2.carbon.identity.organization.management.service.util.Utils.getUserStoreManager;
 
+*/
 /**
  * Service implementation for handling user sharing policies.
- */
+ *//*
+
 public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHandlerService {
 
     private static final Log LOG = LogFactory.getLog(UserSharingPolicyHandlerService2Impl.class);
@@ -82,11 +85,13 @@ public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHa
 
     //SELECTIVE SHARE
 
-    /**
+    */
+/**
      * Propagates the selective share of a user to specific organizations.
      *
      * @param userShareSelectiveDO Contains details for selective sharing.
-     */
+     *//*
+
     @Override
     public void propagateUserSelectiveShare(UserShareSelectiveDO userShareSelectiveDO)
             throws UserShareMgtServerException, OrganizationManagementException, IdentityRoleManagementException,
@@ -166,11 +171,13 @@ public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHa
         }
     }
 
-    /**
+    */
+/**
      * Handles storing or processing the user-organization share.
      *
      * @param userShareSelective Contains details for sharing a user with an organization.
-     */
+     *//*
+
     private void propagateUserSelectiveShareToSelectedOrganization(UserShareSelective userShareSelective)
             throws OrganizationManagementException, UserStoreException {
 
@@ -339,11 +346,13 @@ public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHa
 
     //GENERAL SHARE
 
-    /**
+    */
+/**
      * Propagates the general share of a user to all organizations.
      *
      * @param userShareGeneralDO Contains details for general sharing.
-     */
+     *//*
+
     @Override
     public void propagateUserGeneralShare(UserShareGeneralDO userShareGeneralDO)
             throws UserShareMgtServerException, OrganizationManagementException, IdentityRoleManagementException,
@@ -375,11 +384,13 @@ public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHa
         return userShareGeneral;
     }
 
-    /**
+    */
+/**
      * Handles storing or processing the general user share.
      *
      * @param userShareGeneral Contains details for sharing a user with all organizations.
-     */
+     *//*
+
     private void shareUserWithAllOrganizations(UserShareGeneral userShareGeneral, PolicyEnum policy) {
 
         // We get all orgs under the policy given by userShareGeneral.
@@ -572,3 +583,4 @@ public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHa
     // the user (update)
     // (5) Max thread count - get it from server config for parallel stream (try now to hardcode)
 }
+*/

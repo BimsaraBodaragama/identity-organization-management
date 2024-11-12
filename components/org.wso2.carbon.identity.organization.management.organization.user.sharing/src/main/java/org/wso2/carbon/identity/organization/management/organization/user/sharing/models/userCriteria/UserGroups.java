@@ -16,27 +16,22 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
-
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria.UserCriteriaType;
+package org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria;
 
 import java.util.List;
 
-/**
- * Model that contains the user share selective data object.
- */
-public class UserShareSelectiveDO extends UserShareBaseDO<UserCriteriaType> {
+public class UserGroups implements UserCriteriaType {
+    private List<String> groupNames;
 
-    private List<UserShareSelectiveOrgDetailsDO> organizations;
-
-    public List<UserShareSelectiveOrgDetailsDO> getOrganizations() {
-
-        return organizations;
+    public UserGroups(List<String> groupNames) {
+        this.groupNames = groupNames;
     }
 
-    public void setOrganizations(
-            List<UserShareSelectiveOrgDetailsDO> organizations) {
+    public List<String> getGroupNames() {
+        return groupNames;
+    }
 
-        this.organizations = organizations;
+    public void setGroupNames(List<String> groupNames) {
+        this.groupNames = groupNames;
     }
 }

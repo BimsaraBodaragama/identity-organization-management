@@ -39,6 +39,8 @@ import org.wso2.carbon.identity.organization.management.organization.user.sharin
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserSharingDetails;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserUnshareGeneralDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserUnshareSelectiveDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria.UserCriteriaType;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria.UserIds;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
@@ -97,7 +99,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         validateInput(userShareSelectiveDO, VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO);
         List<UserShareSelectiveOrgDetailsDO> organizations = userShareSelectiveDO.getOrganizations();
-        Map<String, List<String>> userCriteria = userShareSelectiveDO.getUserCriteria();
+        Map<String, UserCriteriaType> userCriteria = userShareSelectiveDO.getUserCriteria();
 
         for (UserShareSelectiveOrgDetailsDO organization : organizations) {
             propagateUserSelectiveShareWithOrganizationByUserCriteria(organization, userCriteria);
@@ -114,17 +116,21 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     }
     //TODO: Rename to Populate - Rename
     private void propagateUserSelectiveShareWithOrganizationByUserCriteria(UserShareSelectiveOrgDetailsDO organization,
-                                                                           Map<String, List<String>> userCriteria)
+                                                                           Map<String, UserCriteriaType> userCriteria)
             throws OrganizationManagementException, IdentityApplicationManagementException,
             IdentityRoleManagementException, UserStoreException {
 
-        for (Map.Entry<String, List<String>> criterion : userCriteria.entrySet()) {
+        for (Map.Entry<String, UserCriteriaType> criterion : userCriteria.entrySet()) {
             String criterionKey = criterion.getKey();
-            List<String> criterionValues = criterion.getValue();
+            UserCriteriaType criterionValues = criterion.getValue();
 
             switch (criterionKey) {
                 case USER_IDS:
-                    propagateUserSelectiveShareBasedOnUserIds(criterionValues, organization);
+                    if (criterionValues instanceof UserIds) {
+                        propagateUserSelectiveShareBasedOnUserIds((UserIds) criterionValues, organization);
+                    } else {
+                        throw new OrganizationManagementException("Invalid type for USER_IDS criterion.");
+                    }
                     break;
                 case USER_GROUPS:
                     // Placeholder for future user criteria.
@@ -135,12 +141,12 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         }
     }
 
-    private void propagateUserSelectiveShareBasedOnUserIds(List<String> userIds,
+    private void propagateUserSelectiveShareBasedOnUserIds(UserIds userIds,
                                                            UserShareSelectiveOrgDetailsDO organization)
             throws IdentityApplicationManagementException, OrganizationManagementException, UserStoreException,
             IdentityRoleManagementException {
 
-        for (String userId : userIds) {
+        for (String userId : userIds.getIds()) {
             propagateUserSelectiveShare(userId, organization);
         }
     }

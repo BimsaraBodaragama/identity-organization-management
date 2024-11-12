@@ -218,6 +218,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             assignRolesIfPresent(roleIds, sharedUserId, targetOrg);
 
             // Handle future propagation if policy indicates it is required
+            //TODO: Save the roles as well in
             handleFuturePropagationIfRequired(USER, originalUserId, originalUserResidenceOrgId, targetOrg,
                     appliedSharingPolicy);
 
@@ -322,6 +323,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         Map<String, String> mainRoleToSharedRoleMappingsBySubOrg =
                 getRoleManagementService().getMainRoleToSharedRoleMappingsBySubOrg(originalRoles, targetOrgTenantDomain);
+
+        //TODO: Since we are going only with POST, even for role updates, we have to get the earlier roles and delete it
 
         for (String role : mainRoleToSharedRoleMappingsBySubOrg.values()) {
             getRoleManagementService().updateUserListOfRole(role, Collections.singletonList(sharedUser),

@@ -112,7 +112,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         }
 
     }
-
+    //TODO: Rename to Populate - Rename
     private void propagateUserSelectiveShareWithOrganizationByUserCriteria(UserShareSelectiveOrgDetailsDO organization,
                                                                            Map<String, List<String>> userCriteria)
             throws OrganizationManagementException, IdentityApplicationManagementException,
@@ -144,7 +144,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             propagateUserSelectiveShare(userId, organization);
         }
     }
-
+    //TODO: Process
     private void propagateUserSelectiveShare(String userId, UserShareSelectiveOrgDetailsDO organization)
             throws IdentityApplicationManagementException, OrganizationManagementException,
             IdentityRoleManagementException, UserStoreException {
@@ -274,7 +274,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             saveForFuturePropagations(resourceType, originalUserId, originalUserResidenceOrgId, targetOrg, policy);
         }
     }
-
+    //TODO: Make names readable and make comment
     private UserShareSelective createUserShareSelective(String userId, UserShareSelectiveOrgDetailsDO orgDetails)
             throws OrganizationManagementException, IdentityApplicationManagementException,
             IdentityRoleManagementException {

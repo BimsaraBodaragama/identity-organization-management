@@ -26,7 +26,7 @@ import java.util.List;
 public class UserShareSelectiveOrgDetailsDO {
 
     private String organizationId;
-    private String policy;
+    private String policy; //TODO: Go with ENUM
     private List<RoleWithAudienceDO> roles;
 
     public String getOrganizationId() {

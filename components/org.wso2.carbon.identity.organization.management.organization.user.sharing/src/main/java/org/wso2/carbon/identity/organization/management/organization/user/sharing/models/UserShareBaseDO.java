@@ -25,6 +25,7 @@ import java.util.Map;
  */
 public abstract class UserShareBaseDO {
 
+    //TODO: Use Generics
     private Map<String, List<String>> userCriteria;
 
     public Map<String, List<String>> getUserCriteria() {

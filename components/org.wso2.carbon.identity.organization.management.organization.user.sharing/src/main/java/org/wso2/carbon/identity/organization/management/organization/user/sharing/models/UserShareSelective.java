@@ -43,7 +43,7 @@ public class UserShareSelective extends UserShareBase {
         this.organizationId = organizationId;
         return this;
     }
-
+    //TODO: Go with Builder pattern
     @Override
     public UserShareSelective withUserId(String userId) {
         super.withUserId(userId);

@@ -18,8 +18,16 @@
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_BUILD_USER_SHARE;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_ORGANIZATION_ID_MISSING;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_POLICY_MISSING;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_ROLES_NULL;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_USER_ID_MISSING;
 
 /**
  * Model that contains the user share selective data object.
@@ -38,27 +46,55 @@ public class UserShareSelective extends UserShareBase {
         this.organizationId = organizationId;
     }
 
-    // Chaining method
-    public UserShareSelective withOrganizationId(String organizationId) {
-        this.organizationId = organizationId;
-        return this;
-    }
-    //TODO: Go with Builder pattern
-    @Override
-    public UserShareSelective withUserId(String userId) {
-        super.withUserId(userId);
-        return this;
-    }
+    // Custom Builder for UserShareSelective
+    public static class Builder {
+        private String userId;
+        private String organizationId;
+        private PolicyEnum policy;
+        private List<String> roles;
 
-    @Override
-    public UserShareSelective withPolicy(PolicyEnum policy) {
-        super.withPolicy(policy);
-        return this;
-    }
+        public Builder withUserId(String userId) throws OrganizationManagementServerException {
+            if (userId == null || userId.isEmpty()) {
+                throw new OrganizationManagementServerException(ERROR_CODE_USER_ID_MISSING.getMessage());
+            }
+            this.userId = userId;
+            return this;
+        }
 
-    @Override
-    public UserShareSelective withRoles(List<String> roles) {
-        super.withRoles(roles);
-        return this;
+        public Builder withOrganizationId(String organizationId) throws OrganizationManagementServerException {
+            if (organizationId == null || organizationId.isEmpty()) {
+                throw new OrganizationManagementServerException(ERROR_CODE_ORGANIZATION_ID_MISSING.getMessage());
+            }
+            this.organizationId = organizationId;
+            return this;
+        }
+
+        public Builder withPolicy(PolicyEnum policy) throws OrganizationManagementServerException {
+            if (policy == null) {
+                throw new OrganizationManagementServerException(ERROR_CODE_POLICY_MISSING.getMessage());
+            }
+            this.policy = policy;
+            return this;
+        }
+
+        public Builder withRoles(List<String> roles) throws OrganizationManagementServerException {
+            if (roles == null) {
+                throw new OrganizationManagementServerException(ERROR_CODE_ROLES_NULL.getMessage());
+            }
+            this.roles = roles;
+            return this;
+        }
+
+        public UserShareSelective build() throws OrganizationManagementServerException {
+            if (userId == null || organizationId == null || policy == null) {
+                throw new OrganizationManagementServerException(ERROR_CODE_BUILD_USER_SHARE.getMessage());
+            }
+            UserShareSelective userShareSelective = new UserShareSelective();
+            userShareSelective.setUserId(userId);
+            userShareSelective.setOrganizationId(organizationId);
+            userShareSelective.setPolicy(policy);
+            userShareSelective.setRoles(roles != null ? roles : new ArrayList<>());
+            return userShareSelective;
+        }
     }
 }

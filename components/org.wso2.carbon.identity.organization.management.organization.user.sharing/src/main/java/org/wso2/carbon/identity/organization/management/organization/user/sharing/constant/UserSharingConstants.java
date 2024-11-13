@@ -163,7 +163,19 @@ public class UserSharingConstants {
                 "Audience name must be provided."),
         ERROR_CODE_AUDIENCE_TYPE_NULL("10032",
                 "Audience type is null.",
-                "Audience type must be provided.");
+                "Audience type must be provided."),
+        ERROR_CODE_USER_ID_MISSING("10033",
+                "userId is mandatory and cannot be null or empty",
+                "User ID must be provided."),
+        ERROR_CODE_ORGANIZATION_ID_MISSING("10034",
+                "organizationId is mandatory and cannot be null or empty",
+                "Organization ID must be provided."),
+        ERROR_CODE_POLICY_MISSING("10035",
+                "policy is mandatory and cannot be null",
+                "Policy must be provided."),
+        ERROR_CODE_BUILD_USER_SHARE("10036",
+                "userId, organizationId, and policy are mandatory fields and must be provided",
+                "All required fields must be provided for building a UserShareSelective object.");
 
         private final String code;
         private final String message;

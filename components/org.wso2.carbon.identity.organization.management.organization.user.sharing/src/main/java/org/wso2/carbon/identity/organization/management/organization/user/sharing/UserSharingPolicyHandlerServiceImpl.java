@@ -284,11 +284,11 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             throws OrganizationManagementException, IdentityApplicationManagementException,
             IdentityRoleManagementException {
 
-        return new UserShareSelective()
+        return new UserShareSelective.Builder()
                 .withUserId(userId)
                 .withOrganizationId(orgDetails.getOrganizationId())
                 .withPolicy(orgDetails.getPolicy())
-                .withRoles(getRoleIdsFromRoleNameAndAudience(orgDetails.getRoles()));
+                .withRoles(getRoleIdsFromRoleNameAndAudience(orgDetails.getRoles())).build();
     }
 
     ///////////

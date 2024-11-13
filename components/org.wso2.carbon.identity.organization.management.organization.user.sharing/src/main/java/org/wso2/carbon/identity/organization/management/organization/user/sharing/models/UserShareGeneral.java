@@ -17,9 +17,62 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_BUILD_USER_SHARE;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_ORGANIZATION_ID_MISSING;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_POLICY_MISSING;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_ROLES_NULL;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_USER_ID_MISSING;
+
 /**
  * Model that contains the user share general data object.
  */
 public class UserShareGeneral extends UserShareBase {
-    // No additional attributes needed, as all fields are already present in UserShareBase.
+
+    // Custom Builder for UserShareGeneral
+    public static class Builder {
+        private String userId;
+        private PolicyEnum policy;
+        private List<String> roles;
+
+        public Builder withUserId(String userId) throws OrganizationManagementServerException {
+            if (userId == null || userId.isEmpty()) {
+                throw new OrganizationManagementServerException(ERROR_CODE_USER_ID_MISSING.getMessage());
+            }
+            this.userId = userId;
+            return this;
+        }
+
+        public Builder withPolicy(PolicyEnum policy) throws OrganizationManagementServerException {
+            if (policy == null) {
+                throw new OrganizationManagementServerException(ERROR_CODE_POLICY_MISSING.getMessage());
+            }
+            this.policy = policy;
+            return this;
+        }
+
+        public Builder withRoles(List<String> roles) throws OrganizationManagementServerException {
+            if (roles == null) {
+                throw new OrganizationManagementServerException(ERROR_CODE_ROLES_NULL.getMessage());
+            }
+            this.roles = roles;
+            return this;
+        }
+
+        public UserShareGeneral build() throws OrganizationManagementServerException {
+            if (userId == null || policy == null) {
+                throw new OrganizationManagementServerException(ERROR_CODE_BUILD_USER_SHARE.getMessage());
+            }
+            UserShareGeneral userShareGeneral = new UserShareGeneral();
+            userShareGeneral.setUserId(userId);
+            userShareGeneral.setPolicy(policy);
+            userShareGeneral.setRoles(roles != null ? roles : new ArrayList<>());
+            return userShareGeneral;
+        }
+    }
 }

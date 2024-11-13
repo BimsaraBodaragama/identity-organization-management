@@ -59,20 +59,4 @@ public abstract class UserShareBase {
 
         this.roles = roles;
     }
-
-    // Chaining methods
-    public UserShareBase withUserId(String userId) {
-        this.userId = userId;
-        return this;
-    }
-
-    public UserShareBase withPolicy(PolicyEnum policy) {
-        this.policy = policy;
-        return this;
-    }
-
-    public UserShareBase withRoles(List<String> roles) {
-        this.roles = roles;
-        return this;
-    }
 }

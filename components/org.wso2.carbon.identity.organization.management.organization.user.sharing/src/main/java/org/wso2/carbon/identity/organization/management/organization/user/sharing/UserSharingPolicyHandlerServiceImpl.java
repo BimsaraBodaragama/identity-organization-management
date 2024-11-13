@@ -106,7 +106,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         LOG.info(LOG_INFO_SELECTIVE_SHARE_COMPLETED);
 
-        // After parallel processing, check for errors and handle them
+        // After parallel processing, check for errors and handle them.
         if (!errorMessages.isEmpty()) {
             throw new OrganizationManagementException(
                     "Failed to share user with some organizations: " + String.join(", ", errorMessages));
@@ -162,7 +162,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         AbstractUserStoreManager userStoreManager = getUserStoreManager(tenantId);
 
-        String sharingUserId = userShareSelective.getUserId();
+        String sharingUserId = userShareSelective.getUserId(); //TODO: Make a comment
         String sharingInitiatedOrgId = getOrganizationId();
 
         Map<String, String> originalUserDetails = sharingService.getOriginalUserDetailsFromSharingUser(sharingUserId);
@@ -186,6 +186,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         for (String targetOrg : targetOrganizations) {
             LOG.info("Processing sharing for target organization: " + targetOrg);
+            //TODO: Put sharingService inside the below method.
             processUserSelectiveSharing(sharingService, userSharingDetails.withTargetOrgId(targetOrg));
             LOG.info("Completed sharing for target organization: " + targetOrg);
         }
@@ -208,6 +209,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         PolicyEnum appliedSharingPolicy = userSharingDetails.getAppliedSharingPolicy();
 
         if (isExistingUserInTargetOrg(originalUserName, targetOrg)) {
+            //TODO: Put userName in the error message.
             errorMessages.add("User already shared with organization: " + targetOrg);
             return;
         }
@@ -220,10 +222,12 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                     targetOrg, sharingInitiatedOrgId, sharingType);
 
             // Assign roles if any are present
+            //TODO: Params sequence -> user, orgs, roles
             assignRolesIfPresent(roleIds, sharedUserId, targetOrg);
 
             // Handle future propagation if policy indicates it is required
             //TODO: Save the roles as well in
+            //TODO: Rename the below method as storeSharingPolicy
             handleFuturePropagationIfRequired(USER, originalUserId, originalUserResidenceOrgId, targetOrg,
                     appliedSharingPolicy);
 
@@ -321,8 +325,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         String targetOrgTenantDomain = getOrganizationManager().resolveTenantDomain(targetOrg);
 
-        //TODO: For each role in the roles, I want to find the UM_MAIN_ROLE_ID (and then get uuid)
-        // Then I have to pass that list to the below method
+        //TODO: Update the query
 
         List<String> originalRoles = getRoleManagementService().getMainRoleUUIDsForSharedRoles(roles);
 
@@ -330,7 +333,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                 getRoleManagementService().getMainRoleToSharedRoleMappingsBySubOrg(originalRoles, targetOrgTenantDomain);
 
         //TODO: Since we are going only with POST, even for role updates, we have to get the earlier roles and delete it
-
+        //TODO: Handle sub-org role assignments (consider only roles assigned from parents)
         for (String role : mainRoleToSharedRoleMappingsBySubOrg.values()) {
             getRoleManagementService().updateUserListOfRole(role, Collections.singletonList(sharedUser),
                     Collections.emptyList(), targetOrgTenantDomain);

@@ -21,17 +21,21 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 import java.util.List;
 
 public class UserIds implements UserCriteriaType {
+
     private List<String> ids;
 
     public UserIds(List<String> ids) {
+
         this.ids = ids;
     }
 
     public List<String> getIds() {
+
         return ids;
     }
 
     public void setIds(List<String> ids) {
+
         this.ids = ids;
     }
 }

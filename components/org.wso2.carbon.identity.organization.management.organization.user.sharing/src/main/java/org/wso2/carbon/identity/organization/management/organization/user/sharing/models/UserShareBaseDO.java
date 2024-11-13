@@ -30,10 +30,12 @@ public abstract class UserShareBaseDO<T extends UserCriteriaType> {
     private Map<String, T> userCriteria;
 
     public Map<String, T> getUserCriteria() {
+
         return userCriteria;
     }
 
     public void setUserCriteria(Map<String, T> userCriteria) {
+
         this.userCriteria = userCriteria;
     }
 }

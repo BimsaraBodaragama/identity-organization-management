@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum;
+
 import java.util.List;
 
 /**
@@ -26,7 +28,7 @@ import java.util.List;
 public class UserShareSelectiveOrgDetailsDO {
 
     private String organizationId;
-    private String policy; //TODO: Go with ENUM
+    private PolicyEnum policy; //TODO: Go with ENUM
     private List<RoleWithAudienceDO> roles;
 
     public String getOrganizationId() {
@@ -39,12 +41,12 @@ public class UserShareSelectiveOrgDetailsDO {
         this.organizationId = organizationId;
     }
 
-    public String getPolicy() {
+    public PolicyEnum getPolicy() {
 
         return policy;
     }
 
-    public void setPolicy(String policy) {
+    public void setPolicy(PolicyEnum policy) {
 
         this.policy = policy;
     }

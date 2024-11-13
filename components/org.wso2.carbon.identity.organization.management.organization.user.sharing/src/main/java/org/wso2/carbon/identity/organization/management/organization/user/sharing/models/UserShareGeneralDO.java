@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria.UserCriteriaType;
 
 import java.util.List;
@@ -26,15 +27,15 @@ import java.util.List;
  */
 public class UserShareGeneralDO extends UserShareBaseDO<UserCriteriaType> {
 
-    private String policy;
+    private PolicyEnum policy;
     private List<RoleWithAudienceDO> roles;
 
-    public String getPolicy() {
+    public PolicyEnum getPolicy() {
 
         return policy;
     }
 
-    public void setPolicy(String policy) {
+    public void setPolicy(PolicyEnum policy) {
 
         this.policy = policy;
     }

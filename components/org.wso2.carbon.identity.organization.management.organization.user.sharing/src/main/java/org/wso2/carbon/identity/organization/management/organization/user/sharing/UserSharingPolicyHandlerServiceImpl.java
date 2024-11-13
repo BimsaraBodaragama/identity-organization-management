@@ -58,7 +58,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum.getPolicyByValue;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.APPLICATION;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.LOG_INFO_SELECTIVE_SHARE_COMPLETED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_INPUT_MESSAGE_SUFFIX;
@@ -288,7 +287,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         return new UserShareSelective()
                 .withUserId(userId)
                 .withOrganizationId(orgDetails.getOrganizationId())
-                .withPolicy(getPolicyByValue(orgDetails.getPolicy()))
+                .withPolicy(orgDetails.getPolicy())
                 .withRoles(getRoleIdsFromRoleNameAndAudience(orgDetails.getRoles()));
     }
 

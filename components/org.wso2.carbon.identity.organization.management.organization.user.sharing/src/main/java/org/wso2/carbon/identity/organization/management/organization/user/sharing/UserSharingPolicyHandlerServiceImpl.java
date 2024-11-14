@@ -403,16 +403,14 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         switch (policy) {
             case ALL_EXISTING_ORGS_ONLY:
             case ALL_EXISTING_AND_FUTURE_ORGS:
-                getOrganizationManager().getChildOrganizations(policyHoldingOrgId, true).stream()
-                        .map(BasicOrganization::getId)
-                        .forEach(organizationsToShareWithPerPolicy::add);
+                organizationsToShareWithPerPolicy.addAll(getOrganizationManager()
+                        .getChildOrganizationsIds(policyHoldingOrgId, true));
                 break;
 
             case IMMEDIATE_EXISTING_ORGS_ONLY:
             case IMMEDIATE_EXISTING_AND_FUTURE_ORGS:
-                getOrganizationManager().getChildOrganizations(policyHoldingOrgId, false).stream()
-                        .map(BasicOrganization::getId)
-                        .forEach(organizationsToShareWithPerPolicy::add);
+                organizationsToShareWithPerPolicy.addAll(getOrganizationManager()
+                        .getChildOrganizationsIds(policyHoldingOrgId, false));
                 break;
 
             case SELECTED_ORG_ONLY:
@@ -422,17 +420,15 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             case SELECTED_ORG_WITH_ALL_EXISTING_CHILDREN_ONLY:
             case SELECTED_ORG_WITH_ALL_EXISTING_AND_FUTURE_CHILDREN:
                 organizationsToShareWithPerPolicy.add(policyHoldingOrgId);
-                getOrganizationManager().getChildOrganizations(policyHoldingOrgId, true).stream()
-                        .map(BasicOrganization::getId)
-                        .forEach(organizationsToShareWithPerPolicy::add);
+                organizationsToShareWithPerPolicy.addAll(getOrganizationManager()
+                        .getChildOrganizationsIds(policyHoldingOrgId, true));
                 break;
 
             case SELECTED_ORG_WITH_EXISTING_IMMEDIATE_CHILDREN_ONLY:
             case SELECTED_ORG_WITH_EXISTING_IMMEDIATE_AND_FUTURE_CHILDREN:
                 organizationsToShareWithPerPolicy.add(policyHoldingOrgId);
-                getOrganizationManager().getChildOrganizations(policyHoldingOrgId, false).stream()
-                        .map(BasicOrganization::getId)
-                        .forEach(organizationsToShareWithPerPolicy::add);
+                organizationsToShareWithPerPolicy.addAll(getOrganizationManager()
+                        .getChildOrganizationsIds(policyHoldingOrgId, false));
                 break;
 
             default:

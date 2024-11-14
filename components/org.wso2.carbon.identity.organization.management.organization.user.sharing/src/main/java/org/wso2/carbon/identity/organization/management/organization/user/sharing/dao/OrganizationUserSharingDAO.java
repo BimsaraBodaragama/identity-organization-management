@@ -116,21 +116,6 @@ public interface OrganizationUserSharingDAO {
             throws OrganizationManagementServerException;
 
     /**
-     * Creates specified columns in the given database table if they do not already exist, with a defined default value.
-     * <p>
-     * This method checks for the presence of each specified column in the given table. If any column is missing,
-     * it will be created with the specified default value.
-     *
-     * @param tableName    The name of the table in which to check and potentially create columns.
-     * @param defaultValue The default value to assign to each column if it needs to be created.
-     * @param columns      The names of the columns to ensure exist in the table.
-     * @throws UserStoreException                    If an error occurs while accessing the user store.
-     * @throws OrganizationManagementServerException If an error occurs while creating columns in the table.
-     */
-    void createMissingColumns(String tableName, String defaultValue, String... columns)
-            throws UserStoreException, OrganizationManagementServerException;
-
-    /**
      * Checks if the specified columns are present in the given table in the database.
      * <p>
      * This method verifies the presence of each of the specified columns in the specified table.

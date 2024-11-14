@@ -46,7 +46,6 @@ public class SQLConstants {
                     "FROM UM_ORG_USER_ASSOCIATION WHERE UM_USER_ID = ?";
     public static final String CHECK_COLUMN_EXISTENCE_IN_TABLE =
             "SELECT COUNT(*) AS count FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?";
-    public static final String ADD_COLUMN_TO_TABLE = "ALTER TABLE %s ADD %s VARCHAR(255) DEFAULT '%s'";
 
     public static final String DEFAULT_VALUE_NOT_SPECIFIED = "NOT_SPECIFIED";
 

@@ -65,8 +65,58 @@ public class OrganizationUserSharingServiceImpl implements OrganizationUserShari
     public void shareOrganizationUser(String orgId, String associatedUserId, String associatedOrgId)
             throws OrganizationManagementException, UserStoreException {
 
-        shareOrganizationUser(orgId, associatedUserId, associatedOrgId, DEFAULT_VALUE_NOT_SPECIFIED,
-                DEFAULT_VALUE_NOT_SPECIFIED);
+        if (organizationUserSharingDAO.areRequiredColumnsPresent(TABLE_NAME_UM_ORG_USER_ASSOCIATION,
+                COLUMN_NAME_ASSOCIATION_INITIATED_ORG_ID, COLUMN_NAME_ASSOCIATION_TYPE)) {
+            shareOrganizationUser(orgId, associatedUserId, associatedOrgId, DEFAULT_VALUE_NOT_SPECIFIED,
+                    DEFAULT_VALUE_NOT_SPECIFIED);
+        } else {
+            try {
+                int associatedUserTenantId =
+                        IdentityTenantUtil.getTenantId(getOrganizationManager().resolveTenantDomain(associatedOrgId));
+                AbstractUserStoreManager userStoreManager = getAbstractUserStoreManager(associatedUserTenantId);
+                String userName = userStoreManager.getUser(associatedUserId, null).getUsername();
+
+                HashMap<String, String> userClaims = new HashMap<>();
+                userClaims.put(CLAIM_MANAGED_ORGANIZATION, associatedOrgId);
+                userClaims.put(ID_CLAIM_READ_ONLY, "true");
+                UserCoreUtil.setSkipPasswordPatternValidationThreadLocal(true);
+
+                int tenantId = IdentityTenantUtil.getTenantId(getOrganizationManager().resolveTenantDomain(orgId));
+                String domain = IdentityUtil.getProperty("OrganizationUserInvitation.PrimaryUserDomain");
+                userStoreManager = getAbstractUserStoreManager(tenantId);
+
+                if (PRIMARY_DOMAIN.equalsIgnoreCase(domain)) {
+                    userStoreManager.addUser(userName, generatePassword(), null, userClaims,
+                            DEFAULT_PROFILE);
+                } else {
+                    // Wait for the user store manager to be available in the user realm.
+                    UserStoreManager defaultUserStore = null;
+                    int threadSleepTime = Integer.parseInt(
+                            IdentityUtil.getProperty("OrganizationUserInvitation.AssociationWaitTime"));
+                    int waited = 0;
+                    int waitIntervals = 500;
+                    while (defaultUserStore == null) {
+                        if (waited > threadSleepTime) {
+                            break;
+                        }
+                        Thread.sleep(waitIntervals);
+                        waited += waitIntervals;
+                        defaultUserStore = getAbstractUserStoreManager(tenantId).getSecondaryUserStoreManager(domain);
+                    }
+                    if (defaultUserStore == null) {
+                        throw new OrganizationManagementException(
+                                "Error while retrieving user store manager for domain: " +
+                                        domain);
+                    }
+                    defaultUserStore.addUser(userName, generatePassword(), null, userClaims, DEFAULT_PROFILE);
+                }
+                String userId = userStoreManager.getUserIDFromUserName(UserCoreUtil.addDomainToName(userName, domain));
+                organizationUserSharingDAO.createOrganizationUserAssociation(userId, orgId, associatedUserId,
+                        associatedOrgId);
+            } catch (UserStoreException | InterruptedException e) {
+                throw handleServerException(ERROR_CODE_ERROR_CREATE_SHARED_USER, e, orgId);
+            }
+        }
 
     }
 
@@ -77,55 +127,54 @@ public class OrganizationUserSharingServiceImpl implements OrganizationUserShari
 
         if (!organizationUserSharingDAO.areRequiredColumnsPresent(TABLE_NAME_UM_ORG_USER_ASSOCIATION,
                 COLUMN_NAME_ASSOCIATION_INITIATED_ORG_ID, COLUMN_NAME_ASSOCIATION_TYPE)) {
-            //TODO: Go for the old method
-            createAndEnsureRelevantColumnsExist(TABLE_NAME_UM_ORG_USER_ASSOCIATION,
-                    COLUMN_NAME_ASSOCIATION_INITIATED_ORG_ID, COLUMN_NAME_ASSOCIATION_TYPE);
-        }
+            shareOrganizationUser(orgId, associatedUserId, associatedOrgId);
+        } else {
+            try {
+                int associatedUserTenantId =
+                        IdentityTenantUtil.getTenantId(getOrganizationManager().resolveTenantDomain(associatedOrgId));
+                AbstractUserStoreManager userStoreManager = getAbstractUserStoreManager(associatedUserTenantId);
+                String userName = userStoreManager.getUser(associatedUserId, null).getUsername();
 
-        try {
-            int associatedUserTenantId =
-                    IdentityTenantUtil.getTenantId(getOrganizationManager().resolveTenantDomain(associatedOrgId));
-            AbstractUserStoreManager userStoreManager = getAbstractUserStoreManager(associatedUserTenantId);
-            String userName = userStoreManager.getUser(associatedUserId, null).getUsername();
+                HashMap<String, String> userClaims = new HashMap<>();
+                userClaims.put(CLAIM_MANAGED_ORGANIZATION, associatedOrgId);
+                userClaims.put(ID_CLAIM_READ_ONLY, "true");
+                UserCoreUtil.setSkipPasswordPatternValidationThreadLocal(true);
 
-            HashMap<String, String> userClaims = new HashMap<>();
-            userClaims.put(CLAIM_MANAGED_ORGANIZATION, associatedOrgId);
-            userClaims.put(ID_CLAIM_READ_ONLY, "true");
-            UserCoreUtil.setSkipPasswordPatternValidationThreadLocal(true);
+                int tenantId = IdentityTenantUtil.getTenantId(getOrganizationManager().resolveTenantDomain(orgId));
+                String domain = IdentityUtil.getProperty("OrganizationUserInvitation.PrimaryUserDomain");
+                userStoreManager = getAbstractUserStoreManager(tenantId);
 
-            int tenantId = IdentityTenantUtil.getTenantId(getOrganizationManager().resolveTenantDomain(orgId));
-            String domain = IdentityUtil.getProperty("OrganizationUserInvitation.PrimaryUserDomain");
-            userStoreManager = getAbstractUserStoreManager(tenantId);
-
-            if (PRIMARY_DOMAIN.equalsIgnoreCase(domain)) {
-                userStoreManager.addUser(userName, generatePassword(), null, userClaims,
-                        DEFAULT_PROFILE);
-            } else {
-                // Wait for the user store manager to be available in the user realm.
-                UserStoreManager defaultUserStore = null;
-                int threadSleepTime = Integer.parseInt(
-                        IdentityUtil.getProperty("OrganizationUserInvitation.AssociationWaitTime"));
-                int waited = 0;
-                int waitIntervals = 500;
-                while (defaultUserStore == null) {
-                    if (waited > threadSleepTime) {
-                        break;
+                if (PRIMARY_DOMAIN.equalsIgnoreCase(domain)) {
+                    userStoreManager.addUser(userName, generatePassword(), null, userClaims,
+                            DEFAULT_PROFILE);
+                } else {
+                    // Wait for the user store manager to be available in the user realm.
+                    UserStoreManager defaultUserStore = null;
+                    int threadSleepTime = Integer.parseInt(
+                            IdentityUtil.getProperty("OrganizationUserInvitation.AssociationWaitTime"));
+                    int waited = 0;
+                    int waitIntervals = 500;
+                    while (defaultUserStore == null) {
+                        if (waited > threadSleepTime) {
+                            break;
+                        }
+                        Thread.sleep(waitIntervals);
+                        waited += waitIntervals;
+                        defaultUserStore = getAbstractUserStoreManager(tenantId).getSecondaryUserStoreManager(domain);
                     }
-                    Thread.sleep(waitIntervals);
-                    waited += waitIntervals;
-                    defaultUserStore = getAbstractUserStoreManager(tenantId).getSecondaryUserStoreManager(domain);
+                    if (defaultUserStore == null) {
+                        throw new OrganizationManagementException(
+                                "Error while retrieving user store manager for domain: " +
+                                        domain);
+                    }
+                    defaultUserStore.addUser(userName, generatePassword(), null, userClaims, DEFAULT_PROFILE);
                 }
-                if (defaultUserStore == null) {
-                    throw new OrganizationManagementException("Error while retrieving user store manager for domain: " +
-                            domain);
-                }
-                defaultUserStore.addUser(userName, generatePassword(), null, userClaims, DEFAULT_PROFILE);
+                String userId = userStoreManager.getUserIDFromUserName(UserCoreUtil.addDomainToName(userName, domain));
+                organizationUserSharingDAO.createOrganizationUserAssociation(userId, orgId, associatedUserId,
+                        associatedOrgId, associationInitiatedOrgId, associationType);
+            } catch (UserStoreException | InterruptedException e) {
+                throw handleServerException(ERROR_CODE_ERROR_CREATE_SHARED_USER, e, orgId);
             }
-            String userId = userStoreManager.getUserIDFromUserName(UserCoreUtil.addDomainToName(userName, domain));
-            organizationUserSharingDAO.createOrganizationUserAssociation(userId, orgId, associatedUserId,
-                    associatedOrgId, associationInitiatedOrgId, associationType);
-        } catch (UserStoreException | InterruptedException e) {
-            throw handleServerException(ERROR_CODE_ERROR_CREATE_SHARED_USER, e, orgId);
         }
     }
 
@@ -211,20 +260,4 @@ public class OrganizationUserSharingServiceImpl implements OrganizationUserShari
         return uuid.toString().substring(0, 12);
     }
 
-    private void createAndEnsureRelevantColumnsExist(String tableName, String... columnNames)
-            throws UserStoreException {
-
-        try {
-            // Attempt to create the missing columns.
-            organizationUserSharingDAO.createMissingColumns(tableName, DEFAULT_VALUE_NOT_SPECIFIED, columnNames);
-
-            // Recheck if the columns were successfully created.
-            if (!organizationUserSharingDAO.areRequiredColumnsPresent(tableName, columnNames)) {
-                throw new UserStoreException("Failed to create the required columns in table: " + tableName);
-            }
-        } catch (OrganizationManagementServerException e) {
-            throw new UserStoreException("An error occurred while creating the required columns in table: " + tableName,
-                    e);
-        }
-    }
 }

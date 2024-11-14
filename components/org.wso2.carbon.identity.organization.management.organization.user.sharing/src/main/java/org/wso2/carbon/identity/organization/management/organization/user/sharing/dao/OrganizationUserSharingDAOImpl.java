@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.ADD_COLUMN_TO_TABLE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.CHECK_COLUMN_EXISTENCE_IN_TABLE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.CREATE_ORGANIZATION_USER_ASSOCIATION;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.SQLConstants.CREATE_ORGANIZATION_USER_ASSOCIATION_EXTENDED;
@@ -236,24 +235,6 @@ public class OrganizationUserSharingDAOImpl implements OrganizationUserSharingDA
                 }
             }
             return true; // All specified columns are present
-        } catch (DataAccessException e) {
-            throw handleServerException(ERROR_CODE_ERROR_GET_ORGANIZATION_USER_ASSOCIATIONS, e, tableName);
-        }
-    }
-
-    @Override
-    public void createMissingColumns(String tableName, String defaultValue, String... columnNames)
-            throws OrganizationManagementServerException {
-
-        NamedJdbcTemplate namedJdbcTemplate = getNewTemplate();
-
-        try {
-            for (String columnName : columnNames) {
-                if (!areRequiredColumnsPresent(tableName, columnName)) {
-                    String sql = String.format(ADD_COLUMN_TO_TABLE, tableName, columnName, defaultValue);
-                    namedJdbcTemplate.executeUpdate(sql);
-                }
-            }
         } catch (DataAccessException e) {
             throw handleServerException(ERROR_CODE_ERROR_GET_ORGANIZATION_USER_ASSOCIATIONS, e, tableName);
         }

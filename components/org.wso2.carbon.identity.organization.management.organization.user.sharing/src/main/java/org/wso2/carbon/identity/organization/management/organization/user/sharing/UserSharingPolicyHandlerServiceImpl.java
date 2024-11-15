@@ -94,7 +94,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     public void populateSelectiveUserShare(SelectiveUserShareDO selectiveUserShareDO)
             throws UserShareMgtServerException, OrganizationManagementException, IdentityRoleManagementException,
             UserStoreException, IdentityApplicationManagementException {
-    //TODO: Stop Skip share
+
         validateInput(selectiveUserShareDO);
         List<SelectiveUserShareOrgDetailsDO> organizations = selectiveUserShareDO.getOrganizations();
         Map<String, UserCriteriaType> userCriteria = selectiveUserShareDO.getUserCriteria();

@@ -136,9 +136,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                         throw new OrganizationManagementException("Invalid type for USER_IDS criterion.");
                     }
                     break;
-                case USER_GROUPS:
-                    // Placeholder for future user criteria.
-                    break;
                 default:
                     throw new OrganizationManagementException("Invalid user criterion provided: " + criterionKey);
             }

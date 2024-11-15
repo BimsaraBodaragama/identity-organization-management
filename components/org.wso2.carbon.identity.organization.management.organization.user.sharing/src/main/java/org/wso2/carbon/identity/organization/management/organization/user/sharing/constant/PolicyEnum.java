@@ -18,6 +18,7 @@
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.constant;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,7 +94,15 @@ public enum PolicyEnum {
             "SELECTED_ORG_WITH_EXISTING_IMMEDIATE_AND_FUTURE_CHILDREN",
             Arrays.asList("User"),
             "This policy allows sharing the resource with a selected organization and all of its " +
-                    "immediate child organizations, including those created in the future.");
+                    "immediate child organizations, including those created in the future."),
+    NO_SHARING(
+            "NS-0000",
+            "NoSharing",
+            "NO_SHARING",
+            Collections.emptyList(),
+            "This policy specifies that no sharing will occur. The resource remains restricted to its " +
+                    "current context and is not shared with any organization or user."
+    );
 
     private final String policyCode;
     private final String policyName;

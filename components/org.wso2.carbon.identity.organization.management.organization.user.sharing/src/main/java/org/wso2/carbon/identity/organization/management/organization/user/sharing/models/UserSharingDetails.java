@@ -14,11 +14,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,124 +34,184 @@ public class UserSharingDetails {
     private String originalOrgId;
     private String sharingType;
     private List<String> roleIds;
-    private PolicyEnum appliedSharingPolicy;
+    private PolicyEnum policy;
 
-    // Getters and Setters
+    private UserSharingDetails(Builder builder) {
+
+        this.sharingUserId = builder.sharingUserId;
+        this.sharingInitiatedOrgId = builder.sharingInitiatedOrgId;
+        this.targetOrgId = builder.targetOrgId;
+        this.originalUserId = builder.originalUserId;
+        this.originalUserName = builder.originalUserName;
+        this.originalOrgId = builder.originalOrgId;
+        this.sharingType = builder.sharingType;
+        this.roleIds = builder.roleIds;
+        this.policy = builder.policy;
+    }
+
     public String getSharingUserId() {
+
         return sharingUserId;
     }
 
-    public void setSharingUserId(String sharingUserId) {
-        this.sharingUserId = sharingUserId;
-    }
-
     public String getSharingInitiatedOrgId() {
+
         return sharingInitiatedOrgId;
     }
 
-    public void setSharingInitiatedOrgId(String sharingInitiatedOrg) {
-        this.sharingInitiatedOrgId = sharingInitiatedOrg;
-    }
-
     public String getTargetOrgId() {
+
         return targetOrgId;
     }
 
-    public void setTargetOrgId(String targetOrgId) {
-        this.targetOrgId = targetOrgId;
-    }
-
     public String getOriginalUserId() {
+
         return originalUserId;
     }
 
-    public void setOriginalUserId(String originalUserId) {
-        this.originalUserId = originalUserId;
-    }
-
     public String getOriginalUserName() {
+
         return originalUserName;
     }
 
-    public void setOriginalUserName(String originalUserName) {
-        this.originalUserName = originalUserName;
-    }
-
     public String getOriginalOrgId() {
+
         return originalOrgId;
     }
 
-    public void setOriginalOrgId(String originalOrgId) {
-        this.originalOrgId = originalOrgId;
-    }
-
     public String getSharingType() {
+
         return sharingType;
     }
 
-    public void setSharingType(String sharingType) {
-        this.sharingType = sharingType;
-    }
-
     public List<String> getRoleIds() {
+
         return roleIds;
     }
 
-    public void setRoleIds(List<String> roleIds) {
-        this.roleIds = roleIds;
+    public PolicyEnum getPolicy() {
+
+        return policy;
     }
 
-    public PolicyEnum getAppliedSharingPolicy() {
-        return appliedSharingPolicy;
-    }
+    public void setSharingUserId(String sharingUserId) {
 
-    public void setAppliedSharingPolicy(PolicyEnum appliedSharingPolicy) {
-        this.appliedSharingPolicy = appliedSharingPolicy;
-    }
-
-    // Chaining methods
-    public UserSharingDetails withSharingUserId(String sharingUserId) {
         this.sharingUserId = sharingUserId;
-        return this;
     }
 
-    public UserSharingDetails withSharingInitiatedOrgId(String sharingInitiatedOrg) {
-        this.sharingInitiatedOrgId = sharingInitiatedOrg;
-        return this;
+    public void setSharingInitiatedOrgId(String sharingInitiatedOrgId) {
+
+        this.sharingInitiatedOrgId = sharingInitiatedOrgId;
     }
 
-    public UserSharingDetails withTargetOrgId(String targetOrgId) {
+    public void setTargetOrgId(String targetOrgId) {
+
         this.targetOrgId = targetOrgId;
-        return this;
     }
 
-    public UserSharingDetails withOriginalUserId(String originalUserId) {
+    public void setOriginalUserId(String originalUserId) {
+
         this.originalUserId = originalUserId;
-        return this;
     }
 
-    public UserSharingDetails withOriginalUserName(String originalUserName) {
+    public void setOriginalUserName(String originalUserName) {
+
         this.originalUserName = originalUserName;
-        return this;
     }
 
-    public UserSharingDetails withOriginalOrgId(String originalOrgId) {
+    public void setOriginalOrgId(String originalOrgId) {
+
         this.originalOrgId = originalOrgId;
-        return this;
     }
 
-    public UserSharingDetails withSharingType(String sharingType) {
+    public void setSharingType(String sharingType) {
+
         this.sharingType = sharingType;
-        return this;
     }
 
-    public UserSharingDetails withRoleIds(List<String> roleIds) {
+    public void setRoleIds(List<String> roleIds) {
+
         this.roleIds = roleIds;
-        return this;
     }
 
-    public UserSharingDetails withAppliedSharingPolicy(PolicyEnum appliedSharingPolicy) {
-        this.appliedSharingPolicy = appliedSharingPolicy;
-        return this;
+    public void setPolicy(PolicyEnum policy) {
+
+        this.policy = policy;
+    }
+
+    /**
+     * Builder class for UserSharingDetails.
+     */
+    public static class Builder {
+
+        private String sharingUserId = "";
+        private String sharingInitiatedOrgId = "";
+        private String targetOrgId = "";
+        private String originalUserId = "";
+        private String originalUserName = "";
+        private String originalOrgId = "";
+        private String sharingType = "";
+        private List<String> roleIds = Collections.emptyList();
+        private PolicyEnum policy = PolicyEnum.NO_SHARING;
+
+        public Builder withSharingUserId(String sharingUserId) {
+
+            this.sharingUserId = sharingUserId != null ? sharingUserId : "";
+            return this;
+        }
+
+        public Builder withSharingInitiatedOrgId(String sharingInitiatedOrgId) {
+
+            this.sharingInitiatedOrgId = sharingInitiatedOrgId != null ? sharingInitiatedOrgId : "";
+            return this;
+        }
+
+        public Builder withTargetOrgId(String targetOrgId) {
+
+            this.targetOrgId = targetOrgId != null ? targetOrgId : "";
+            return this;
+        }
+
+        public Builder withOriginalUserId(String originalUserId) {
+
+            this.originalUserId = originalUserId != null ? originalUserId : "";
+            return this;
+        }
+
+        public Builder withOriginalUserName(String originalUserName) {
+
+            this.originalUserName = originalUserName != null ? originalUserName : "";
+            return this;
+        }
+
+        public Builder withOriginalOrgId(String originalOrgId) {
+
+            this.originalOrgId = originalOrgId != null ? originalOrgId : "";
+            return this;
+        }
+
+        public Builder withSharingType(String sharingType) {
+
+            this.sharingType = sharingType != null ? sharingType : "Not Specified";
+            return this;
+        }
+
+        public Builder withRoleIds(List<String> roleIds) {
+
+            this.roleIds = roleIds != null ? roleIds : Collections.emptyList();
+            return this;
+        }
+
+        public Builder withPolicy(PolicyEnum appliedSharingPolicy) {
+
+            this.policy =
+                    appliedSharingPolicy != null ? appliedSharingPolicy : PolicyEnum.NO_SHARING; // Assumed default
+            return this;
+        }
+
+        public UserSharingDetails build() {
+
+            return new UserSharingDetails(this);
+        }
     }
 }

@@ -60,6 +60,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.APPLICATION;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.LOG_INFO_SELECTIVE_SHARE_COMPLETED;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_INPUT_MESSAGE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_INPUT_MESSAGE_SUFFIX;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORGANIZATION;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORG_ID;
@@ -96,7 +97,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             throws UserShareMgtServerException, OrganizationManagementException, IdentityRoleManagementException,
             UserStoreException, IdentityApplicationManagementException {
 
-        validateInput(userShareSelectiveDO, VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO);
+        validateInput(userShareSelectiveDO);
         List<UserShareSelectiveOrgDetailsDO> organizations = userShareSelectiveDO.getOrganizations();
         Map<String, UserCriteriaType> userCriteria = userShareSelectiveDO.getUserCriteria();
 
@@ -459,10 +460,10 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
     //Validation methods
 
-    private void validateInput(UserShareBaseDO userShareDO, String context) throws UserShareMgtServerException {
+    private <T extends UserCriteriaType> void validateInput(UserShareBaseDO<T> userShareDO) throws UserShareMgtServerException {
 
         if (userShareDO == null) {
-            throwValidationException(context + NULL_INPUT_MESSAGE_SUFFIX,
+            throwValidationException(NULL_INPUT_MESSAGE,
                     UserSharingConstants.ErrorMessage.ERROR_CODE_NULL_INPUT.getCode(),
                     UserSharingConstants.ErrorMessage.ERROR_CODE_NULL_INPUT.getDescription());
         }

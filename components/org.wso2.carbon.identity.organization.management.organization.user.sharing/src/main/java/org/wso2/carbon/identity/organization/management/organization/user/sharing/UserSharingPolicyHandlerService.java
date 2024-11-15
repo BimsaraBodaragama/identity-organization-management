@@ -33,16 +33,16 @@ import org.wso2.carbon.user.api.UserStoreException;
  */
 public interface UserSharingPolicyHandlerService {
 
-    void propagateUserSelectiveShare(UserShareSelectiveDO userShareSelectiveDO)
+    void populateSelectiveUserShare(UserShareSelectiveDO userShareSelectiveDO)
             throws UserShareMgtException, OrganizationManagementException, IdentityRoleManagementException,
             UserStoreException, IdentityApplicationManagementException;
 
-    void propagateUserGeneralShare(UserShareGeneralDO userShareGeneralDO)
+    void populateGeneralUserShare(UserShareGeneralDO userShareGeneralDO)
             throws UserShareMgtException, OrganizationManagementException, IdentityRoleManagementException,
             IdentityApplicationManagementException;
 
-    void propagateUserSelectiveUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO);
+    void populateSelectiveUserUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO);
 
-    void propagateUserGeneralUnshare(UserUnshareGeneralDO userUnshareGeneralDO);
+    void populateGeneralUserUnshare(UserUnshareGeneralDO userUnshareGeneralDO);
 
 }

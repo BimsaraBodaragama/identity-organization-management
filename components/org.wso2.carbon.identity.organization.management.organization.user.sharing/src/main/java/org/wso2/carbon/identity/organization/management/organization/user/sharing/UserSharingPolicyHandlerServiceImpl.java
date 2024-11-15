@@ -92,7 +92,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
      * @param userShareSelectiveDO Contains details for selective sharing.
      */
     @Override
-    public void propagateUserSelectiveShare(UserShareSelectiveDO userShareSelectiveDO)
+    public void populateSelectiveUserShare(UserShareSelectiveDO userShareSelectiveDO)
             throws UserShareMgtServerException, OrganizationManagementException, IdentityRoleManagementException,
             UserStoreException, IdentityApplicationManagementException {
 
@@ -101,7 +101,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         Map<String, UserCriteriaType> userCriteria = userShareSelectiveDO.getUserCriteria();
 
         for (UserShareSelectiveOrgDetailsDO organization : organizations) {
-            propagateUserSelectiveShareWithOrganizationByUserCriteria(organization, userCriteria);
+            populateSelectiveUserShareByCriteria(organization, userCriteria);
         }
 
         LOG.info(LOG_INFO_SELECTIVE_SHARE_COMPLETED);
@@ -113,8 +113,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         }
 
     }
-    //TODO: Rename to Populate - Rename
-    private void propagateUserSelectiveShareWithOrganizationByUserCriteria(UserShareSelectiveOrgDetailsDO organization,
+
+    private void populateSelectiveUserShareByCriteria(UserShareSelectiveOrgDetailsDO organization,
                                                                            Map<String, UserCriteriaType> userCriteria)
             throws OrganizationManagementException, IdentityApplicationManagementException,
             IdentityRoleManagementException, UserStoreException {
@@ -126,7 +126,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             switch (criterionKey) {
                 case USER_IDS:
                     if (criterionValues instanceof UserIds) {
-                        propagateUserSelectiveShareBasedOnUserIds((UserIds) criterionValues, organization);
+                        populateSelectiveUserShareByUserIds((UserIds) criterionValues, organization);
                     } else {
                         throw new OrganizationManagementException("Invalid type for USER_IDS criterion.");
                     }
@@ -140,17 +140,17 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         }
     }
 
-    private void propagateUserSelectiveShareBasedOnUserIds(UserIds userIds,
+    private void populateSelectiveUserShareByUserIds(UserIds userIds,
                                                            UserShareSelectiveOrgDetailsDO organization)
             throws IdentityApplicationManagementException, OrganizationManagementException, UserStoreException,
             IdentityRoleManagementException {
 
         for (String userId : userIds.getIds()) {
-            propagateUserSelectiveShare(userId, organization);
+            processSelectiveUserShare(userId, organization);
         }
     }
-    //TODO: Process
-    private void propagateUserSelectiveShare(String userId, UserShareSelectiveOrgDetailsDO organization)
+
+    private void processSelectiveUserShare(String userId, UserShareSelectiveOrgDetailsDO organization)
             throws IdentityApplicationManagementException, OrganizationManagementException,
             IdentityRoleManagementException, UserStoreException {
 
@@ -186,15 +186,12 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         for (String targetOrg : targetOrganizations) {
             LOG.info("Processing sharing for target organization: " + targetOrg);
-            //TODO: Put sharingService inside the below method.
-            processUserSelectiveSharing(sharingService, userSharingDetails.withTargetOrgId(targetOrg));
+            shareUser(sharingService, userSharingDetails.withTargetOrgId(targetOrg));
             LOG.info("Completed sharing for target organization: " + targetOrg);
         }
     }
 
-    // TODO: Validate policy broad or narrow
-
-    private void processUserSelectiveSharing(
+    private void shareUser(
             OrganizationUserSharingService sharingService, UserSharingDetails userSharingDetails)
             throws UserStoreException, OrganizationManagementException {
 
@@ -583,17 +580,17 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     //Business Logics
 
     @Override
-    public void propagateUserGeneralShare(UserShareGeneralDO userShareGeneralDO) {
+    public void populateGeneralUserShare(UserShareGeneralDO userShareGeneralDO) {
 
     }
 
     @Override
-    public void propagateUserSelectiveUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO) {
+    public void populateSelectiveUserUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO) {
 
     }
 
     @Override
-    public void propagateUserGeneralUnshare(UserUnshareGeneralDO userUnshareGeneralDO) {
+    public void populateGeneralUserUnshare(UserUnshareGeneralDO userUnshareGeneralDO) {
 
     }
 

@@ -51,8 +51,8 @@ public class UserSharingConstants {
     public static final String POLICY_CODE_FOR_EXISTING_AND_FUTURE = "-EF-";
     public static final String POLICY_CODE_FOR_FUTURE_ONLY = "-FO-";
 
-    public static final String VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO = "UserShareSelectiveDO";
-    public static final String VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO = "UserShareGeneralDO";
+    public static final String VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO = "SelectiveUserShareDO";
+    public static final String VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO = "GeneralUserShareDO";
 
     public static final String LOG_INFO_SELECTIVE_SHARE_COMPLETED = "Selective share completed.";
     public static final String LOG_INFO_GENERAL_SHARE_COMPLETED = "General share completed.";
@@ -176,7 +176,7 @@ public class UserSharingConstants {
                 "Policy must be provided."),
         ERROR_CODE_BUILD_USER_SHARE("10036",
                 "userId, organizationId, and policy are mandatory fields and must be provided",
-                "All required fields must be provided for building a UserShareSelective object.");
+                "All required fields must be provided for building a SelectiveUserShare object.");
 
         private final String code;
         private final String message;

@@ -20,10 +20,10 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtException;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareGeneralDO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareSelectiveDO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserUnshareGeneralDO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserUnshareSelectiveDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.GeneralUserShareDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.GeneralUserUnshareDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserShareDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserUnshareDO;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.identity.role.v2.mgt.core.exception.IdentityRoleManagementException;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -33,16 +33,16 @@ import org.wso2.carbon.user.api.UserStoreException;
  */
 public interface UserSharingPolicyHandlerService {
 
-    void populateSelectiveUserShare(UserShareSelectiveDO userShareSelectiveDO)
+    void populateSelectiveUserShare(SelectiveUserShareDO selectiveUserShareDO)
             throws UserShareMgtException, OrganizationManagementException, IdentityRoleManagementException,
             UserStoreException, IdentityApplicationManagementException;
 
-    void populateGeneralUserShare(UserShareGeneralDO userShareGeneralDO)
+    void populateGeneralUserShare(GeneralUserShareDO generalUserShareDO)
             throws UserShareMgtException, OrganizationManagementException, IdentityRoleManagementException,
             IdentityApplicationManagementException;
 
-    void populateSelectiveUserUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO);
+    void populateSelectiveUserUnshare(SelectiveUserUnshareDO selectiveUserUnshareDO);
 
-    void populateGeneralUserUnshare(UserUnshareGeneralDO userUnshareGeneralDO);
+    void populateGeneralUserUnshare(GeneralUserUnshareDO generalUserUnshareDO);
 
 }

@@ -3,7 +3,8 @@
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -17,23 +18,25 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria.UserCriteriaType;
+
 import java.util.List;
-import java.util.Map;
 
 /**
- * Model that contains the user unshare general data object.
+ * Model that contains the user share selective data object.
  */
-public class UserUnshareGeneralDO {
+public class SelectiveUserShareDO extends UserShareBaseDO<UserCriteriaType> {
 
-    private Map<String, List<String>> userCriteria;
+    private List<SelectiveUserShareOrgDetailsDO> organizations;
 
-    public Map<String, List<String>> getUserCriteria() {
+    public List<SelectiveUserShareOrgDetailsDO> getOrganizations() {
 
-        return userCriteria;
+        return organizations;
     }
 
-    public void setUserCriteria(Map<String, List<String>> userCriteria) {
+    public void setOrganizations(
+            List<SelectiveUserShareOrgDetailsDO> organizations) {
 
-        this.userCriteria = userCriteria;
+        this.organizations = organizations;
     }
 }

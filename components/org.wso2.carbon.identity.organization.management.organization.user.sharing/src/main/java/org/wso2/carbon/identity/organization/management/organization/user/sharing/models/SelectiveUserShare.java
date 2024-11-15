@@ -32,7 +32,7 @@ import static org.wso2.carbon.identity.organization.management.organization.user
 /**
  * Model that contains the user share selective data object.
  */
-public class UserShareSelective extends UserShareBase {
+public class SelectiveUserShare extends UserShareBase {
 
     private String organizationId;
 
@@ -46,7 +46,7 @@ public class UserShareSelective extends UserShareBase {
         this.organizationId = organizationId;
     }
 
-    // Custom Builder for UserShareSelective
+    // Custom Builder for SelectiveUserShare
     public static class Builder {
         private String userId;
         private String organizationId;
@@ -85,16 +85,16 @@ public class UserShareSelective extends UserShareBase {
             return this;
         }
 
-        public UserShareSelective build() throws OrganizationManagementServerException {
+        public SelectiveUserShare build() throws OrganizationManagementServerException {
             if (userId == null || organizationId == null || policy == null) {
                 throw new OrganizationManagementServerException(ERROR_CODE_BUILD_USER_SHARE.getMessage());
             }
-            UserShareSelective userShareSelective = new UserShareSelective();
-            userShareSelective.setUserId(userId);
-            userShareSelective.setOrganizationId(organizationId);
-            userShareSelective.setPolicy(policy);
-            userShareSelective.setRoles(roles != null ? roles : new ArrayList<>());
-            return userShareSelective;
+            SelectiveUserShare selectiveUserShare = new SelectiveUserShare();
+            selectiveUserShare.setUserId(userId);
+            selectiveUserShare.setOrganizationId(organizationId);
+            selectiveUserShare.setPolicy(policy);
+            selectiveUserShare.setRoles(roles != null ? roles : new ArrayList<>());
+            return selectiveUserShare;
         }
     }
 }

@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * Model that contains the user share selective org details data object.
  */
-public class UserShareSelectiveOrgDetailsDO {
+public class SelectiveUserShareOrgDetailsDO {
 
     private String organizationId;
     private PolicyEnum policy; //TODO: Go with ENUM

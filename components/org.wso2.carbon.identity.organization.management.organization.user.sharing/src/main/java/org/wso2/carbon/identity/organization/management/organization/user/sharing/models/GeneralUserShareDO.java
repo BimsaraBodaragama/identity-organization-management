@@ -17,34 +17,37 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria.UserCriteriaType;
+
 import java.util.List;
-import java.util.Map;
 
 /**
- * Model that contains the user unshare selective data object.
+ * Model that contains the user share general data object.
  */
-public class UserUnshareSelectiveDO {
+public class GeneralUserShareDO extends UserShareBaseDO<UserCriteriaType> {
 
-    private Map<String, List<String>> userCriteria;
-    private List<String> organizations;
+    private PolicyEnum policy;
+    private List<RoleWithAudienceDO> roles;
 
-    public Map<String, List<String>> getUserCriteria() {
+    public PolicyEnum getPolicy() {
 
-        return userCriteria;
+        return policy;
     }
 
-    public void setUserCriteria(Map<String, List<String>> userCriteria) {
+    public void setPolicy(PolicyEnum policy) {
 
-        this.userCriteria = userCriteria;
+        this.policy = policy;
     }
 
-    public List<String> getOrganizations() {
+    public List<RoleWithAudienceDO> getRoles() {
 
-        return organizations;
+        return roles;
     }
 
-    public void setOrganizations(List<String> organizations) {
+    public void setRoles(
+            List<RoleWithAudienceDO> roles) {
 
-        this.organizations = organizations;
+        this.roles = roles;
     }
 }

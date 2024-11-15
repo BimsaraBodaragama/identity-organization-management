@@ -33,13 +33,13 @@ import org.wso2.carbon.identity.organization.management.organization.user.sharin
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.internal.OrganizationUserSharingDataHolder;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.RoleWithAudienceDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareBaseDO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareGeneral;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareGeneralDO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareSelective;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareSelectiveDO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareSelectiveOrgDetailsDO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserUnshareGeneralDO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserUnshareSelectiveDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.GeneralUserShare;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.GeneralUserShareDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserShare;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserShareDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserShareOrgDetailsDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.GeneralUserUnshareDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserUnshareDO;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
@@ -93,7 +93,7 @@ public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHa
      *//*
 
     @Override
-    public void propagateUserSelectiveShare(UserShareSelectiveDO userShareSelectiveDO)
+    public void propagateUserSelectiveShare(SelectiveUserShareDO userShareSelectiveDO)
             throws UserShareMgtServerException, OrganizationManagementException, IdentityRoleManagementException,
             UserStoreException, IdentityApplicationManagementException {
 
@@ -108,21 +108,21 @@ public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHa
     }
 
     private void propagateUserSelectiveShareForGivenUser(String userId,
-                                                         List<UserShareSelectiveOrgDetailsDO> organizations)
+                                                         List<SelectiveUserShareOrgDetailsDO> organizations)
             throws OrganizationManagementException, IdentityRoleManagementException,
             UserStoreException, IdentityApplicationManagementException {
 
-        for (UserShareSelectiveOrgDetailsDO orgDetails : organizations) {
-            UserShareSelective userShareSelective = createUserShareSelective(userId, orgDetails);
+        for (SelectiveUserShareOrgDetailsDO orgDetails : organizations) {
+            SelectiveUserShare userShareSelective = createUserShareSelective(userId, orgDetails);
             propagateUserSelectiveShareToSelectedOrganization(userShareSelective);
         }
     }
 
-    private UserShareSelective createUserShareSelective(String userId, UserShareSelectiveOrgDetailsDO orgDetails)
+    private SelectiveUserShare createUserShareSelective(String userId, SelectiveUserShareOrgDetailsDO orgDetails)
             throws OrganizationManagementException, IdentityApplicationManagementException,
             IdentityRoleManagementException {
 
-        return new UserShareSelective()
+        return new SelectiveUserShare()
                 .withUserId(userId)
                 .withOrganizationId(orgDetails.getOrganizationId())
                 .withPolicy(getPolicyByValue(orgDetails.getPolicy()))
@@ -178,7 +178,7 @@ public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHa
      * @param userShareSelective Contains details for sharing a user with an organization.
      *//*
 
-    private void propagateUserSelectiveShareToSelectedOrganization(UserShareSelective userShareSelective)
+    private void propagateUserSelectiveShareToSelectedOrganization(SelectiveUserShare userShareSelective)
             throws OrganizationManagementException, UserStoreException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
@@ -354,7 +354,7 @@ public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHa
      *//*
 
     @Override
-    public void propagateUserGeneralShare(UserShareGeneralDO userShareGeneralDO)
+    public void propagateUserGeneralShare(GeneralUserShareDO userShareGeneralDO)
             throws UserShareMgtServerException, OrganizationManagementException, IdentityRoleManagementException,
             IdentityApplicationManagementException {
 
@@ -371,13 +371,13 @@ public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHa
 
     private void propagateGeneralShareForUser(String userId, PolicyEnum policy, List<String> roleIds) {
 
-        UserShareGeneral userShareGeneral = createUserShareGeneral(userId, policy, roleIds);
+        GeneralUserShare userShareGeneral = createUserShareGeneral(userId, policy, roleIds);
         shareUserWithAllOrganizations(userShareGeneral, policy);
     }
 
-    private UserShareGeneral createUserShareGeneral(String userId, PolicyEnum policy, List<String> roleIds) {
+    private GeneralUserShare createUserShareGeneral(String userId, PolicyEnum policy, List<String> roleIds) {
 
-        UserShareGeneral userShareGeneral = new UserShareGeneral();
+        GeneralUserShare userShareGeneral = new GeneralUserShare();
         userShareGeneral.setUserId(userId);
         userShareGeneral.setPolicy(policy);
         userShareGeneral.setRoles(roleIds);
@@ -391,7 +391,7 @@ public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHa
      * @param userShareGeneral Contains details for sharing a user with all organizations.
      *//*
 
-    private void shareUserWithAllOrganizations(UserShareGeneral userShareGeneral, PolicyEnum policy) {
+    private void shareUserWithAllOrganizations(GeneralUserShare userShareGeneral, PolicyEnum policy) {
 
         // We get all orgs under the policy given by userShareGeneral.
         // We can use private List<String> getOrganizationsBasedOnPolicy(String policy) for that
@@ -400,12 +400,12 @@ public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHa
     }
 
     @Override
-    public void propagateUserSelectiveUnshare(UserUnshareSelectiveDO userUnshareSelectiveDO) {
+    public void propagateUserSelectiveUnshare(SelectiveUserUnshareDO userUnshareSelectiveDO) {
         // TODO: To be implemented on selective unsharing
     }
 
     @Override
-    public void propagateUserGeneralUnshare(UserUnshareGeneralDO userUnshareGeneralDO) {
+    public void propagateUserGeneralUnshare(GeneralUserUnshareDO userUnshareGeneralDO) {
         // TODO: To be implemented on general unsharing
     }
 
@@ -441,14 +441,14 @@ public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHa
                     UserSharingConstants.ErrorMessage.ERROR_CODE_NULL_INPUT.getDescription());
         }
 
-        if (userShareDO instanceof UserShareSelectiveDO) {
-            validateSelectiveDO((UserShareSelectiveDO) userShareDO);
-        } else if (userShareDO instanceof UserShareGeneralDO) {
-            validateGeneralDO((UserShareGeneralDO) userShareDO);
+        if (userShareDO instanceof SelectiveUserShareDO) {
+            validateSelectiveDO((SelectiveUserShareDO) userShareDO);
+        } else if (userShareDO instanceof GeneralUserShareDO) {
+            validateGeneralDO((GeneralUserShareDO) userShareDO);
         }
     }
 
-    private void validateSelectiveDO(UserShareSelectiveDO selectiveDO) throws UserShareMgtServerException {
+    private void validateSelectiveDO(SelectiveUserShareDO selectiveDO) throws UserShareMgtServerException {
 
         // Validate userCriteria is not null
         validateNotNull(selectiveDO.getUserCriteria(),
@@ -469,7 +469,7 @@ public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHa
                 UserSharingConstants.ErrorMessage.ERROR_CODE_ORGANIZATIONS_NULL.getCode());
 
         // Validate each organization in the list
-        for (UserShareSelectiveOrgDetailsDO orgDetails : selectiveDO.getOrganizations()) {
+        for (SelectiveUserShareOrgDetailsDO orgDetails : selectiveDO.getOrganizations()) {
             validateNotNull(orgDetails.getOrganizationId(),
                     UserSharingConstants.ErrorMessage.ERROR_CODE_ORG_ID_NULL.getMessage(),
                     UserSharingConstants.ErrorMessage.ERROR_CODE_ORG_ID_NULL.getCode());
@@ -502,7 +502,7 @@ public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHa
         }
     }
 
-    private void validateGeneralDO(UserShareGeneralDO generalDO) throws UserShareMgtServerException {
+    private void validateGeneralDO(GeneralUserShareDO generalDO) throws UserShareMgtServerException {
 
         validateNotNull(generalDO.getUserCriteria(),
                 UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_INVALID.getMessage(),
@@ -553,7 +553,7 @@ public class UserSharingPolicyHandlerService2Impl implements UserSharingPolicyHa
 
     //Utility Methods.
 
-    private void validateUserShareSelectiveDO(UserShareSelectiveDO userShareSelectiveDO) {
+    private void validateUserShareSelectiveDO(SelectiveUserShareDO userShareSelectiveDO) {
         // TODO: HOPE EVERYTHING HAS ALREADY BEEN TAKEN CARE OF AT DB LEVEL
         //  1. validate if the user is in db
         //  2. validate if the org is in db --not priority

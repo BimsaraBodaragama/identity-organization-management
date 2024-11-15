@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_BUILD_USER_SHARE;
-import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_ORGANIZATION_ID_MISSING;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_POLICY_MISSING;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_ROLES_NULL;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_USER_ID_MISSING;
@@ -32,9 +31,9 @@ import static org.wso2.carbon.identity.organization.management.organization.user
 /**
  * Model that contains the user share general data object.
  */
-public class UserShareGeneral extends UserShareBase {
+public class GeneralUserShare extends UserShareBase {
 
-    // Custom Builder for UserShareGeneral
+    // Custom Builder for GeneralUserShare
     public static class Builder {
         private String userId;
         private PolicyEnum policy;
@@ -64,15 +63,15 @@ public class UserShareGeneral extends UserShareBase {
             return this;
         }
 
-        public UserShareGeneral build() throws OrganizationManagementServerException {
+        public GeneralUserShare build() throws OrganizationManagementServerException {
             if (userId == null || policy == null) {
                 throw new OrganizationManagementServerException(ERROR_CODE_BUILD_USER_SHARE.getMessage());
             }
-            UserShareGeneral userShareGeneral = new UserShareGeneral();
-            userShareGeneral.setUserId(userId);
-            userShareGeneral.setPolicy(policy);
-            userShareGeneral.setRoles(roles != null ? roles : new ArrayList<>());
-            return userShareGeneral;
+            GeneralUserShare generalUserShare = new GeneralUserShare();
+            generalUserShare.setUserId(userId);
+            generalUserShare.setPolicy(policy);
+            generalUserShare.setRoles(roles != null ? roles : new ArrayList<>());
+            return generalUserShare;
         }
     }
 }

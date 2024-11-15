@@ -176,7 +176,12 @@ public class UserSharingConstants {
                 "Policy must be provided."),
         ERROR_CODE_BUILD_USER_SHARE("10036",
                 "userId, organizationId, and policy are mandatory fields and must be provided",
-                "All required fields must be provided for building a SelectiveUserShare object.");
+                "All required fields must be provided for building a SelectiveUserShare object."),
+        ERROR_SKIP_SHARE("10037",
+                "Sharing beyond immediate child organizations is not allowed.",
+                "User sharing is only permitted with immediate child organizations. " +
+                        "Attempts to share beyond this scope are restricted."),
+        ;
 
         private final String code;
         private final String message;

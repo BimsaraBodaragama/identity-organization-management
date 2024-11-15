@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.APPLICATION;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_SKIP_SHARE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.LOG_INFO_SELECTIVE_SHARE_COMPLETED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_INPUT_MESSAGE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORGANIZATION;
@@ -98,8 +99,16 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         List<SelectiveUserShareOrgDetailsDO> organizations = selectiveUserShareDO.getOrganizations();
         Map<String, UserCriteriaType> userCriteria = selectiveUserShareDO.getUserCriteria();
 
+        List<String> sharingInitiatedOrg =
+                getOrganizationManager().getChildOrganizationsIds(getOrganizationId(), false);
+
         for (SelectiveUserShareOrgDetailsDO organization : organizations) {
-            populateSelectiveUserShareByCriteria(organization, userCriteria);
+            if(sharingInitiatedOrg.contains(organization.getOrganizationId())) {
+                populateSelectiveUserShareByCriteria(organization, userCriteria);
+            } else {
+                LOG.info(ERROR_SKIP_SHARE.getMessage());
+                errorMessages.offer(ERROR_SKIP_SHARE.getMessage());
+            }
         }
 
         LOG.info(LOG_INFO_SELECTIVE_SHARE_COMPLETED);

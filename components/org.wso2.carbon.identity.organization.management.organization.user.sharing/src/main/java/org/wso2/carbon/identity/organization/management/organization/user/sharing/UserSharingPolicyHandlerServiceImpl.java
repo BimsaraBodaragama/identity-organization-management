@@ -83,8 +83,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             new ResourceSharingPolicyHandlerDAOImpl();
     private static ConcurrentLinkedQueue<String> errorMessages;
 
-    //SELECTIVE SHARE
-
     /**
      * Propagates the selective share of a user to specific organizations.
      *
@@ -192,7 +190,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         for (String targetOrg : targetOrganizations) {
             LOG.info("Processing sharing for target organization: " + targetOrg);
-            //shareUser(userSharingDetails.withTargetOrgId(targetOrg));
             userSharingDetails.setTargetOrgId(targetOrg);
             shareUser(userSharingDetails);
             LOG.info("Completed sharing for target organization: " + targetOrg);
@@ -214,8 +211,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         if (isExistingUserInTargetOrg(originalUserName, targetOrg)) {
             errorMessages.add(
-                    "User under the username: " + originalUserName + " is already shared with organization: " +
-                            targetOrg);
+                    "User under the username: " + originalUserName +
+                            " is already shared with organization: " + targetOrg);
             return;
         }
 
@@ -227,14 +224,11 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                     targetOrg, sharingInitiatedOrgId, sharingType);
 
             // Assign roles if any are present
-            //TODO: Params sequence -> user, orgs, roles
             assignRolesIfPresent(sharedUserId, targetOrg, roleIds);
 
             // Handle future propagation if policy indicates it is required
             //TODO: Save the roles as well in
-            //TODO: Rename the below method as storeSharingPolicy
-            storeSharingPolicyAndDetails(USER, originalUserId, originalUserResidenceOrgId, targetOrg,
-                    policy);
+            storeSharingPolicyAndDetails(USER, originalUserId, originalUserResidenceOrgId, targetOrg, policy);
 
         } catch (OrganizationManagementException | IdentityRoleManagementException e) {
             handleErrorWhileSharingUser(targetOrg, e);

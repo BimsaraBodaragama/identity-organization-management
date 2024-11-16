@@ -55,7 +55,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.APPLICATION;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_SKIP_SHARE;
@@ -185,12 +189,58 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         List<String> targetOrganizations =
                 getOrgsToShareUserWithPerPolicy(organizationId, selectiveUserShare.getPolicy());
 
+//        for (String targetOrg : targetOrganizations) {
+//            LOG.info("Processing sharing for target organization: " + targetOrg);
+//            userSharingDetails.setTargetOrgId(targetOrg);
+//            shareUser(userSharingDetails);
+//            LOG.info("Completed sharing for target organization: " + targetOrg);
+//        }
+
+        // Thread-safe set to track processed organizations
+        Set<String> processedOrgs = ConcurrentHashMap.newKeySet();
+
+        // Create a thread pool for parallel execution
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
         for (String targetOrg : targetOrganizations) {
-            LOG.info("Processing sharing for target organization: " + targetOrg);
-            userSharingDetails.setTargetOrgId(targetOrg);
-            shareUser(userSharingDetails);
-            LOG.info("Completed sharing for target organization: " + targetOrg);
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                // Check and process organization if not already processed
+                try {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
+
+                    if (processedOrgs.add(targetOrg)) {
+                        try {
+                            LOG.info("Processing sharing for target organization: " + targetOrg);
+                            UserSharingDetails detailsCopy = userSharingDetails.copy(); // Defensive copy
+                            detailsCopy.setTargetOrgId(targetOrg);
+                            shareUser(detailsCopy);
+                            LOG.info("Completed sharing for target organization: " + targetOrg);
+                        } catch (Exception e) {
+                            handleErrorWhileSharingUser(targetOrg, e);
+                        }
+                    } else {
+                        LOG.warn("Skipping already processed organization: " + targetOrg);
+                    }
+
+                } finally {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+
+            }, executor);
+
+            futures.add(future);
         }
+
+        // Wait for all tasks to complete
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        // Shutdown the executor
+        executor.shutdown();
+
+        // Final log after all processing is complete
+        LOG.info("PP - Selective share completed in PP.");
     }
 
     private void shareUser(UserSharingDetails userSharingDetails)

@@ -18,6 +18,7 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -197,8 +198,7 @@ public class UserSharingDetails {
         }
 
         public Builder withRoleIds(List<String> roleIds) {
-
-            this.roleIds = roleIds != null ? roleIds : Collections.emptyList();
+            this.roleIds = roleIds != null ? new ArrayList<>(roleIds) : Collections.emptyList();
             return this;
         }
 
@@ -213,5 +213,19 @@ public class UserSharingDetails {
 
             return new UserSharingDetails(this);
         }
+    }
+
+    public UserSharingDetails copy() {
+        return new UserSharingDetails.Builder()
+                .withSharingUserId(this.sharingUserId)
+                .withSharingInitiatedOrgId(this.sharingInitiatedOrgId)
+                .withTargetOrgId(this.targetOrgId)
+                .withOriginalUserId(this.originalUserId)
+                .withOriginalUserName(this.originalUserName)
+                .withOriginalOrgId(this.originalOrgId)
+                .withSharingType(this.sharingType)
+                .withRoleIds(this.roleIds != null ? new ArrayList<>(this.roleIds) : null)
+                .withPolicy(this.policy)
+                .build();
     }
 }

@@ -189,13 +189,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         List<String> targetOrganizations =
                 getOrgsToShareUserWithPerPolicy(organizationId, selectiveUserShare.getPolicy());
 
-//        for (String targetOrg : targetOrganizations) {
-//            LOG.info("Processing sharing for target organization: " + targetOrg);
-//            userSharingDetails.setTargetOrgId(targetOrg);
-//            shareUser(userSharingDetails);
-//            LOG.info("Completed sharing for target organization: " + targetOrg);
-//        }
-
         // Thread-safe set to track processed organizations
         Set<String> processedOrgs = ConcurrentHashMap.newKeySet();
 
@@ -205,7 +198,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         for (String targetOrg : targetOrganizations) {
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                // Check and process organization if not already processed
+
                 try {
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
@@ -220,8 +213,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                         } catch (Exception e) {
                             handleErrorWhileSharingUser(targetOrg, e);
                         }
-                    } else {
-                        LOG.warn("Skipping already processed organization: " + targetOrg);
                     }
 
                 } finally {

@@ -216,7 +216,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                             detailsCopy.setTargetOrgId(targetOrg);
                             shareUser(detailsCopy);
                             LOG.info("Completed sharing for target organization: " + targetOrg);
-                        } catch (Exception e) {
+                        } catch (OrganizationManagementException | UserStoreException e) {
                             handleErrorWhileSharingUser(targetOrg, e);
                         }
                     }

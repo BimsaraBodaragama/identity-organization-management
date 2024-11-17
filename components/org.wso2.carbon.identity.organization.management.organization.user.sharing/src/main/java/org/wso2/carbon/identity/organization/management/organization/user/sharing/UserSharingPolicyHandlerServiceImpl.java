@@ -71,7 +71,6 @@ import static org.wso2.carbon.identity.organization.management.organization.user
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY_CODE_FOR_FUTURE_ONLY;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.SHARING_TYPE_SHARED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER;
-import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_GROUPS;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_ID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_IDS;
 import static org.wso2.carbon.identity.organization.management.service.util.Utils.getOrganizationId;
@@ -156,15 +155,9 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         }
     }
 
-    private void processSelectiveUserShare(String userId, SelectiveUserShareOrgDetailsDO organization)
-            throws IdentityApplicationManagementException, OrganizationManagementException,
-            IdentityRoleManagementException, UserStoreException {
-
-        SelectiveUserShare selectiveUserShare = createUserShareSelective(userId, organization);
-        String organizationId = organization.getOrganizationId();
-
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        AbstractUserStoreManager userStoreManager = getUserStoreManager(tenantId);
+    private UserSharingDetails getUserShareDetails(SelectiveUserShare selectiveUserShare,
+                                                   AbstractUserStoreManager userStoreManager)
+            throws OrganizationManagementException, UserStoreException {
 
         String sharingInitiatedOrgId = getOrganizationId();
         String sharingUserId = selectiveUserShare.getUserId(); //ID of the sharing user in the sharingInitiatedOrg
@@ -175,16 +168,29 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         String originalUserId = originalUserDetails.get(USER_ID);  //ID of the user in its originalUserResidenceOrgId
         String originalUserName = userStoreManager.getUserNameFromUserID(sharingUserId);
 
-        UserSharingDetails userSharingDetails =
-                new UserSharingDetails.Builder()
-                        .withSharingUserId(sharingUserId)
-                        .withSharingInitiatedOrgId(sharingInitiatedOrgId)
-                        .withOriginalUserId(originalUserId)
-                        .withOriginalOrgId(originalUserResidenceOrgId)
-                        .withOriginalUserName(originalUserName)
-                        .withSharingType(SHARING_TYPE_SHARED)
-                        .withRoleIds(selectiveUserShare.getRoles())
-                        .withPolicy(selectiveUserShare.getPolicy()).build();
+        return new UserSharingDetails.Builder()
+                .withSharingUserId(sharingUserId)
+                .withSharingInitiatedOrgId(sharingInitiatedOrgId)
+                .withOriginalUserId(originalUserId)
+                .withOriginalOrgId(originalUserResidenceOrgId)
+                .withOriginalUserName(originalUserName)
+                .withSharingType(SHARING_TYPE_SHARED)
+                .withRoleIds(selectiveUserShare.getRoles())
+                .withPolicy(selectiveUserShare.getPolicy()).build();
+
+    }
+
+    private void processSelectiveUserShare(String userId, SelectiveUserShareOrgDetailsDO organization)
+            throws IdentityApplicationManagementException, OrganizationManagementException,
+            IdentityRoleManagementException, UserStoreException {
+
+        SelectiveUserShare selectiveUserShare = createSelectiveUserShare(userId, organization);
+        String organizationId = organization.getOrganizationId();
+
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        AbstractUserStoreManager userStoreManager = getUserStoreManager(tenantId);
+
+        UserSharingDetails userSharingDetails = getUserShareDetails(selectiveUserShare, userStoreManager);
 
         List<String> targetOrganizations =
                 getOrgsToShareUserWithPerPolicy(organizationId, selectiveUserShare.getPolicy());
@@ -323,7 +329,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     }
 
     //TODO: Make names readable and make comment
-    private SelectiveUserShare createUserShareSelective(String userId, SelectiveUserShareOrgDetailsDO orgDetails)
+    private SelectiveUserShare createSelectiveUserShare(String userId, SelectiveUserShareOrgDetailsDO orgDetails)
             throws OrganizationManagementException, IdentityApplicationManagementException,
             IdentityRoleManagementException {
 

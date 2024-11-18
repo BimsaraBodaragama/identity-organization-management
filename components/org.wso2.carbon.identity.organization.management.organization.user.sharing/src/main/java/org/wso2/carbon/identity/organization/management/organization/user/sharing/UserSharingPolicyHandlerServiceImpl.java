@@ -44,6 +44,7 @@ import org.wso2.carbon.identity.organization.management.organization.user.sharin
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
+import org.wso2.carbon.identity.organization.resource.sharing.policy.management.ResourceSharingPolicyHandlerService;
 import org.wso2.carbon.identity.role.v2.mgt.core.RoleManagementService;
 import org.wso2.carbon.identity.role.v2.mgt.core.exception.IdentityRoleManagementException;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -273,6 +274,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             // Handle future propagation if policy indicates it is required
             //TODO: Save the roles as well in
             storeSharingPolicyAndDetails(USER, originalUserId, originalUserResidenceOrgId, targetOrg, policy);
+            getResourceSharingPolicyHandlerService().save();
 
         } catch (OrganizationManagementException | IdentityRoleManagementException e) {
             handleErrorWhileSharingUser(targetOrg, e);
@@ -507,6 +509,10 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     private ApplicationManagementService getApplicationManagementService() {
 
         return OrganizationUserSharingDataHolder.getInstance().getApplicationManagementService();
+    }
+
+    private ResourceSharingPolicyHandlerService getResourceSharingPolicyHandlerService() {
+        return OrganizationUserSharingDataHolder.getInstance().getResourceSharingPolicyHandlerService();
     }
 
     //Validation methods

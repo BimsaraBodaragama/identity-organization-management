@@ -20,4 +20,6 @@ package org.wso2.carbon.identity.organization.resource.sharing.policy.management
 
 public interface ResourceSharingPolicyHandlerService {
 
+    public void save();
+
 }

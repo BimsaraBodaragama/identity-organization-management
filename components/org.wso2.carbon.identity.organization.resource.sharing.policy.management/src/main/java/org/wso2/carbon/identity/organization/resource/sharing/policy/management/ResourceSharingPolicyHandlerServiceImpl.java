@@ -18,6 +18,21 @@
 
 package org.wso2.carbon.identity.organization.resource.sharing.policy.management;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.organization.resource.sharing.policy.management.dao.ResourceSharingPolicyHandlerDAO;
+import org.wso2.carbon.identity.organization.resource.sharing.policy.management.dao.ResourceSharingPolicyHandlerDAOImpl;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 public class ResourceSharingPolicyHandlerServiceImpl implements ResourceSharingPolicyHandlerService{
 
+    private static final Log LOG = LogFactory.getLog(ResourceSharingPolicyHandlerServiceImpl.class);
+    private static final ResourceSharingPolicyHandlerDAO resourceSharingPolicyHandlerDAO =
+            new ResourceSharingPolicyHandlerDAOImpl();
+    private static ConcurrentLinkedQueue<String> errorMessages;
+
+    public void save() {
+        LOG.info("Saving resource sharing policy handler");
+    }
 }

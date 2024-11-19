@@ -112,13 +112,13 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Bundle-Description>Organization User Association Management Service Bundle</Bundle-Description>
+                        <Bundle-Description>Organization Resource Sharing Policy Service Bundle</Bundle-Description>
                         <Private-Package>
-                            org.wso2.carbon.identity.organization.management.organization.user.sharing.internal
+                            org.wso2.carbon.identity.organization.resource.sharing.policy.management.internal
                         </Private-Package>
                         <Export-Package>
-                            !org.wso2.carbon.identity.organization.management.organization.user.sharing.internal,
-                            org.wso2.carbon.identity.organization.management.organization.user.sharing.*;
+                            !org.wso2.carbon.identity.organization.resource.sharing.policy.management.internal,
+                            org.wso2.carbon.identity.organization.resource.sharing.policy.management.*;
                             version="${identity.organization.management.exp.pkg.version}",
                         </Export-Package>
                         <Import-Package>

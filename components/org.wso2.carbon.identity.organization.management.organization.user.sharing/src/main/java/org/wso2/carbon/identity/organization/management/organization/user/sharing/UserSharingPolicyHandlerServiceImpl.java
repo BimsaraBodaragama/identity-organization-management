@@ -34,16 +34,17 @@ import org.wso2.carbon.identity.organization.management.organization.user.sharin
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.RoleWithAudienceDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserShareDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserShareOrgDetailsDO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareBaseDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.GeneralUserShareDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserShare;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserSharingDetails;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserUnshareDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareBaseDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserSharingDetails;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria.UserCriteriaType;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria.UserIds;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
+import org.wso2.carbon.identity.organization.resource.sharing.policy.management.ResourceSharingPolicyHandlerService;
 import org.wso2.carbon.identity.role.v2.mgt.core.RoleManagementService;
 import org.wso2.carbon.identity.role.v2.mgt.core.exception.IdentityRoleManagementException;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -273,6 +274,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             // Handle future propagation if policy indicates it is required
             //TODO: Save the roles as well in
             storeSharingPolicyAndDetails(USER, originalUserId, originalUserResidenceOrgId, targetOrg, policy);
+            getResourceSharingPolicyHandlerService().save();
 
         } catch (OrganizationManagementException | IdentityRoleManagementException e) {
             handleErrorWhileSharingUser(targetOrg, e);
@@ -319,8 +321,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     }
 
     private void storeSharingPolicyAndDetails(String resourceType, String originalUserId,
-                                                   String originalUserResidenceOrgId, String targetOrg,
-                                                   PolicyEnum policy)
+                                              String originalUserResidenceOrgId, String targetOrg,
+                                              PolicyEnum policy)
             throws OrganizationManagementServerException {
 
         if (getPoliciesForFuturePropagation().contains(policy.getPolicyCode())) {
@@ -340,7 +342,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                 .withRoles(getRoleIdsFromRoleNameAndAudience(orgDetails.getRoles())).build();
     }
 
-    ///////////
+    /// ////////
 
     private List<String> getPoliciesForFuturePropagation() {
 
@@ -507,6 +509,11 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     private ApplicationManagementService getApplicationManagementService() {
 
         return OrganizationUserSharingDataHolder.getInstance().getApplicationManagementService();
+    }
+
+    private ResourceSharingPolicyHandlerService getResourceSharingPolicyHandlerService() {
+
+        return OrganizationUserSharingDataHolder.getInstance().getResourceSharingPolicyHandlerService();
     }
 
     //Validation methods

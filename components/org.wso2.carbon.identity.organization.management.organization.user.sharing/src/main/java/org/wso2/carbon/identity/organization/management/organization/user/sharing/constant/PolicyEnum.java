@@ -13,7 +13,8 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
+ *//*
+
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.constant;
 
@@ -22,9 +23,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+*/
 /**
  * Enum representing user sharing policies with additional fields for code, name, applicable resources, and details.
- */
+ *//*
+
 public enum PolicyEnum {
 
     ALL_EXISTING_ORGS_ONLY(
@@ -110,14 +113,16 @@ public enum PolicyEnum {
     private final List<String> applicableResources;
     private final String description;
 
-    /**
+    */
+/**
      * Constructor to initialize the user sharing policy enum.
      *
      * @param policyCode          Unique code representing the sharing policy.
      * @param policyName          Name of the sharing policy (e.g., All_Orgs, Immediate_Children).
      * @param applicableResources Type of resources to which the policy applies (General/Selective).
      * @param description         Short description of the sharing policy.
-     */
+     *//*
+
     PolicyEnum(String policyCode, String policyName, String value, List<String> applicableResources,
                String description) {
 
@@ -128,62 +133,74 @@ public enum PolicyEnum {
         this.description = description;
     }
 
-    /**
+    */
+/**
      * Get the unique code of the sharing policy.
      *
      * @return Unique code of the sharing policy.
-     */
+     *//*
+
     public String getPolicyCode() {
 
         return policyCode;
     }
 
-    /**
+    */
+/**
      * Get the name of the sharing policy.
      *
      * @return Name of the sharing policy.
-     */
+     *//*
+
     public String getPolicyName() {
 
         return policyName;
     }
 
-    /**
+    */
+/**
      * Get the value of the sharing policy.
      *
      * @return Value of the sharing policy.
-     */
+     *//*
+
     public String getValue() {
 
         return value;
     }
 
-    /**
+    */
+/**
      * Get the applicable resource type for the sharing policy.
      *
      * @return Type of the applicable resource.
-     */
+     *//*
+
     public List<String> getApplicableResources() {
 
         return applicableResources;
     }
 
-    /**
+    */
+/**
      * Get the short description of the sharing policy.
      *
      * @return Description of the sharing policy.
-     */
+     *//*
+
     public String getDescription() {
 
         return description;
     }
 
-    /**
+    */
+/**
      * Get the PolicyEnum based on the given policy code.
      *
      * @param policyCode Code of the sharing policy.
      * @return Corresponding PolicyEnum, wrapped in Optional.
-     */
+     *//*
+
     public static Optional<PolicyEnum> getByPolicyCode(String policyCode) {
 
         for (PolicyEnum policy : PolicyEnum.values()) {
@@ -194,12 +211,14 @@ public enum PolicyEnum {
         return Optional.empty();
     }
 
-    /**
+    */
+/**
      * Get the PolicyEnum based on the given policy value.
      *
      * @param value Code of the sharing policy.
      * @return Corresponding PolicyEnum, wrapped in Optional.
-     */
+     *//*
+
     public static Optional<PolicyEnum> getByValue(String value) {
 
         for (PolicyEnum policy : PolicyEnum.values()) {
@@ -210,13 +229,15 @@ public enum PolicyEnum {
         return Optional.empty();
     }
 
-    /**
+    */
+/**
      * Validate and get the PolicyEnum based on the given requested policy.
      *
      * @param requestedPolicy Requested policy as an Object (should be an instance of String).
      * @return Corresponding PolicyEnum.
      * @throws IllegalArgumentException if the requested policy is invalid or not found.
-     */
+     *//*
+
     public static PolicyEnum validateAndGetPolicyEnum(String requestedPolicy) {
         for (PolicyEnum policy : PolicyEnum.values()) {
             if (policy.value.equalsIgnoreCase(requestedPolicy) ||
@@ -229,13 +250,15 @@ public enum PolicyEnum {
         throw new IllegalArgumentException("Invalid policy: " + requestedPolicy);
     }
 
-    /**
+    */
+/**
      * Get the PolicyEnum by matching value.
      *
      * @param value Policy value to match.
      * @return Corresponding PolicyEnum.
      * @throws IllegalArgumentException if the policy value is not found.
-     */
+     *//*
+
     public static PolicyEnum getPolicyByValue(String value) {
         for (PolicyEnum policy : PolicyEnum.values()) {
             if (policy.value.equalsIgnoreCase(value)) {
@@ -245,13 +268,15 @@ public enum PolicyEnum {
         throw new IllegalArgumentException("Invalid policy value: " + value);
     }
 
-    /**
+    */
+/**
      * Get the PolicyEnum by matching policy code.
      *
      * @param policyCode Policy code to match.
      * @return Corresponding PolicyEnum.
      * @throws IllegalArgumentException if the policy code is not found.
-     */
+     *//*
+
     public static PolicyEnum getPolicyByPolicyCode(String policyCode) {
         for (PolicyEnum policy : PolicyEnum.values()) {
             if (policy.policyCode.equalsIgnoreCase(policyCode)) {
@@ -261,13 +286,15 @@ public enum PolicyEnum {
         throw new IllegalArgumentException("Invalid policy code: " + policyCode);
     }
 
-    /**
+    */
+/**
      * Get the PolicyEnum by matching policy name.
      *
      * @param policyName Policy name to match.
      * @return Corresponding PolicyEnum.
      * @throws IllegalArgumentException if the policy name is not found.
-     */
+     *//*
+
     public static PolicyEnum getPolicyByPolicyName(String policyName) {
 
         for (PolicyEnum policy : PolicyEnum.values()) {
@@ -279,3 +306,4 @@ public enum PolicyEnum {
     }
 
 }
+*/

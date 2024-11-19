@@ -20,6 +20,9 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 
 import java.util.List;
 
+/**
+ * Represents a user criteria type that contains a list of user IDs.
+ */
 public class UserIds implements UserCriteriaType {
 
     private List<String> ids;

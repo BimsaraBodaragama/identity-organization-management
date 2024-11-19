@@ -30,12 +30,12 @@ import org.wso2.carbon.identity.organization.management.organization.user.sharin
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.dao.ResourceSharingPolicyHandlerDAOImpl;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtServerException;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.internal.OrganizationUserSharingDataHolder;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.GeneralUserShareDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.GeneralUserUnshareDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.RoleWithAudienceDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserShare;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserShareDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserShareOrgDetailsDO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.GeneralUserShareDO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserShare;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserUnshareDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserShareBaseDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserSharingDetails;
@@ -105,7 +105,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                 getOrganizationManager().getChildOrganizationsIds(getOrganizationId(), false);
 
         for (SelectiveUserShareOrgDetailsDO organization : organizations) {
-            if(sharingInitiatedOrg.contains(organization.getOrganizationId())) {
+            if (sharingInitiatedOrg.contains(organization.getOrganizationId())) {
                 populateSelectiveUserShareByCriteria(organization, userCriteria);
             } else {
                 LOG.info(ERROR_SKIP_SHARE.getMessage());

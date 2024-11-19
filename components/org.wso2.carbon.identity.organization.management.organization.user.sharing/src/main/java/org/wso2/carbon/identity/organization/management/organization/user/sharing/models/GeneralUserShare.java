@@ -33,7 +33,9 @@ import static org.wso2.carbon.identity.organization.management.organization.user
  */
 public class GeneralUserShare extends UserShareBase {
 
-    // Custom Builder for GeneralUserShare
+    /**
+     * Builder for constructing {@link GeneralUserShare} instances.
+     */
     public static class Builder {
         private String userId;
         private PolicyEnum policy;

@@ -42,7 +42,7 @@ public class ResourceSharingPolicyHandlerDAOImpl implements ResourceSharingPolic
 
         NamedJdbcTemplate namedJdbcTemplate = getNewTemplate();
         //TODO: Concern with mssql
-        try {//TODO: Go with placeholder names rather than 1,2,3,4,5
+        try { //TODO: Go with placeholder names rather than 1,2,3,4,5
             namedJdbcTemplate.withTransaction(template -> {
                 template.executeInsert(CREATE_RESOURCE_SHARING_POLICY, namedPreparedStatement -> {
                     namedPreparedStatement.setString(1, resource);

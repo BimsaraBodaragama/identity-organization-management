@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria;
 
+/**
+ * Represents a type of user criteria for sharing operations.
+ */
 public interface UserCriteriaType {
 
 }

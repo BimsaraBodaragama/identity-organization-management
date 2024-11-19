@@ -46,7 +46,9 @@ public class SelectiveUserShare extends UserShareBase {
         this.organizationId = organizationId;
     }
 
-    // Custom Builder for SelectiveUserShare
+    /**
+     * Builder for constructing {@link SelectiveUserShare} instances.
+     */
     public static class Builder {
         private String userId;
         private String organizationId;

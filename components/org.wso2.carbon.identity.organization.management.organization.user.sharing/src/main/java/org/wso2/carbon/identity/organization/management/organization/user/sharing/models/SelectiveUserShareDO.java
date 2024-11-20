@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria.UserCriteriaType;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.usercriteria.UserCriteriaType;
 
 import java.util.List;
 

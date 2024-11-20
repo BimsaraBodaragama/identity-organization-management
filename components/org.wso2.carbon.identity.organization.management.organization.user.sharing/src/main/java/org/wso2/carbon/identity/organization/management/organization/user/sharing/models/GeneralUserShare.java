@@ -17,8 +17,8 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
-import org.wso2.carbon.identity.organization.resource.sharing.policy.management.constant.PolicyEnum;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
+import org.wso2.carbon.identity.organization.resource.sharing.policy.management.constant.PolicyEnum;
 
 import java.util.ArrayList;
 import java.util.List;

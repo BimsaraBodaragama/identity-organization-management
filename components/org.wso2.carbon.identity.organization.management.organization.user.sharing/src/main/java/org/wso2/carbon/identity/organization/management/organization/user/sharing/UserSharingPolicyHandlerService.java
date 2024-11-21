@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing;
 
+import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtException;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.GeneralUserShareDO;
@@ -25,6 +26,7 @@ import org.wso2.carbon.identity.organization.management.organization.user.sharin
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserShareDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserUnshareDO;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.identity.organization.resource.sharing.policy.management.exception.ResourceSharingPolicyMgtException;
 import org.wso2.carbon.identity.role.v2.mgt.core.exception.IdentityRoleManagementException;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -35,7 +37,8 @@ public interface UserSharingPolicyHandlerService {
 
     void populateSelectiveUserShare(SelectiveUserShareDO selectiveUserShareDO)
             throws UserShareMgtException, OrganizationManagementException, IdentityRoleManagementException,
-            UserStoreException, IdentityApplicationManagementException;
+            UserStoreException, IdentityApplicationManagementException, ResourceSharingPolicyMgtException,
+            DataAccessException;
 
     void populateGeneralUserShare(GeneralUserShareDO generalUserShareDO)
             throws UserShareMgtException, OrganizationManagementException, IdentityRoleManagementException,

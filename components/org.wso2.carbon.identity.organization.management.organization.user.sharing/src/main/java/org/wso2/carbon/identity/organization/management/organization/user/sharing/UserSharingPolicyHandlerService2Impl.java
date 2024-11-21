@@ -69,8 +69,8 @@ import static org.wso2.carbon.identity.organization.management.organization.user
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_IDS;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.VALIDATION_CONTEXT_USER_SHARE_GENERAL_DO;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.VALIDATION_CONTEXT_USER_SHARE_SELECTIVE_DO;
-import static org.wso2.carbon.identity.organization.management.service.util.Utils.getOrganizationId;
-import static org.wso2.carbon.identity.organization.management.service.util.Utils.getUserStoreManager;
+import static org.wso2.carbon.identity.organization.management.service.util.ResourceSharingUtils.getOrganizationId;
+import static org.wso2.carbon.identity.organization.management.service.util.ResourceSharingUtils.getUserStoreManager;
 
 */
 /**

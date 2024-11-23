@@ -203,7 +203,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         if (getPoliciesForFuturePropagation().contains(organization.getPolicy().getPolicyCode())) {
             ResourceSharingPolicy resourceSharingPolicy = new ResourceSharingPolicy.Builder().
-                    withResourceId(userSharingDetails.getOriginalUserId()).
+                    withResourceId(userId).
                     withResourceType(ResourceType.USER).
                     withInitiatingOrgId(getOrganizationId()).
                     withPolicyHoldingOrgId(policyHoldingOrgId).
@@ -212,7 +212,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                     getResourceSharingPolicyHandlerService().addResourceSharingPolicy(resourceSharingPolicy);
 
             saveSharedResourceAttributes(resourceSharingPolicyRecordId, SharedAttributeType.ROLE,
-                    getOriginalRoleIds(userSharingDetails.getRoleIds()));
+                    userSharingDetails.getRoleIds());
 
         }
 

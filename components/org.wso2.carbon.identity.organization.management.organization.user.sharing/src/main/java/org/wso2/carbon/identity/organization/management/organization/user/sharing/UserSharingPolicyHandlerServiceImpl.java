@@ -51,6 +51,7 @@ import org.wso2.carbon.identity.organization.resource.sharing.policy.management.
 import org.wso2.carbon.identity.organization.resource.sharing.policy.management.exception.ResourceSharingPolicyMgtException;
 import org.wso2.carbon.identity.organization.resource.sharing.policy.management.exception.ResourceSharingPolicyMgtServerException;
 import org.wso2.carbon.identity.organization.resource.sharing.policy.management.models.ResourceSharingPolicy;
+import org.wso2.carbon.identity.organization.resource.sharing.policy.management.models.SharedResourceAttributes;
 import org.wso2.carbon.identity.role.v2.mgt.core.RoleManagementService;
 import org.wso2.carbon.identity.role.v2.mgt.core.exception.IdentityRoleManagementException;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -211,8 +212,13 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             int resourceSharingPolicyRecordId =
                     getResourceSharingPolicyHandlerService().addResourceSharingPolicy(resourceSharingPolicy);
 
-            saveSharedResourceAttributes(resourceSharingPolicyRecordId, SharedAttributeType.ROLE,
-                    userSharingDetails.getRoleIds());
+            SharedResourceAttributes sharedResourceAttributes = new SharedResourceAttributes.Builder()
+                    .withResourceSharingPolicyId(resourceSharingPolicyRecordId)
+                    .withSharedAttributeType(SharedAttributeType.ROLE)
+                    .withSharedAttributes(userSharingDetails.getRoleIds()).build();
+
+
+            saveSharedResourceAttributes(sharedResourceAttributes);
 
         }
 
@@ -264,12 +270,10 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         LOG.info("PP - Selective share completed in PP.");
     }
 
-    private void saveSharedResourceAttributes(int resourceSharingPolicyRecordId,
-                                              SharedAttributeType sharedAttributeType, List<String> roleIds)
+    private void saveSharedResourceAttributes(SharedResourceAttributes sharedResourceAttributes)
             throws ResourceSharingPolicyMgtServerException {
 
-        getResourceSharingPolicyHandlerService().addSharedResourceAttributes(resourceSharingPolicyRecordId,
-                sharedAttributeType, roleIds);
+        getResourceSharingPolicyHandlerService().addSharedResourceAttributes(sharedResourceAttributes);
     }
 
     private void shareUser(UserSharingDetails userSharingDetails)

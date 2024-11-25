@@ -51,7 +51,7 @@ import org.wso2.carbon.identity.organization.resource.sharing.policy.management.
 import org.wso2.carbon.identity.organization.resource.sharing.policy.management.exception.ResourceSharingPolicyMgtException;
 import org.wso2.carbon.identity.organization.resource.sharing.policy.management.exception.ResourceSharingPolicyMgtServerException;
 import org.wso2.carbon.identity.organization.resource.sharing.policy.management.models.ResourceSharingPolicy;
-import org.wso2.carbon.identity.organization.resource.sharing.policy.management.models.SharedResourceAttributes;
+import org.wso2.carbon.identity.organization.resource.sharing.policy.management.models.SharedResourceAttribute;
 import org.wso2.carbon.identity.role.v2.mgt.core.RoleManagementService;
 import org.wso2.carbon.identity.role.v2.mgt.core.exception.IdentityRoleManagementException;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -212,10 +212,19 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             int resourceSharingPolicyRecordId =
                     getResourceSharingPolicyHandlerService().addResourceSharingPolicy(resourceSharingPolicy);
 
-            SharedResourceAttributes sharedResourceAttributes = new SharedResourceAttributes.Builder()
-                    .withResourceSharingPolicyId(resourceSharingPolicyRecordId)
-                    .withSharedAttributeType(SharedAttributeType.ROLE)
-                    .withSharedAttributes(userSharingDetails.getRoleIds()).build();
+//            SharedResourceAttribute sharedResourceAttribute1 = new SharedResourceAttribute.Builder()
+//                    .withResourceSharingPolicyId(resourceSharingPolicyRecordId)
+//                    .withSharedAttributeType(SharedAttributeType.ROLE)
+//                    .withSharedAttributes(userSharingDetails.getRoleIds()).build();
+
+            List<SharedResourceAttribute> sharedResourceAttributes = new ArrayList<>();
+            for (String role : userSharingDetails.getRoleIds()) {
+                SharedResourceAttribute sharedResourceAttribute = new SharedResourceAttribute.Builder()
+                        .withResourceSharingPolicyId(resourceSharingPolicyRecordId)
+                        .withSharedAttributeType(SharedAttributeType.ROLE)
+                        .withSharedAttributeId(role).build();
+                sharedResourceAttributes.add(sharedResourceAttribute);
+            }
 
 
             saveSharedResourceAttributes(sharedResourceAttributes);
@@ -270,7 +279,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         LOG.info("PP - Selective share completed in PP.");
     }
 
-    private void saveSharedResourceAttributes(SharedResourceAttributes sharedResourceAttributes)
+    private void saveSharedResourceAttributes(List<SharedResourceAttribute> sharedResourceAttributes)
             throws ResourceSharingPolicyMgtServerException {
 
         getResourceSharingPolicyHandlerService().addSharedResourceAttributes(sharedResourceAttributes);

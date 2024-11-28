@@ -20,8 +20,10 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserAssociation;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
+import org.wso2.carbon.user.core.UserStoreException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * DAO interface for organization user sharing.
@@ -38,7 +40,24 @@ public interface OrganizationUserSharingDAO {
      * @throws OrganizationManagementServerException If an error occurs while creating the organization user
      *                                               association.
      */
-    void createOrganizationUserAssociation(String userId, String orgId, String associatedUserId, String associatedOrgId)
+    void createOrganizationUserAssociation(String userId, String orgId, String associatedUserId,
+                                           String associatedOrgId)
+            throws OrganizationManagementServerException;
+
+    /**
+     * Creates the association between the shared user and the actual user in the shared organization.
+     *
+     * @param userId                    ID of the user who gets created in the organization.
+     * @param orgId                     Organization ID of the user shared organization.
+     * @param associatedUserId          Actual user ID of the associated user.
+     * @param associatedOrgId           The organization ID where the associated user is managed.
+     * @param associationInitiatedOrgId The organization ID where the association was initiated.
+     * @param associationType           The type of association.
+     * @throws OrganizationManagementServerException If an error occurs while creating the organization user
+     *                                               association.
+     */
+    void createOrganizationUserAssociation(String userId, String orgId, String associatedUserId, String associatedOrgId,
+                                           String associationInitiatedOrgId, String associationType)
             throws OrganizationManagementServerException;
 
     /**
@@ -95,4 +114,37 @@ public interface OrganizationUserSharingDAO {
      */
     UserAssociation getUserAssociation(String userId, String organizationId)
             throws OrganizationManagementServerException;
+
+    /**
+     * Checks if the specified columns are present in the given table in the database.
+     * <p>
+     * This method verifies the presence of each of the specified columns in the specified table.
+     * It returns true if all required columns exist, and false if any are missing.
+     *
+     * @param tableName   The name of the table to check for the presence of required columns.
+     * @param columnNames The names of the columns that are required to exist in the table.
+     * @return true if all specified columns are present in the table, false otherwise.
+     * @throws UserStoreException If an error occurs while accessing the user store.
+     */
+    boolean areRequiredColumnsPresent(String tableName, String... columnNames)
+            throws UserStoreException, OrganizationManagementServerException;
+
+    /**
+     * Retrieves the user association details for the given user ID.
+     * <p>
+     * This method queries the UM_ORG_USER_ASSOCIATION table to fetch records based on the given user ID.
+     * It returns a map containing the original user and organization details:
+     * - If no records are found, the returned map contains the original user as the given user ID, and
+     * "originalOrg" as "Resident org of the input".
+     * - If a single record is found, the map contains "originalUser" as the associated user ID, and
+     * "originalOrg" as the associated organization ID from the record.
+     * - If multiple records are found, the map contains "originalUser" and "originalOrg" from the first record.
+     *
+     * @param userId The ID of the user for whom to fetch the association details.
+     * @return A map with keys "originalUser" and "originalOrg", containing the corresponding user and organization
+     * details.
+     * @throws OrganizationManagementServerException If an error occurs while retrieving the user association details.
+     */
+    Map<String, String> getUserAssociationDetailsByUserId(String userId) throws OrganizationManagementServerException;
+
 }

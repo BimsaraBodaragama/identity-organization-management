@@ -31,6 +31,8 @@ import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.OrganizationUserSharingService;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.OrganizationUserSharingServiceImpl;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.UserSharingPolicyHandlerService;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.UserSharingPolicyHandlerServiceImpl;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.listener.SharedUserOperationEventListener;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.listener.SharingOrganizationCreatorUserEventHandler;
 import org.wso2.carbon.identity.organization.management.role.management.service.RoleManager;
@@ -63,6 +65,10 @@ public class OrganizationUserSharingServiceComponent {
                 new SharedUserOperationEventListener(), null);
         bundleContext.registerService(AbstractEventHandler.class.getName(),
                 new SharingOrganizationCreatorUserEventHandler(), null);
+        UserSharingPolicyHandlerService userSharingPolicyHandlerService = new UserSharingPolicyHandlerServiceImpl();
+        bundleContext.registerService(UserSharingPolicyHandlerService.class.getName(), userSharingPolicyHandlerService,
+                null);
+
         LOG.info("OrganizationUserSharingServiceComponent activated successfully.");
     }
 

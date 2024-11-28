@@ -28,11 +28,11 @@ public interface ResourceSharingPolicyHandlerDAO {
     /**
      * Creates a record of a resource sharing policy.
      *
-     * @param resource               The resource being shared.
-     * @param resourceType           The type of the resource.
-     * @param initiatedOrganization  The organization initiating the sharing.
+     * @param resource                  The resource being shared.
+     * @param resourceType              The type of the resource.
+     * @param initiatedOrganization     The organization initiating the sharing.
      * @param policyHoldingOrganization The organization holding the policy for the shared resource.
-     * @param policy                 The sharing policy.
+     * @param policy                    The sharing policy.
      * @throws OrganizationManagementServerException If an error occurs while creating the sharing policy record.
      */
     void createResourceSharingPolicyRecord(String resource, String resourceType, String initiatedOrganization,
@@ -42,9 +42,9 @@ public interface ResourceSharingPolicyHandlerDAO {
     /**
      * Deletes a resource sharing policy record.
      *
-     * @param resource               The resource being shared.
-     * @param resourceType           The type of the resource.
-     * @param initiatedOrganization  The organization initiating the sharing.
+     * @param resource                  The resource being shared.
+     * @param resourceType              The type of the resource.
+     * @param initiatedOrganization     The organization initiating the sharing.
      * @param policyHoldingOrganization The organization holding the policy for the shared resource.
      * @return True if the record is deleted successfully.
      * @throws OrganizationManagementServerException If an error occurs while deleting the sharing policy record.

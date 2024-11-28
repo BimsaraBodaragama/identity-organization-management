@@ -17,8 +17,8 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria.UserCriteriaType;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.usercriteria.UserCriteriaType;
+import org.wso2.carbon.identity.organization.resource.sharing.policy.management.constant.PolicyEnum;
 
 import java.util.List;
 

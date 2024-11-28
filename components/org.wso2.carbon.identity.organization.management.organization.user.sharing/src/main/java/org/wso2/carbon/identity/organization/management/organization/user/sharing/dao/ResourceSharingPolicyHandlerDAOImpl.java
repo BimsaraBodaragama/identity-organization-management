@@ -29,6 +29,7 @@ import static org.wso2.carbon.identity.organization.management.service.constant.
 import static org.wso2.carbon.identity.organization.management.service.constant.OrganizationManagementConstants.ErrorMessages.ERROR_CODE_ERROR_DELETE_ORGANIZATION_USER_ASSOCIATION_FOR_SHARED_USER;
 import static org.wso2.carbon.identity.organization.management.service.util.Utils.getNewTemplate;
 import static org.wso2.carbon.identity.organization.management.service.util.Utils.handleServerException;
+
 /**
  * DAO implementation for handling user sharing policies.
  */
@@ -41,7 +42,7 @@ public class ResourceSharingPolicyHandlerDAOImpl implements ResourceSharingPolic
 
         NamedJdbcTemplate namedJdbcTemplate = getNewTemplate();
         //TODO: Concern with mssql
-        try {//TODO: Go with placeholder names rather than 1,2,3,4,5
+        try { //TODO: Go with placeholder names rather than 1,2,3,4,5
             namedJdbcTemplate.withTransaction(template -> {
                 template.executeInsert(CREATE_RESOURCE_SHARING_POLICY, namedPreparedStatement -> {
                     namedPreparedStatement.setString(1, resource);

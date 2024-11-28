@@ -17,8 +17,8 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.PolicyEnum;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
+import org.wso2.carbon.identity.organization.resource.sharing.policy.management.constant.PolicyEnum;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,9 @@ public class SelectiveUserShare extends UserShareBase {
         this.organizationId = organizationId;
     }
 
-    // Custom Builder for SelectiveUserShare
+    /**
+     * Builder for constructing {@link GeneralUserShare} instances.
+     */
     public static class Builder {
         private String userId;
         private String organizationId;

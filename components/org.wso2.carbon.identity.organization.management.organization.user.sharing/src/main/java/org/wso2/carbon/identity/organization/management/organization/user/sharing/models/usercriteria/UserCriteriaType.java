@@ -16,8 +16,11 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria;
+package org.wso2.carbon.identity.organization.management.organization.user.sharing.models.usercriteria;
 
+/**
+ * Represents a type of user criteria for sharing operations.
+ */
 public interface UserCriteriaType {
 
 }

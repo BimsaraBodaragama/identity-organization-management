@@ -16,10 +16,13 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria;
+package org.wso2.carbon.identity.organization.management.organization.user.sharing.models.usercriteria;
 
 import java.util.List;
 
+/**
+ * Represents a user criteria type that contains a list of user IDs.
+ */
 public class UserIds implements UserCriteriaType {
 
     private List<String> ids;

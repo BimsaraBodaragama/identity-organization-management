@@ -17,13 +17,14 @@
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
 
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.userCriteria.UserCriteriaType;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.usercriteria.UserCriteriaType;
 
-import java.util.List;
 import java.util.Map;
 
 /**
  * Abstract class for common properties and methods for user share data objects.
+ *
+ * @param <T> The type of user criteria used in the user sharing operations.
  */
 public abstract class UserShareBaseDO<T extends UserCriteriaType> {
 

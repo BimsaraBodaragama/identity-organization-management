@@ -290,7 +290,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         // Keep a String to save sharingUserId which equals to userSharingDetails.getSharingUserId()
         String sharingInitiatedOrgId = userSharingDetails.getSharingInitiatedOrgId();
-        String targetOrg = userSharingDetails.getTargetOrgId();
+        String targetOrgId = userSharingDetails.getTargetOrgId();
         String originalUserId = userSharingDetails.getOriginalUserId();
         String originalUserName = userSharingDetails.getOriginalUserName();
         String originalUserResidenceOrgId = userSharingDetails.getOriginalOrgId();
@@ -298,10 +298,10 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         List<String> roleIds = userSharingDetails.getRoleIds();
         //PolicyEnum policy = userSharingDetails.getPolicy();
 
-        if (isExistingUserInTargetOrg(originalUserName, targetOrg)) {
+        if (isExistingUserInTargetOrg(originalUserName, targetOrgId)) {
             errorMessages.add(
                     "User under the username: " + originalUserName +
-                            " is already shared with organization: " + targetOrg);
+                            " is already shared with organization: " + targetOrgId);
             return;
         }
 
@@ -310,18 +310,18 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
             // Share the user with the target organization and get shared user ID for further operations
             sharedUserId = shareUserWithTargetOrg(originalUserId, originalUserResidenceOrgId,
-                    targetOrg, sharingInitiatedOrgId, sharingType);
+                    targetOrgId, sharingInitiatedOrgId, sharingType);
 
             // Assign roles if any are present
-            assignRolesIfPresent(sharedUserId, targetOrg, roleIds);
+            assignRolesIfPresent(sharedUserId, targetOrgId, sharingInitiatedOrgId, roleIds);
 
             // Handle future propagation if policy indicates it is required
             //TODO: Save the roles as well in
             //storeSharingPolicyAndDetails(USER, originalUserId, originalUserResidenceOrgId, targetOrg, policy);
 
         } catch (OrganizationManagementException | IdentityRoleManagementException e) {
-            handleErrorWhileSharingUser(targetOrg, e);
-            rollbackSharingIfNecessary(sharedUserId, targetOrg);
+            handleErrorWhileSharingUser(targetOrgId, e);
+            rollbackSharingIfNecessary(sharedUserId, targetOrgId);
         }
     }
 
@@ -355,11 +355,12 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         }
     }
 
-    private void assignRolesIfPresent(String sharedUserId, String targetOrg, List<String> roleIds)
+    private void assignRolesIfPresent(String sharedUserId, String targetOrgId, String sharingInitiatedOrgId,
+                                      List<String> roleIds)
             throws IdentityRoleManagementException, OrganizationManagementException {
 
         if (!roleIds.isEmpty()) {
-            assignRolesToTheSharedUser(sharedUserId, targetOrg, roleIds);
+            assignRolesToTheSharedUser(sharedUserId, targetOrgId, sharingInitiatedOrgId, roleIds);
         }
     }
 
@@ -410,17 +411,26 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
     }
 
-    private void assignRolesToTheSharedUser(String sharedUser, String targetOrg, List<String> roles)
+    private void assignRolesToTheSharedUser(String sharedUser, String targetOrgId, String sharingInitiatedOrgId,
+                                            List<String> roles)
             throws IdentityRoleManagementException, OrganizationManagementException {
 
-        String targetOrgTenantDomain = getOrganizationManager().resolveTenantDomain(targetOrg);
+        String sharingInitiatedOrgTenantDomain = getOrganizationManager().resolveTenantDomain(sharingInitiatedOrgId);
+        String targetOrgTenantDomain = getOrganizationManager().resolveTenantDomain(targetOrgId);
 
         //TODO: Update the query
 
-        List<String> originalRoles = getOriginalRoleIds(roles);
+        Map<String, String> sharedRoleToMainRoleMappingsBySubOrg =
+                getRoleManagementService().getSharedRoleToMainRoleMappingsBySubOrg(roles,
+                        sharingInitiatedOrgTenantDomain);
+
+        List<String> mainRoles = new ArrayList<>();
+        for (String role : roles) {
+            mainRoles.add(sharedRoleToMainRoleMappingsBySubOrg.getOrDefault(role, role));
+        }
 
         Map<String, String> mainRoleToSharedRoleMappingsBySubOrg =
-                getRoleManagementService().getMainRoleToSharedRoleMappingsBySubOrg(originalRoles,
+                getRoleManagementService().getMainRoleToSharedRoleMappingsBySubOrg(mainRoles,
                         targetOrgTenantDomain);
 
         //TODO: Since we are going only with POST, even for role updates, we have to get the earlier roles and delete it
@@ -430,10 +440,6 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                     Collections.emptyList(), targetOrgTenantDomain);
         }
 
-    }
-
-    private List<String> getOriginalRoleIds(List<String> roles) throws IdentityRoleManagementException {
-        return getRoleManagementService().getMainRoleUUIDsForSharedRoles(roles);
     }
 
     private boolean isExistingUserInTargetOrg(String userName, String organizationId)

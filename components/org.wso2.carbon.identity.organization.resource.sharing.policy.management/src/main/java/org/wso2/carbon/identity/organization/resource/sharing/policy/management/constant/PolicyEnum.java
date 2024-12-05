@@ -17,14 +17,9 @@
 
 package org.wso2.carbon.identity.organization.resource.sharing.policy.management.constant;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import static org.wso2.carbon.identity.organization.resource.sharing.policy.management.constant.ResourceSharingConstants.APPLICATION;
-import static org.wso2.carbon.identity.organization.resource.sharing.policy.management.constant.ResourceSharingConstants.IDP;
-import static org.wso2.carbon.identity.organization.resource.sharing.policy.management.constant.ResourceSharingConstants.USER;
 
 /**
  * Enum representing user sharing policies with additional fields for code, name, applicable resources, and details.
@@ -35,7 +30,7 @@ public enum PolicyEnum {
             "GEN-EO-0001",
             "AllExistingOrgsOnly",
             "ALL_EXISTING_ORGS_ONLY",
-            Arrays.asList(USER, APPLICATION, IDP),
+            Collections.singletonList(ResourceType.USER),
             "This policy applies when the resource needs to be shared with all existing organizations at " +
                     "the current time. Newly created organizations after the policy is applied will not be included " +
                     "under this policy."),
@@ -43,14 +38,14 @@ public enum PolicyEnum {
             "GEN-EF-0002",
             "AllExistingAndFutureOrgs",
             "ALL_EXISTING_AND_FUTURE_ORGS",
-            Arrays.asList(USER, APPLICATION, IDP),
+            Collections.singletonList(ResourceType.USER),
             "This policy allows sharing the resource with all current and any future organizations. It " +
                     "ensures that any new organizations created after the policy is set are automatically included."),
     IMMEDIATE_EXISTING_ORGS_ONLY(
             "GEN-EO-0003",
             "ImmediateExistingOrgsOnly",
             "IMMEDIATE_EXISTING_ORGS_ONLY",
-            Arrays.asList(USER, APPLICATION, IDP),
+            Collections.singletonList(ResourceType.USER),
             "This policy is used to share the resource exclusively with all immediate existing child " +
                     "organizations. Newly created immediate child organizations after the policy is applied are " +
                     "not included."),
@@ -58,7 +53,7 @@ public enum PolicyEnum {
             "GEN-EF-0004",
             "ImmediateExistingAndFutureOrgs",
             "IMMEDIATE_EXISTING_AND_FUTURE_ORGS",
-            Arrays.asList(USER, APPLICATION, IDP),
+            Collections.singletonList(ResourceType.USER),
             "This policy is used to share the resource exclusively with all immediate existing child " +
                     "organizations. Newly created immediate child organizations after the policy is applied are " +
                     "not included."),
@@ -66,14 +61,14 @@ public enum PolicyEnum {
             "SEL-EO-0001",
             "SelectedOrgOnly",
             "SELECTED_ORG_ONLY",
-            Arrays.asList(USER, APPLICATION, IDP),
+            Collections.singletonList(ResourceType.USER),
             "This policy applies when the resource is to be shared with a single, specific organization " +
                     "only. Newly created child organizations under this selected organization will not be included."),
     SELECTED_ORG_WITH_ALL_EXISTING_CHILDREN_ONLY(
             "SEL-EO-0002",
             "SelectedOrgWithAllExistingChildrenOnly",
             "SELECTED_ORG_WITH_ALL_EXISTING_CHILDREN_ONLY",
-            Arrays.asList(USER, APPLICATION, IDP),
+            Collections.singletonList(ResourceType.USER),
             "This policy ensures the resource is shared with a selected organization and all of its " +
                     "existing child organizations. New child organizations created under this selected organization " +
                     "after the policy is applied will not be included."),
@@ -81,14 +76,14 @@ public enum PolicyEnum {
             "SEL-EF-0003",
             "SelectedOrgWithAllExistingAndFutureChildren",
             "SELECTED_ORG_WITH_ALL_EXISTING_AND_FUTURE_CHILDREN",
-            Arrays.asList(USER, APPLICATION, IDP),
+            Collections.singletonList(ResourceType.USER),
             "This policy ensures the resource is shared with a selected organization and all of its child " +
                     "organizations, including those created in the future."),
     SELECTED_ORG_WITH_EXISTING_IMMEDIATE_CHILDREN_ONLY(
             "SEL-EO-0004",
             "SelectedOrgWithExistingImmediateChildrenOnly",
             "SELECTED_ORG_WITH_EXISTING_IMMEDIATE_CHILDREN_ONLY",
-            Arrays.asList(USER, APPLICATION, IDP),
+            Collections.singletonList(ResourceType.USER),
             "This policy shares the resource with a selected organization and all of its existing " +
                     "immediate child organizations. Newly created immediate children will not be included after " +
                     "the policy is applied."),
@@ -96,7 +91,7 @@ public enum PolicyEnum {
             "SEL-EF-0005",
             "SelectedOrgWithExistingImmediateAndFutureChildren",
             "SELECTED_ORG_WITH_EXISTING_IMMEDIATE_AND_FUTURE_CHILDREN",
-            Arrays.asList(USER, APPLICATION, IDP),
+            Collections.singletonList(ResourceType.USER),
             "This policy allows sharing the resource with a selected organization and all of its " +
                     "immediate child organizations, including those created in the future."),
     NO_SHARING(
@@ -111,19 +106,20 @@ public enum PolicyEnum {
     private final String policyCode;
     private final String policyName;
     private final String value;
-    private final List<String> applicableResources;
+    private final List<ResourceType> applicableResources;
     private final String description;
 
     /**
      * Constructor to initialize the user sharing policy enum.
      *
      * @param policyCode          Unique code representing the sharing policy.
-     * @param policyName          Name of the sharing policy (e.g., All_Orgs, Immediate_Children).
-     * @param applicableResources Type of resources to which the policy applies (General/Selective).
+     * @param policyName          Name of the sharing policy.
+     * @param value               The value of the sharing policy.
+     * @param applicableResources Type of resources to which the policy applies.
      * @param description         Short description of the sharing policy.
      */
-    PolicyEnum(String policyCode, String policyName, String value, List<String> applicableResources,
-               String description) {
+    PolicyEnum(String policyCode, String policyName, String value,
+               List<ResourceType> applicableResources, String description) {
 
         this.policyCode = policyCode;
         this.policyName = policyName;
@@ -165,9 +161,9 @@ public enum PolicyEnum {
     /**
      * Get the applicable resource type for the sharing policy.
      *
-     * @return Type of the applicable resource.
+     * @return Types of the applicable resources.
      */
-    public List<String> getApplicableResources() {
+    public List<ResourceType> getApplicableResources() {
 
         return applicableResources;
     }
@@ -222,6 +218,7 @@ public enum PolicyEnum {
      * @throws IllegalArgumentException if the requested policy is invalid or not found.
      */
     public static PolicyEnum validateAndGetPolicyEnum(String requestedPolicy) {
+
         for (PolicyEnum policy : PolicyEnum.values()) {
             if (policy.value.equalsIgnoreCase(requestedPolicy) ||
                     policy.policyCode.equalsIgnoreCase(requestedPolicy) ||
@@ -241,6 +238,7 @@ public enum PolicyEnum {
      * @throws IllegalArgumentException if the policy value is not found.
      */
     public static PolicyEnum getPolicyByValue(String value) {
+
         for (PolicyEnum policy : PolicyEnum.values()) {
             if (policy.value.equalsIgnoreCase(value)) {
                 return policy;
@@ -257,6 +255,7 @@ public enum PolicyEnum {
      * @throws IllegalArgumentException if the policy code is not found.
      */
     public static PolicyEnum getPolicyByPolicyCode(String policyCode) {
+
         for (PolicyEnum policy : PolicyEnum.values()) {
             if (policy.policyCode.equalsIgnoreCase(policyCode)) {
                 return policy;
@@ -281,5 +280,4 @@ public enum PolicyEnum {
         }
         throw new IllegalArgumentException("Invalid policy name: " + policyName);
     }
-
 }

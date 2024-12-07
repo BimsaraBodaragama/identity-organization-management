@@ -168,21 +168,20 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
                                                    AbstractUserStoreManager userStoreManager)
             throws OrganizationManagementException, UserStoreException {
 
-        String sharingInitiatedOrgId = getOrganizationId();
-        String sharingUserId = selectiveUserShare.getUserId(); //ID of the sharing user in the sharingInitiatedOrg
+        String sharingInitOrgId = getOrganizationId();
+        String userIdOfSharingUser = selectiveUserShare.getUserId();
 
-        Map<String, String> originalUserDetails =
-                getOrganizationUserSharingService().getOriginalUserDetailsFromSharingUser(sharingUserId);
-        String originalUserResidenceOrgId = originalUserDetails.get(ORG_ID);
-        String originalUserId = originalUserDetails.get(USER_ID);  //ID of the user in its originalUserResidenceOrgId
-        String originalUserName = userStoreManager.getUserNameFromUserID(sharingUserId);
+        Map<String, String> detailsOfMainUser = getOrganizationUserSharingService().getOriginalUserDetailsFromSharingUser(userIdOfSharingUser);
+        String orgIdOfMainUser = detailsOfMainUser.get(ORG_ID);
+        String userIdOfMainUser = detailsOfMainUser.get(USER_ID);
+        String usernameOfMainUser = userStoreManager.getUserNameFromUserID(userIdOfSharingUser);
 
         return new UserSharingDetails.Builder()
-                .withSharingUserId(sharingUserId)
-                .withSharingInitiatedOrgId(sharingInitiatedOrgId)
-                .withOriginalUserId(originalUserId)
-                .withOriginalOrgId(originalUserResidenceOrgId)
-                .withOriginalUserName(originalUserName)
+                .withUserIdOfSharingUser(userIdOfSharingUser)
+                .withSharingInitiatedOrgId(sharingInitOrgId)
+                .withUserIdOfMainUser(userIdOfMainUser)
+                .withOrganizationIdOfMainUser(orgIdOfMainUser)
+                .withUsernameOfMainUser(usernameOfMainUser)
                 .withSharingType(SHARING_TYPE_SHARED)
                 .withRoleIds(selectiveUserShare.getRoles())
                 .withPolicy(selectiveUserShare.getPolicy()).build();
@@ -280,7 +279,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     }
 
     private void saveSharedResourceAttributes(List<SharedResourceAttribute> sharedResourceAttributes)
-            throws ResourceSharingPolicyMgtServerException {
+            throws ResourceSharingPolicyMgtException {
 
         getResourceSharingPolicyHandlerService().addSharedResourceAttributes(sharedResourceAttributes);
     }
@@ -289,18 +288,18 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
             throws UserStoreException, OrganizationManagementException {
 
         // Keep a String to save sharingUserId which equals to userSharingDetails.getSharingUserId()
-        String sharingInitiatedOrgId = userSharingDetails.getSharingInitiatedOrgId();
+        String sharingInitiatedOrgId = userSharingDetails.getSharingInitOrgId();
         String targetOrgId = userSharingDetails.getTargetOrgId();
-        String originalUserId = userSharingDetails.getOriginalUserId();
-        String originalUserName = userSharingDetails.getOriginalUserName();
-        String originalUserResidenceOrgId = userSharingDetails.getOriginalOrgId();
+        String userIdOfMainUser = userSharingDetails.getUserIdOfMainUser();
+        String usernameOfMainUser = userSharingDetails.getUsernameOfMainUser();
+        String orgIdOfMainUser = userSharingDetails.getOrgIdOfMainUser();
         String sharingType = userSharingDetails.getSharingType();
         List<String> roleIds = userSharingDetails.getRoleIds();
         //PolicyEnum policy = userSharingDetails.getPolicy();
 
-        if (isExistingUserInTargetOrg(originalUserName, targetOrgId)) {
+        if (isExistingUserInTargetOrg(usernameOfMainUser, targetOrgId)) {
             errorMessages.add(
-                    "User under the username: " + originalUserName +
+                    "User under the username: " + usernameOfMainUser +
                             " is already shared with organization: " + targetOrgId);
             return;
         }
@@ -309,7 +308,7 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         try {
 
             // Share the user with the target organization and get shared user ID for further operations
-            sharedUserId = shareUserWithTargetOrg(originalUserId, originalUserResidenceOrgId,
+            sharedUserId = shareUserWithTargetOrg(userIdOfMainUser, orgIdOfMainUser,
                     targetOrgId, sharingInitiatedOrgId, sharingType);
 
             // Assign roles if any are present

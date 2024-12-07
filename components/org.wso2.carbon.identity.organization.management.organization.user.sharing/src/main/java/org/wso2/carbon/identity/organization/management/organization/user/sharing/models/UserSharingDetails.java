@@ -27,37 +27,37 @@ import java.util.List;
  */
 public class UserSharingDetails {
 
-    private String sharingUserId;
-    private String sharingInitiatedOrgId;
+    private String userIdOfSharingUser;
+    private String sharingInitOrgId;
     private String targetOrgId;
-    private String originalUserId;
-    private String originalUserName;
-    private String originalOrgId;
+    private String userIdOfMainUser;
+    private String usernameOfMainUser;
+    private String orgIdOfMainUser;
     private String sharingType;
     private List<String> roleIds;
     private PolicyEnum policy;
 
     private UserSharingDetails(Builder builder) {
 
-        this.sharingUserId = builder.sharingUserId;
-        this.sharingInitiatedOrgId = builder.sharingInitiatedOrgId;
+        this.userIdOfSharingUser = builder.sharingUserId;
+        this.sharingInitOrgId = builder.sharingInitOrgId;
         this.targetOrgId = builder.targetOrgId;
-        this.originalUserId = builder.originalUserId;
-        this.originalUserName = builder.originalUserName;
-        this.originalOrgId = builder.originalOrgId;
+        this.userIdOfMainUser = builder.userIdOfMainUser;
+        this.usernameOfMainUser = builder.usernameOfMainUser;
+        this.orgIdOfMainUser = builder.orgIdOfMainUser;
         this.sharingType = builder.sharingType;
         this.roleIds = builder.roleIds;
         this.policy = builder.policy;
     }
 
-    public String getSharingUserId() {
+    public String getUserIdOfSharingUser() {
 
-        return sharingUserId;
+        return userIdOfSharingUser;
     }
 
-    public String getSharingInitiatedOrgId() {
+    public String getSharingInitOrgId() {
 
-        return sharingInitiatedOrgId;
+        return sharingInitOrgId;
     }
 
     public String getTargetOrgId() {
@@ -65,19 +65,19 @@ public class UserSharingDetails {
         return targetOrgId;
     }
 
-    public String getOriginalUserId() {
+    public String getUserIdOfMainUser() {
 
-        return originalUserId;
+        return userIdOfMainUser;
     }
 
-    public String getOriginalUserName() {
+    public String getUsernameOfMainUser() {
 
-        return originalUserName;
+        return usernameOfMainUser;
     }
 
-    public String getOriginalOrgId() {
+    public String getOrgIdOfMainUser() {
 
-        return originalOrgId;
+        return orgIdOfMainUser;
     }
 
     public String getSharingType() {
@@ -95,14 +95,14 @@ public class UserSharingDetails {
         return policy;
     }
 
-    public void setSharingUserId(String sharingUserId) {
+    public void setUserIdOfSharingUser(String userIdOfSharingUser) {
 
-        this.sharingUserId = sharingUserId;
+        this.userIdOfSharingUser = userIdOfSharingUser;
     }
 
-    public void setSharingInitiatedOrgId(String sharingInitiatedOrgId) {
+    public void setSharingInitOrgId(String sharingInitOrgId) {
 
-        this.sharingInitiatedOrgId = sharingInitiatedOrgId;
+        this.sharingInitOrgId = sharingInitOrgId;
     }
 
     public void setTargetOrgId(String targetOrgId) {
@@ -110,19 +110,19 @@ public class UserSharingDetails {
         this.targetOrgId = targetOrgId;
     }
 
-    public void setOriginalUserId(String originalUserId) {
+    public void setUserIdOfMainUser(String userIdOfMainUser) {
 
-        this.originalUserId = originalUserId;
+        this.userIdOfMainUser = userIdOfMainUser;
     }
 
-    public void setOriginalUserName(String originalUserName) {
+    public void setUsernameOfMainUser(String usernameOfMainUser) {
 
-        this.originalUserName = originalUserName;
+        this.usernameOfMainUser = usernameOfMainUser;
     }
 
-    public void setOriginalOrgId(String originalOrgId) {
+    public void setOrgIdOfMainUser(String orgIdOfMainUser) {
 
-        this.originalOrgId = originalOrgId;
+        this.orgIdOfMainUser = orgIdOfMainUser;
     }
 
     public void setSharingType(String sharingType) {
@@ -146,16 +146,16 @@ public class UserSharingDetails {
     public static class Builder {
 
         private String sharingUserId = "";
-        private String sharingInitiatedOrgId = "";
+        private String sharingInitOrgId = "";
         private String targetOrgId = "";
-        private String originalUserId = "";
-        private String originalUserName = "";
-        private String originalOrgId = "";
+        private String userIdOfMainUser = "";
+        private String usernameOfMainUser = "";
+        private String orgIdOfMainUser = "";
         private String sharingType = "";
         private List<String> roleIds = Collections.emptyList();
         private PolicyEnum policy = PolicyEnum.NO_SHARING;
 
-        public Builder withSharingUserId(String sharingUserId) {
+        public Builder withUserIdOfSharingUser(String sharingUserId) {
 
             this.sharingUserId = sharingUserId != null ? sharingUserId : "";
             return this;
@@ -163,7 +163,7 @@ public class UserSharingDetails {
 
         public Builder withSharingInitiatedOrgId(String sharingInitiatedOrgId) {
 
-            this.sharingInitiatedOrgId = sharingInitiatedOrgId != null ? sharingInitiatedOrgId : "";
+            this.sharingInitOrgId = sharingInitiatedOrgId != null ? sharingInitiatedOrgId : "";
             return this;
         }
 
@@ -173,21 +173,21 @@ public class UserSharingDetails {
             return this;
         }
 
-        public Builder withOriginalUserId(String originalUserId) {
+        public Builder withUserIdOfMainUser(String userIdOfMainUser) {
 
-            this.originalUserId = originalUserId != null ? originalUserId : "";
+            this.userIdOfMainUser = userIdOfMainUser != null ? userIdOfMainUser : "";
             return this;
         }
 
-        public Builder withOriginalUserName(String originalUserName) {
+        public Builder withUsernameOfMainUser(String usernameOfMainUser) {
 
-            this.originalUserName = originalUserName != null ? originalUserName : "";
+            this.usernameOfMainUser = usernameOfMainUser != null ? usernameOfMainUser : "";
             return this;
         }
 
-        public Builder withOriginalOrgId(String originalOrgId) {
+        public Builder withOrganizationIdOfMainUser(String orgIdOfMainUser) {
 
-            this.originalOrgId = originalOrgId != null ? originalOrgId : "";
+            this.orgIdOfMainUser = orgIdOfMainUser != null ? orgIdOfMainUser : "";
             return this;
         }
 
@@ -217,12 +217,12 @@ public class UserSharingDetails {
 
     public UserSharingDetails copy() {
         return new UserSharingDetails.Builder()
-                .withSharingUserId(this.sharingUserId)
-                .withSharingInitiatedOrgId(this.sharingInitiatedOrgId)
+                .withUserIdOfSharingUser(this.userIdOfSharingUser)
+                .withSharingInitiatedOrgId(this.sharingInitOrgId)
                 .withTargetOrgId(this.targetOrgId)
-                .withOriginalUserId(this.originalUserId)
-                .withOriginalUserName(this.originalUserName)
-                .withOriginalOrgId(this.originalOrgId)
+                .withUserIdOfMainUser(this.userIdOfMainUser)
+                .withUsernameOfMainUser(this.usernameOfMainUser)
+                .withOrganizationIdOfMainUser(this.orgIdOfMainUser)
                 .withSharingType(this.sharingType)
                 .withRoleIds(this.roleIds != null ? new ArrayList<>(this.roleIds) : null)
                 .withPolicy(this.policy)

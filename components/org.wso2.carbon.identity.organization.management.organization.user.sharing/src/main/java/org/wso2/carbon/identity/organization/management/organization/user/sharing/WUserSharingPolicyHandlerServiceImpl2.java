@@ -14,6 +14,7 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ */
 
 
 
@@ -710,4 +711,3 @@ public class WUserSharingPolicyHandlerServiceImpl2 implements WUserSharingPolicy
     }
 
 }
-*/

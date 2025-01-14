@@ -14,7 +14,7 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *//*
+
 
 
 package org.wso2.carbon.identity.organization.management.organization.user.sharing;
@@ -31,14 +31,14 @@ import org.wso2.carbon.identity.organization.management.organization.user.sharin
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.dao.ResourceSharingPolicyHandlerDAOImpl;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtServerException;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.internal.OrganizationUserSharingDataHolder;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.GeneralUserShareDO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.GeneralUserUnshareDO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.RoleWithAudienceDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.dos.GeneralUserShareDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.dos.GeneralUserUnshareDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.dos.RoleWithAudienceDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserShare;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserShareDO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserShareOrgDetailsDO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.SelectiveUserUnshareDO;
-import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.BaseUserShareDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.dos.SelectiveUserShareDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.dos.SelectiveUserShareOrgDetailsDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.dos.SelectiveUserUnshareDO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.dos.BaseUserShareDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserSharingDetails;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.usercriteria.UserCriteriaType;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.usercriteria.UserIds;
@@ -73,7 +73,8 @@ import static org.wso2.carbon.identity.organization.management.organization.user
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_SKIP_SHARE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.LOG_INFO_SELECTIVE_SHARE_COMPLETED;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_INPUT_MESSAGE;
-import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORGANIZATION;
+ import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_SHARE_INPUT_MESSAGE;
+ import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORGANIZATION;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ORG_ID;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY_CODE_FOR_EXISTING_AND_FUTURE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.POLICY_CODE_FOR_FUTURE_ONLY;
@@ -83,10 +84,9 @@ import static org.wso2.carbon.identity.organization.management.organization.user
 import static org.wso2.carbon.identity.organization.management.service.util.Utils.getOrganizationId;
 import static org.wso2.carbon.identity.organization.management.service.util.Utils.getUserStoreManager;
 
-*/
-/**
+*
  * Service implementation for handling user sharing policies.
- *//*
+
 
 public class WUserSharingPolicyHandlerServiceImpl2 implements WUserSharingPolicyHandlerService2 {
 
@@ -95,12 +95,11 @@ public class WUserSharingPolicyHandlerServiceImpl2 implements WUserSharingPolicy
             new ResourceSharingPolicyHandlerDAOImpl();
     private static ConcurrentLinkedQueue<String> errorMessages;
 
-    */
-/**
+*
      * Propagates the selective share of a user to specific organizations.
      *
      * @param selectiveUserShareDO Contains details for selective sharing.
-     *//*
+
 
     @Override
     public void populateSelectiveUserShare(SelectiveUserShareDO selectiveUserShareDO)
@@ -578,7 +577,7 @@ public class WUserSharingPolicyHandlerServiceImpl2 implements WUserSharingPolicy
             throws UserShareMgtServerException {
 
         if (userShareDO == null) {
-            throwValidationException(NULL_INPUT_MESSAGE,
+            throwValidationException(NULL_SHARE_INPUT_MESSAGE,
                     UserSharingConstants.ErrorMessage.ERROR_CODE_NULL_INPUT.getCode(),
                     UserSharingConstants.ErrorMessage.ERROR_CODE_NULL_INPUT.getDescription());
         }

@@ -15,18 +15,18 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
+package org.wso2.carbon.identity.organization.management.organization.user.sharing.models.dos;
 
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.usercriteria.UserCriteriaType;
 
 import java.util.Map;
 
 /**
- * Abstract class for common properties and methods for user unshare data objects.
+ * Abstract class for common properties and methods for user share data objects.
  *
- * @param <T> The type of user criteria used in the user unsharing operations.
+ * @param <T> The type of user criteria used in the user sharing operations.
  */
-public abstract class BaseUserUnShareDO<T extends UserCriteriaType> {
+public abstract class BaseUserShareDO<T extends UserCriteriaType> {
 
     private Map<String, T> userCriteria;
 

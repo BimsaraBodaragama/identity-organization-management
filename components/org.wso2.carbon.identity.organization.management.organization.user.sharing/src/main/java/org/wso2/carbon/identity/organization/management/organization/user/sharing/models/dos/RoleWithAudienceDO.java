@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
+package org.wso2.carbon.identity.organization.management.organization.user.sharing.models.dos;
 
 /**
  * Model that contains the user share role with audience details data object.

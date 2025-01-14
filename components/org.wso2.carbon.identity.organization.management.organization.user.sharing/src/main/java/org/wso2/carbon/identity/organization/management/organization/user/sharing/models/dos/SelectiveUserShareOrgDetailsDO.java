@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
+package org.wso2.carbon.identity.organization.management.organization.user.sharing.models.dos;
 
 import org.wso2.carbon.identity.organization.resource.sharing.policy.management.constant.PolicyEnum;
 

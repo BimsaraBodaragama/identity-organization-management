@@ -15,25 +15,26 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.organization.management.organization.user.sharing.models;
+package org.wso2.carbon.identity.organization.management.organization.user.sharing.models.dos;
+
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.usercriteria.UserCriteriaType;
 
 import java.util.List;
-import java.util.Map;
 
 /**
- * Model that contains the user unshare general data object.
+ * Model that contains the user unshare selective data object.
  */
-public class GeneralUserUnshareDO {
+public class SelectiveUserUnshareDO extends BaseUserUnshareDO<UserCriteriaType> {
 
-    private Map<String, List<String>> userCriteria;
+    private List<String> organizations;
 
-    public Map<String, List<String>> getUserCriteria() {
+    public List<String> getOrganizations() {
 
-        return userCriteria;
+        return organizations;
     }
 
-    public void setUserCriteria(Map<String, List<String>> userCriteria) {
+    public void setOrganizations(List<String> organizations) {
 
-        this.userCriteria = userCriteria;
+        this.organizations = organizations;
     }
 }

@@ -46,7 +46,8 @@ public class UserSharingConstants {
     public static final String SHARING_ERROR_PREFIX = "OUS-";
 
     public static final String NULL_INPUT_MESSAGE_SUFFIX = " is null";
-    public static final String NULL_INPUT_MESSAGE = "Attempting to do a null share";
+    public static final String NULL_SHARE_INPUT_MESSAGE = "Attempting to do a null share";
+    public static final String NULL_UNSHARE_INPUT_MESSAGE = "Attempting to do a null unshare";
 
     public static final String POLICY_CODE_FOR_EXISTING_AND_FUTURE = "-EF-";
     public static final String POLICY_CODE_FOR_FUTURE_ONLY = "-FO-";

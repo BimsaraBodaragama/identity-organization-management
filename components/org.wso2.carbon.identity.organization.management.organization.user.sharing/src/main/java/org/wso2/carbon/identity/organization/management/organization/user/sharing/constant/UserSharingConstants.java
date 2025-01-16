@@ -182,6 +182,9 @@ public class UserSharingConstants {
                 "Sharing beyond immediate child organizations is not allowed.",
                 "User sharing is only permitted with immediate child organizations. " +
                         "Attempts to share beyond this scope are restricted."),
+        ERROR_CODE_USER_UNSHARE("10038",
+                "Error occurred during user unshare operation.",
+                "An unexpected error occurred while unsharing the user."),
         ;
 
         private final String code;

@@ -2,10 +2,15 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.dao.OrganizationUserSharingDAO;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.dao.OrganizationUserSharingDAOImpl;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtClientException;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtException;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.exception.UserShareMgtServerException;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.internal.OrganizationUserSharingDataHolder;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.UserAssociation;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.dos.BaseUserShareDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.dos.BaseUserUnshareDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.dos.GeneralUserShareDO;
@@ -15,16 +20,33 @@ import org.wso2.carbon.identity.organization.management.organization.user.sharin
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.dos.SelectiveUserShareOrgDetailsDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.dos.SelectiveUserUnshareDO;
 import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.usercriteria.UserCriteriaType;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.models.usercriteria.UserIds;
+import org.wso2.carbon.identity.organization.management.organization.user.sharing.util.OrganizationSharedUserUtil;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
+import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementServerException;
+import org.wso2.carbon.identity.organization.resource.sharing.policy.management.ResourceSharingPolicyHandlerService;
+import org.wso2.carbon.identity.organization.resource.sharing.policy.management.constant.ResourceType;
+import org.wso2.carbon.identity.organization.resource.sharing.policy.management.exception.ResourceSharingPolicyMgtException;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_INVALID;
+import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.ErrorMessage.ERROR_CODE_USER_UNSHARE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_SHARE_INPUT_MESSAGE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.NULL_UNSHARE_INPUT_MESSAGE;
 import static org.wso2.carbon.identity.organization.management.organization.user.sharing.constant.UserSharingConstants.USER_IDS;
+import static org.wso2.carbon.identity.organization.management.service.util.Utils.getOrganizationId;
+import static org.wso2.carbon.identity.organization.management.service.util.Utils.getTenantId;
+import static org.wso2.carbon.identity.organization.management.service.util.Utils.getUserStoreManager;
 
 public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHandlerService {
 
     private static final Log LOG = LogFactory.getLog(UserSharingPolicyHandlerServiceImpl.class);
+    private final OrganizationUserSharingDAO organizationUserSharingDAO = new OrganizationUserSharingDAOImpl();
     private static ConcurrentLinkedQueue<String> errorMessages;
 
     @Override
@@ -50,6 +72,61 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         LOG.debug("Came in user selective unshare");
         validateUserUnshareInput(selectiveUserUnshareDO);
         LOG.debug("Validated user selective unshare input");
+
+        Map<String, UserCriteriaType> userCriteria = selectiveUserUnshareDO.getUserCriteria();
+        List<String> organizations = selectiveUserUnshareDO.getOrganizations();
+
+        for (Map.Entry<String, UserCriteriaType> criterion : userCriteria.entrySet()) {
+            String criterionKey = criterion.getKey();
+            UserCriteriaType criterionValues = criterion.getValue();
+
+            switch (criterionKey) {
+                case USER_IDS:
+                    if (criterionValues instanceof UserIds) {
+                        selectiveUserUnshareByUserIds((UserIds) criterionValues, organizations);
+                    } else {
+                        throw new UserShareMgtClientException(ERROR_CODE_USER_CRITERIA_INVALID.getCode(),
+                                ERROR_CODE_USER_CRITERIA_INVALID.getMessage(),
+                                ERROR_CODE_USER_CRITERIA_INVALID.getDescription());
+                    }
+                    break;
+                default:
+                    throw new UserShareMgtClientException(ERROR_CODE_USER_CRITERIA_INVALID.getCode(),
+                            ERROR_CODE_USER_CRITERIA_INVALID.getMessage(),
+                            ERROR_CODE_USER_CRITERIA_INVALID.getDescription());
+            }
+        }
+
+        LOG.debug("Completed user selective unshare.");
+    }
+
+    private void selectiveUserUnshareByUserIds(UserIds userIds, List<String> organizations)
+            throws UserShareMgtServerException {
+
+        String unsharingInitiatedOrgId = getOrganizationId();
+
+        for (String associatedUserId : userIds.getIds()) {
+            LOG.debug("Deleting user general unshare for associated user id : " + associatedUserId);
+            try {
+                for (String organizationId : organizations) {
+
+                    getOrganizationUserSharingService().unshareOrganizationUserInSharedOrganization(associatedUserId,
+                            organizationId);
+
+                    //Delete resource sharing policy if it has been stored for future shares.
+                    getResourceSharingPolicyHandlerService().deleteResourceSharingPolicyInOrgByResourceTypeAndId(
+                            organizationId, ResourceType.USER, associatedUserId, unsharingInitiatedOrgId);
+
+                    LOG.debug("Completed user selective unshare for associated user id : " + associatedUserId +
+                            " in shared org id : " + organizationId);
+
+                }
+            } catch (OrganizationManagementException | ResourceSharingPolicyMgtException e) {
+                throw new UserShareMgtServerException(ERROR_CODE_USER_UNSHARE.getCode(),
+                        ERROR_CODE_USER_UNSHARE.getMessage(), ERROR_CODE_USER_UNSHARE.getDescription());
+            }
+            LOG.debug("Completed user general unshare for associated user id : " + associatedUserId);
+        }
     }
 
     @Override
@@ -58,6 +135,56 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
         LOG.debug("Came in user general unshare");
         validateUserUnshareInput(generalUserUnshareDO);
         LOG.debug("Validated user general unshare input");
+
+        Map<String, UserCriteriaType> userCriteria = generalUserUnshareDO.getUserCriteria();
+
+        for (Map.Entry<String, UserCriteriaType> criterion : userCriteria.entrySet()) {
+            String criterionKey = criterion.getKey();
+            UserCriteriaType criterionValues = criterion.getValue();
+
+            switch (criterionKey) {
+                case USER_IDS:
+                    if (criterionValues instanceof UserIds) {
+                        generalUserUnshareByUserIds((UserIds) criterionValues);
+                    } else {
+                        throw new UserShareMgtClientException(ERROR_CODE_USER_CRITERIA_INVALID.getCode(),
+                                ERROR_CODE_USER_CRITERIA_INVALID.getMessage(),
+                                ERROR_CODE_USER_CRITERIA_INVALID.getDescription());
+                    }
+                    break;
+                default:
+                    throw new UserShareMgtClientException(ERROR_CODE_USER_CRITERIA_INVALID.getCode(),
+                            ERROR_CODE_USER_CRITERIA_INVALID.getMessage(),
+                            ERROR_CODE_USER_CRITERIA_INVALID.getDescription());
+            }
+        }
+
+        LOG.debug("Completed user general unshare.");
+
+    }
+
+    private void generalUserUnshareByUserIds(UserIds userIds)
+            throws UserShareMgtServerException {
+
+        String unsharingInitiatedOrgId = getOrganizationId();
+
+        for (String associatedUserId : userIds.getIds()) {
+            LOG.debug("Deleting user general unshare for associated user id : " + associatedUserId);
+            try {
+
+                getOrganizationUserSharingService().unshareOrganizationUsers(associatedUserId, unsharingInitiatedOrgId);
+
+                //Delete resource sharing policy if it has been stored for future shares.
+                getResourceSharingPolicyHandlerService().deleteResourceSharingPolicyByResourceTypeAndId(ResourceType.USER, associatedUserId, unsharingInitiatedOrgId);
+
+                LOG.debug("Completed user general unshare for associated user id : " + associatedUserId);
+
+            } catch (OrganizationManagementException | ResourceSharingPolicyMgtException e) {
+                throw new UserShareMgtServerException(ERROR_CODE_USER_UNSHARE.getCode(),
+                        ERROR_CODE_USER_UNSHARE.getMessage(), ERROR_CODE_USER_UNSHARE.getDescription());
+            }
+            LOG.debug("Completed user general unshare for associated user id : " + associatedUserId);
+        }
     }
 
     //Validation methods
@@ -83,8 +210,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         // Validate userCriteria is not null
         validateNotNull(selectiveUserShareDO.getUserCriteria(),
-                UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_INVALID.getMessage(),
-                UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_INVALID.getCode());
+                ERROR_CODE_USER_CRITERIA_INVALID.getMessage(),
+                ERROR_CODE_USER_CRITERIA_INVALID.getCode());
 
         // Validate that userCriteria contains the required USER_IDS key and is not null
         if (!selectiveUserShareDO.getUserCriteria().containsKey(USER_IDS) ||
@@ -136,8 +263,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     private void validateGeneralUserShareDO(GeneralUserShareDO generalDO) throws UserShareMgtClientException {
 
         validateNotNull(generalDO.getUserCriteria(),
-                UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_INVALID.getMessage(),
-                UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_INVALID.getCode());
+                ERROR_CODE_USER_CRITERIA_INVALID.getMessage(),
+                ERROR_CODE_USER_CRITERIA_INVALID.getCode());
         if (!generalDO.getUserCriteria().containsKey(USER_IDS) || generalDO.getUserCriteria().get(USER_IDS) == null) {
             throwValidationException(UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_MISSING.getMessage(),
                     UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_MISSING.getCode(),
@@ -189,8 +316,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         // Validate userCriteria is not null
         validateNotNull(selectiveUserUnshareDO.getUserCriteria(),
-                UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_INVALID.getMessage(),
-                UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_INVALID.getCode());
+                ERROR_CODE_USER_CRITERIA_INVALID.getMessage(),
+                ERROR_CODE_USER_CRITERIA_INVALID.getCode());
 
         // Validate that userCriteria contains the required USER_IDS key and is not null
         if (!selectiveUserUnshareDO.getUserCriteria().containsKey(USER_IDS) ||
@@ -217,8 +344,8 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
 
         // Validate userCriteria is not null
         validateNotNull(generalUserUnshareDO.getUserCriteria(),
-                UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_INVALID.getMessage(),
-                UserSharingConstants.ErrorMessage.ERROR_CODE_USER_CRITERIA_INVALID.getCode());
+                ERROR_CODE_USER_CRITERIA_INVALID.getMessage(),
+                ERROR_CODE_USER_CRITERIA_INVALID.getCode());
 
         // Validate that userCriteria contains the required USER_IDS key and is not null
         if (!generalUserUnshareDO.getUserCriteria().containsKey(USER_IDS) ||
@@ -240,6 +367,16 @@ public class UserSharingPolicyHandlerServiceImpl implements UserSharingPolicyHan
     private void throwValidationException(String message, String errorCode, String description)
             throws UserShareMgtClientException {
 
-        throw new UserShareMgtClientException(message, new NullPointerException(message), errorCode, description);
+        throw new UserShareMgtClientException(errorCode, message, description, new NullPointerException(message));
+    }
+
+    private OrganizationUserSharingService getOrganizationUserSharingService() {
+
+        return OrganizationUserSharingDataHolder.getInstance().getOrganizationUserSharingService();
+    }
+
+    private ResourceSharingPolicyHandlerService getResourceSharingPolicyHandlerService() {
+
+        return OrganizationUserSharingDataHolder.getInstance().getResourceSharingPolicyHandlerService();
     }
 }

@@ -23,29 +23,19 @@ package org.wso2.carbon.identity.organization.management.organization.user.shari
  */
 public class UserShareMgtServerException extends UserShareMgtException {
 
-    public UserShareMgtServerException(String message, String errorCode, String description) {
+    public UserShareMgtServerException(String errorCode, String message, String description) {
 
-        super(message, errorCode, description);
+        super(errorCode, message, description);
     }
 
-    public UserShareMgtServerException(String errorCode, String description) {
+    public UserShareMgtServerException(String errorCode, String message, String description, Throwable cause) {
 
-        super(errorCode, description);
+        super(errorCode, message, description, cause);
     }
 
-    public UserShareMgtServerException(Throwable cause, String errorCode, String description) {
+    public UserShareMgtServerException(String errorCode, String message, String description, Throwable cause,
+                                       boolean enableSuppression, boolean writableStackTrace) {
 
-        super(cause, errorCode, description);
-    }
-
-    public UserShareMgtServerException(String message, Throwable cause, String errorCode, String description) {
-
-        super(message, cause, errorCode, description);
-    }
-
-    public UserShareMgtServerException(String message, Throwable cause, boolean enableSuppression,
-                                       boolean writableStackTrace, String errorCode, String description) {
-
-        super(message, cause, enableSuppression, writableStackTrace, errorCode, description);
+        super(errorCode, message, description, cause, enableSuppression, writableStackTrace);
     }
 }

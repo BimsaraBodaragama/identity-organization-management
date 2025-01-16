@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.organization.resource.sharing.policy.management
 
 import org.wso2.carbon.identity.organization.resource.sharing.policy.management.constant.ResourceType;
 import org.wso2.carbon.identity.organization.resource.sharing.policy.management.constant.SharedAttributeType;
+import org.wso2.carbon.identity.organization.resource.sharing.policy.management.exception.ResourceSharingPolicyMgtException;
 import org.wso2.carbon.identity.organization.resource.sharing.policy.management.exception.ResourceSharingPolicyMgtServerException;
 import org.wso2.carbon.identity.organization.resource.sharing.policy.management.model.ResourceSharingPolicy;
 import org.wso2.carbon.identity.organization.resource.sharing.policy.management.model.SharedResourceAttribute;
@@ -128,6 +129,22 @@ public interface ResourceSharingPolicyHandlerDAO {
     void deleteResourceSharingPolicyByResourceTypeAndId(ResourceType resourceType, String resourceId,
                                                            String sharingPolicyInitiatedOrgId)
             throws ResourceSharingPolicyMgtServerException;
+
+    /**
+     * Deletes a resource sharing policy in the specified policy holding organization, based on its resource type
+     * and resource ID, if permitted.
+     *
+     * @param policyHoldingOrgId          The ID of the organization holding the policy for the resource.
+     * @param resourceType                The {@link ResourceType} of the resource.
+     * @param resourceId                  The unique identifier of the resource whose sharing policy is to be deleted.
+     * @param sharingPolicyInitiatedOrgId The ID of the organization initiating the share request.
+     *                                    The deletion will only be successful if the initiating organization
+     *                                    has permission to delete sharing policies.
+     * @throws ResourceSharingPolicyMgtException If an error occurs while deleting the resource sharing policy.
+     */
+    void deleteResourceSharingPolicyInOrgByResourceTypeAndId(String policyHoldingOrgId, ResourceType resourceType,
+                                                             String resourceId, String sharingPolicyInitiatedOrgId)
+            throws ResourceSharingPolicyMgtException;
 
     /**
      * Adds shared resource attributes to an existing resource sharing policy.
